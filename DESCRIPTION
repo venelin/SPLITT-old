@@ -1,0 +1,24 @@
+Package: ParallelPruning
+Type: Package
+Title: A General Parallel Pruning Framework for Phylogenetic Trees
+Version: 1.4.0
+Date: 2017-10-02
+Authors@R: person("Venelin", "Mitov", email = "vmitov@gmail.com",
+                 role = c("aut", "cre", "cph"))
+Description: TODO
+License: GPL (>= 3.0)
+LazyData: true
+Depends:
+    R (>= 3.1.0),
+    Rcpp,
+LinkingTo: Rcpp, RcppArmadillo
+Imports:
+    ape,
+    Rcpp
+Suggests:
+    testthat,
+    microbenchmark
+RoxygenNote: 5.0.1
+VignetteBuilder: knitr
+ByteCompile: yes
+NeedsCompilation: yes
