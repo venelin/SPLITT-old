@@ -6,7 +6,8 @@ library(microbenchmark)
 context("PruneTree")
 set.seed(1)
 
-N <- 10000
+EPS <- 1e-8
+N <- 2000
 tree <- ape::rtree(N)
 
 g0 <- 16
@@ -17,15 +18,36 @@ sigmae <- .7
 se = rexp(N, 1/.01)
 z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sqrt(sigmae^2+se^2))
 
+pruneInfo2 <- POUMM::pruneTree(tree, z, se)
+pruneInfo <- ParallelPruning::prepare(tree)
 
-microbenchmark(pruneInfo2 <- ParallelPruning::pruneTree2(tree, z, se),
-pruneInfo <- ParallelPruning::pruneTree(tree, z, se), times=1)
+ppa <- ParallelPruning:::ParallelPruningAlgorithm$new()
 
-all(pruneInfo2$implementationCPP$eReord-pruneInfo$eReord == -1)
+poummLikelihood <- ParallelPruning:::POUMM_Likelihood$new()
 
-all(pruneInfo2$implementationCPP$tReord==pruneInfo$tReord)
+poummLikelihood$set_treeAndData(tree = tree, z = z[1:N], se = se[1:N])
 
-all(pruneInfo2$implementationCPP$zReord[1:N]==pruneInfo$z[1:N][pruneInfo2$reord])
+poummLikelihood$do_pruning(
+  list(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
 
-all(pruneInfo2$implementationCPP$seReord==pruneInfo$seReord[pruneInfo2$reord])
 
+expect_lt(abs(
+  POUMM:::loglik_abc_g0_g0Prior(
+    abc = poummLikelihood$abc(), g0Prior = NA,
+    g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik -
+    POUMM::likPOUMMGivenTreeVTips(
+      z = z, tree = tree,
+      g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sqrt(sigmae^2+se^2),
+      g0Prior = NA
+    )), EPS)
+
+
+#
+# all(pruneInfo2$integrator$eReord-pruneInfo$eReord == -1)
+#
+# all(pruneInfo2$implementationCPP$tReord==pruneInfo$tReord)
+#
+# all(pruneInfo2$implementationCPP$zReord[1:N]==pruneInfo$z[1:N][pruneInfo2$reord])
+#
+# all(pruneInfo2$implementationCPP$seReord==pruneInfo$seReord[pruneInfo2$reord])
+#
