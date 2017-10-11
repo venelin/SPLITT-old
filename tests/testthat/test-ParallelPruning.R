@@ -64,5 +64,7 @@ test_that("POUMM abc", expect_lt(abs(
 microbenchmark(
   lik_POUMM(poummLikelihood,
             g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),
   lik_POUMM_old(pruneInfo,
                 g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
