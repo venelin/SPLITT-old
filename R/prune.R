@@ -192,5 +192,7 @@ reorderEdges <- function(edge, t,
 
 # loading the ParallelPruning C++ modules
 loadModule( "ParallelPruningAlgorithm", TRUE )
+loadModule( "ParallelPruningAlgorithm2", TRUE )
 loadModule( "POUMM_Likelihood", TRUE )
+loadModule( "POUMM_abc", TRUE )
 

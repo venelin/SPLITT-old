@@ -40,28 +40,10 @@
 
 #endif // #ifdef _OPENMP
 
+namespace pp{
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace std;
-using namespace arma;
-
-// For each i a[i] with b[i] in x
-// [[Rcpp::export]]
-arma::uvec multiReplaceC(arma::uvec const& x, arma::uvec const& a, arma::uvec const& b) {
-  arma::uvec x2 = x;
-  arma::uvec ind = sort_index(x2);
-  arma::uvec xInd = x2(ind);
-  std::pair<arma::uvec::iterator, arma::uvec::iterator> bounds;
-  for(int i = 0; i < a.n_elem; ++i) {
-    bounds = std::equal_range(xInd.begin(), xInd.end(), a.at(i));
-    if(bounds.first != bounds.second) {
-      uint first = bounds.first - xInd.begin();
-      uint last = bounds.second - xInd.begin() - 1;
-      x2.elem(ind.subvec(first, last)).fill(b.at(i));
-    }
-  }
-  return x2;
-}
 
 
 template <class VectorClass>
@@ -80,6 +62,11 @@ vector<size_t> order(VectorClass const& v) {
 
 template<class VectorValues, class VectorPositions>
 VectorValues at(VectorValues const& v, VectorPositions const& positions) {
+  cout<<"at: v.size()="<<v.size()<<" positions.size()="<<positions.size()<<": ";
+  if(positions.size() > 0) {
+    for(auto i: positions) cout<<i<<" ";
+  }
+  cout<<endl;
   VectorValues sub;
   sub.resize(positions.size());
 
@@ -96,7 +83,7 @@ VectorClass multiReplace(VectorClass const& x, VectorClass const& a, VectorClass
   auto ind = order(x2);
   auto xInd = at(x2, ind);
   std::pair<typename VectorClass::iterator, typename VectorClass::iterator> bounds;
-  for(size_t i = 0; i < a.n_elem; ++i) {
+  for(size_t i = 0; i < a.size(); ++i) {
     bounds = std::equal_range(xInd.begin(), xInd.end(), a.at(i));
     if(bounds.first != bounds.second) {
       size_t first = bounds.first - xInd.begin();
@@ -109,9 +96,11 @@ VectorClass multiReplace(VectorClass const& x, VectorClass const& a, VectorClass
   return x2;
 }
 
-//typedef std::vector<uint> uvec;
+typedef unsigned int uint;
+typedef std::vector<uint> uvec;
+typedef std::vector<double> vec;
 
-class ParallelPruningAlgorithm {
+class ParallelPruningAlgorithm2 {
 protected:
   uint nLevels;
   // number of all nodes
@@ -120,11 +109,13 @@ protected:
   uint N;
 
   // branches matrix
-  arma::umat branches;
+  //arma::umat branches;
+  uvec branches_0, branches_1;
 
-  arma::vec t;
-  arma::uvec parentNode;
-  arma::uvec orderNodes;
+  vec t;
+
+  uvec parentNode;
+  uvec orderNodes;
 
   uvec tipsVector;
   uvec tipsVectorIndex;
@@ -166,11 +157,11 @@ private:
       ee1 = ee1[ee1 != (-1)];
     }
 
-    std::vector<uint> tipsVector;
-    std::vector<uint> tipsVectorIndex(1); // = IntegerVector(1);
+    uvec tipsVector;
+    uvec tipsVectorIndex(1, 0); // = IntegerVector(1);
 
-    std::vector<uint> branchVector;
-    std::vector<uint> branchVectorIndex(1); // = IntegerVector(1);
+    uvec branchVector;
+    uvec branchVectorIndex(1, 0); // = IntegerVector(1);
 
     // start by pruning the tips
     std::vector<uint> tips(N);
@@ -222,7 +213,6 @@ private:
         branchesNext = branchesNext - 1;
         branchesNext = branchesNext.sort();
 
-        //for(int u : branchesNext) branchVector.push_back(u);
         branchVector.insert(branchVector.end(), branchesNext.begin(), branchesNext.end());
 
         // attach the index of the current last element of branchVector
@@ -245,37 +235,73 @@ private:
       }
     }
 
+
     this->nLevels = tipsVectorIndex.size() - 1;
+
+
     this->tipsVector = tipsVector;
+    cout<<"tipsVector.size()"<<tipsVector.size()<<": ";
+    for(auto i : tipsVector) cout<<i<<" ";
+    cout<<endl;
+
     this->tipsVectorIndex = tipsVectorIndex;
+    cout<<"tipsVectorIndex.size()"<<tipsVectorIndex.size()<<": ";
+    for(auto i : tipsVectorIndex) cout<<i<<" ";
+    cout<<endl;
+
     this->branchVector = branchVector;
+    cout<<"branchVector.size()"<<branchVector.size()<<": ";
+    for(auto i : branchVector) cout<<i<<" ";
+    cout<<endl;
+
     this->branchVectorIndex = branchVectorIndex;
-    this->branches = Rcpp::as<arma::umat>(branches);
+    cout<<"branchVectorIndex.size()"<<branchVectorIndex.size()<<": ";
+    for(auto i : branchVectorIndex) cout<<i<<" ";
+    cout<<endl;
+
+    IntegerVector br_0 = branches.column(0);
+    this->branches_0 = as<uvec>(br_0);
+    cout<<"branches_0.size()"<<branches_0.size()<<": ";
+    for(auto i : branches_0) cout<<i<<" ";
+    cout<<endl;
+
+    IntegerVector br_1 = branches.column(1);
+    this->branches_1 = as<uvec>(br_1);
+    cout<<"branches_1.size()"<<branches_1.size()<<": ";
+    for(auto i : branches_1) cout<<i<<" ";
+    cout<<endl;
+
 
     NumericVector branchLength = tree["edge.length"];
-    this->t = Rcpp::as<arma::vec>(branchLength);
+    this->t = Rcpp::as<vec>(branchLength);
 
     IntegerVector orderNodesOriginal = seq(0, M - 1);
-    this->orderNodes = Rcpp::as<arma::uvec>(orderNodesOriginal);
+    this->orderNodes = Rcpp::as<uvec>(orderNodesOriginal);
 
     reorderBranches();
+
+    cout<<"done"<<endl;
   };
 
   void reorderBranches() {
-    using namespace Rcpp;
     arma::uvec ONE(1);
     ONE.fill(1);
 
-    IntegerVector branchEnds(branches.n_rows+1);
-    for(int i = 0; i<branches.n_rows; i++) branchEnds(i) = branches(i, 1);
+    uvec branchEnds(branches_1.size());
+    copy(branches_1.begin(), branches_1.end(), branchEnds.begin());
+    branchEnds.push_back(N);
 
-    branchEnds(branches.n_rows) = N;
+    cout<<"branchEnds.size()"<<branchEnds.size()<<": ";
+    for(auto be : branchEnds) cout<<be<<" ";
+    cout<<endl;
 
-    IntegerVector endingAtRcpp = match(seq(0, M - 1), branchEnds) - 1;
-    uvec endingAt = Rcpp::as<uvec>(endingAtRcpp);
+    uvec endingAt(M);
+    for(int i = 0; i < branchEnds.size(); ++i)
+      endingAt[branchEnds[i]] = i;
 
-    arma::uvec parents = branches.col(0);
-    parents.replace(N, 2*M - 1);
+    uvec parents = branches_0;
+    replace(parents.begin(), parents.end(), N, 2*M - 1);
+
     (this->parentNode) = parents;
     // duplicate t and orderNodes since it will be shuffled during the reordering
     arma::vec tOriginalOrder = (this->t);
@@ -283,93 +309,146 @@ private:
 
 
     // branches pointing to tips
-    uvec branchesToTips = endingAt.elem(tipsVector(span(tipsVectorIndex(0),
-                                                        tipsVectorIndex(1) - 1)));
-    // uvec branchesToTips = at(
-    //   endingAt, uvec(tipsVector.begin() + tipsVectorIndex[0],
-    //                  tipsVector.begin() + tipsVectorIndex[1]));
+    uvec branchesToTips = at(
+      endingAt, uvec(tipsVector.begin() + tipsVectorIndex[0],
+                     tipsVector.begin() + tipsVectorIndex[1]));
 
     uint jBVI = 0;
 
+    cout<<"dot1"<<endl;
     uint nBranchesDone = 0;
-    while(nBranchesDone != branchesToTips.n_elem) {
-      uvec branchesNext = branchVector(span(branchVectorIndex(jBVI),
-                                            branchVectorIndex(jBVI + 1) - 1));
+    while(nBranchesDone != branchesToTips.size()) {
+      uvec branchesNext(branchVector.begin() + branchVectorIndex[jBVI],
+                        branchVector.begin() + branchVectorIndex[jBVI + 1]);
 
-      uvec branchEnds = branches(branchesToTips(branchesNext), ONE);
+      cout<<"dot2"<<endl;
+      uvec branchEnds = at(branches_1, at(branchesToTips, branchesNext));
+      cout<<"branchEnds.size()"<<branchEnds.size()<<": ";
+      for(auto be : branchEnds) cout<<be<<" ";
+      cout<<endl;
 
-      uvec branchEndsNew = arma::regspace<uvec>(branchVectorIndex(jBVI),
-                                                branchVectorIndex(jBVI + 1) - 1);
+      uvec branchEndsNew(branchVectorIndex[jBVI + 1] - branchVectorIndex[jBVI]);
+      std::iota(branchEndsNew.begin(),
+                branchEndsNew.end(),
+                branchVectorIndex[jBVI] + M);
 
-      parents = multiReplace<uvec>(parents, branchEnds, M+branchEndsNew);
+      parents = multiReplace<uvec>(parents, branchEnds, branchEndsNew);
 
-      (this->parentNode).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-        parents(branchesToTips(branchesNext));
-      (this->parentNode) = multiReplace<uvec>((this->parentNode), branchEnds, M+branchEndsNew);
+      auto parentNodeNew = at(parents, at(branchesToTips, branchesNext));
+      std::copy(parentNodeNew.begin(), parentNodeNew.end(),
+                (this->parentNode).begin()+branchVectorIndex[jBVI]);
 
-      (this->t).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-        tOriginalOrder.elem(branchesToTips(branchesNext));
+      (this->parentNode) = multiReplace<uvec>(
+        (this->parentNode), branchEnds, branchEndsNew);
 
-      (this->orderNodes).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-        orderNodesOriginal(branchEnds);
+
+      cout<<"dot3"<<endl;
+      auto tNew = at(tOriginalOrder, at(branchesToTips, branchesNext));
+      std::copy(tNew.begin(), tNew.end(),
+                (this->t).begin() + branchVectorIndex[jBVI]);
+
+      cout<<"dot5"<<endl;
+      auto orderNodesNew = at(orderNodesOriginal, branchEnds);
+      std::copy(orderNodesNew.begin(), orderNodesNew.end(),
+                (this->orderNodes).begin() + branchVectorIndex[jBVI]);
 
       ++jBVI;
-      nBranchesDone += branchesNext.n_elem;
+      nBranchesDone += branchesNext.size();
     }
 
     // branches pointing to internal nodes that have become tips
     for(int i = 1; i < nLevels; ++i) {
-      branchesToTips = endingAt.elem(tipsVector(span(tipsVectorIndex(i),
-                                                     tipsVectorIndex(i + 1) - 1)));
+      cout<<"outer loop "<<i<<endl;
+      branchesToTips = at(
+        endingAt, uvec(tipsVector.begin() + tipsVectorIndex[i],
+                       tipsVector.begin() + tipsVectorIndex[i + 1]));
+
+
 
       uint nBranchesDone = 0;
-      while(nBranchesDone != branchesToTips.n_elem) {
-        uvec branchesNext = branchVector(span(branchVectorIndex(jBVI),
-                                              branchVectorIndex(jBVI + 1) - 1));
+      while(nBranchesDone != branchesToTips.size()) {
+        uvec branchesNext(branchVector.begin() + branchVectorIndex[jBVI],
+                          branchVector.begin() + branchVectorIndex[jBVI + 1]);
 
-        //cout<<"branchesNext"<<branchesNext<<endl;
+        cout<<"branchesNext.size()"<<branchesNext.size()<<": ";
+        for(auto i : branchesNext) cout<<i<<" ";
+        cout<<endl;
 
-        uvec branchEnds = branches(branchesToTips(branchesNext), ONE);
+        //uvec branchEnds = branches(branchesToTips(branchesNext), ONE);
+        uvec branchEnds = at(branches_1, at(branchesToTips, branchesNext));
+
+        cout<<"branchEnds.size()"<<branchEnds.size()<<": ";
+        for(auto i : branchEnds) cout<<i<<" ";
+        cout<<endl;
 
         //cout<<"branchEnds:"<<branchEnds<<endl;
 
+        uvec branchEndsNew(branchVectorIndex[jBVI + 1] - branchVectorIndex[jBVI]);
+        std::iota(branchEndsNew.begin(),
+                  branchEndsNew.end(),
+                  branchVectorIndex[jBVI] + M);
 
-        uvec branchEndsNew = arma::regspace<uvec>(branchVectorIndex(jBVI),
-                                                  branchVectorIndex(jBVI + 1) - 1);
+        cout<<"branchEndsNew.size()"<<branchEndsNew.size()<<": ";
+        for(auto i : branchEndsNew) cout<<i<<" ";
+        cout<<endl;
 
-        //cout<<"branchEndsNew:"<<branchEndsNew<<endl;
+        parents = multiReplace<uvec>(parents, branchEnds, branchEndsNew);
 
-        parents = multiReplace<uvec>(parents, branchEnds, M+branchEndsNew);
+        cout<<"parents.size()"<<parents.size()<<": ";
+        for(auto i : parents) cout<<i<<" ";
+        cout<<endl;
 
-        //cout<<"parents:"<<parents<<endl;
+        auto parentNodeNew = at(parents, at(branchesToTips, branchesNext));
+        std::copy(parentNodeNew.begin(), parentNodeNew.end(),
+                  (this->parentNode).begin()+branchVectorIndex[jBVI]);
+        cout<<"parentNodeNew.size()"<<parentNodeNew.size()<<": ";
+        for(auto i : parentNodeNew) cout<<i<<" ";
+        cout<<endl;
 
-        (this->parentNode).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-          parents(branchesToTips(branchesNext));
-        (this->parentNode) = multiReplace<uvec>((this->parentNode), branchEnds, M+branchEndsNew);
+        (this->parentNode) = multiReplace<uvec>((this->parentNode), branchEnds, branchEndsNew);
 
-        //cout<<"parentNode:"<<(this->parentNode)<<endl;
+        cout<<"parentNode.size()"<<parentNode.size()<<": ";
+        for(auto i : parentNode) cout<<i<<" ";
+        cout<<endl;
 
-        (this->t).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-          tOriginalOrder.elem(branchesToTips(branchesNext));
+        auto tNew = at(tOriginalOrder, at(branchesToTips, branchesNext));
+        cout<<"tNew.size()"<<tNew.size()<<": ";
+        for(auto i : tNew) cout<<i<<" ";
+        cout<<endl;
 
-        //cout<<"t:"<<(this->t)<<endl;
+        std::copy(tNew.begin(), tNew.end(),
+                  (this->t).begin() + branchVectorIndex[jBVI]);
 
-        (this->orderNodes).subvec(branchVectorIndex(jBVI), branchVectorIndex(jBVI + 1) - 1) =
-          orderNodesOriginal(branchEnds);
+        cout<<"t.size()"<<t.size()<<": ";
+        for(auto i : t) cout<<i<<" ";
+        cout<<endl;
 
-        //cout<<"orderNodes:"<<(this->orderNodes)<<endl;
+        auto orderNodesNew = at(orderNodesOriginal, branchEnds);
+        cout<<"orderNodesNew.size()"<<orderNodesNew.size()<<": ";
+        for(auto i : orderNodesNew) cout<<i<<" ";
+        cout<<endl;
+
+        std::copy(orderNodesNew.begin(), orderNodesNew.end(),
+                  (this->orderNodes).begin() + branchVectorIndex[jBVI]);
+
+        cout<<"orderNodes.size()"<<orderNodes.size()<<": ";
+        for(auto i : orderNodes) cout<<i<<" ";
+        cout<<endl;
+
 
         ++jBVI;
-        nBranchesDone += branchesNext.n_elem;
+        nBranchesDone += branchesNext.size();
       }
     }
 
-    (this->parentNode) = (this->parentNode) - M;
+    for(int i = 0; i<parentNode.size(); ++i)
+      (this->parentNode)[i] -= M;
+    cout<<"done"<<endl;
   };
 
 public:
   // Default constructor;
-  ParallelPruningAlgorithm(Rcpp::List const& tree) {
+  ParallelPruningAlgorithm2(Rcpp::List const& tree) {
     this->createPruningOrder(tree);
   };
 
@@ -399,10 +478,6 @@ public:
 
   arma::uvec get_tipsVectorIndex() const {
     return tipsVectorIndex;
-  }
-
-  arma::umat get_branches() const {
-    return this->branches;
   }
 
   arma::uvec get_branchVector() const {
@@ -442,8 +517,8 @@ public:
   uint jBVI = 0;
 
   for(int j = 0; j < nLevels; j++) {
-    const uint bFirst = tipsVectorIndex(j);
-    const uint bLast = tipsVectorIndex(j + 1) - 1;
+    const uint bFirst = tipsVectorIndex[j];
+    const uint bLast = tipsVectorIndex[j + 1] - 1;
 
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = bFirst; i < bLast + 1; i++) {
@@ -454,8 +529,8 @@ public:
 
       uint nBranchesDone = 0;
     while(nBranchesDone != bLast - bFirst + 1) {
-      const uint unFirst = branchVectorIndex(jBVI);
-      const uint unLast = branchVectorIndex(jBVI + 1) - 1;
+      const uint unFirst = branchVectorIndex[jBVI];
+      const uint unLast = branchVectorIndex[jBVI + 1] - 1;
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = unFirst; i < unLast + 1; i++) {
           // store or add up the result from branch i to the results from its
@@ -463,34 +538,33 @@ public:
           // pruning of the parent branch.
           addToParent(i, parentNode[i]);
         }
-        nBranchesDone +=  branchVectorIndex(jBVI + 1) - branchVectorIndex(jBVI);
+        nBranchesDone +=  branchVectorIndex[jBVI + 1] - branchVectorIndex[jBVI];
       ++jBVI;
     }
   }
 }
   };
 
-  virtual ~ParallelPruningAlgorithm() {};
+  virtual ~ParallelPruningAlgorithm2() {};
 };
 
-RCPP_MODULE(ParallelPruningAlgorithm) {
-  Rcpp::class_<ParallelPruningAlgorithm>( "ParallelPruningAlgorithm" )
+RCPP_MODULE(ParallelPruningAlgorithm2) {
+  Rcpp::class_<ParallelPruningAlgorithm2>( "ParallelPruningAlgorithm2" )
   .constructor<Rcpp::List const&>()
-  .method( "do_pruning", &ParallelPruningAlgorithm::do_pruning )
-  .property("nLevels", &ParallelPruningAlgorithm::get_nLevels )
-  .property("M", &ParallelPruningAlgorithm::get_M )
-  .property("N", &ParallelPruningAlgorithm::get_N )
-  .property("t", &ParallelPruningAlgorithm::get_t )
-  .property("parentNode", &ParallelPruningAlgorithm::get_parentNode )
-  .property("branches", &ParallelPruningAlgorithm::get_branches )
-  .property("tipsVector", &ParallelPruningAlgorithm::get_tipsVector )
-  .property("tipsVectorIndex", &ParallelPruningAlgorithm::get_tipsVectorIndex )
-  .property("branchVector", &ParallelPruningAlgorithm::get_branchVector )
-  .property("branchVectorIndex", &ParallelPruningAlgorithm::get_branchVectorIndex )
+  .method( "do_pruning", &ParallelPruningAlgorithm2::do_pruning )
+  .property("nLevels", &ParallelPruningAlgorithm2::get_nLevels )
+  .property("M", &ParallelPruningAlgorithm2::get_M )
+  .property("N", &ParallelPruningAlgorithm2::get_N )
+  .property("t", &ParallelPruningAlgorithm2::get_t )
+  .property("parentNode", &ParallelPruningAlgorithm2::get_parentNode )
+  .property("tipsVector", &ParallelPruningAlgorithm2::get_tipsVector )
+  .property("tipsVectorIndex", &ParallelPruningAlgorithm2::get_tipsVectorIndex )
+  .property("branchVector", &ParallelPruningAlgorithm2::get_branchVector )
+  .property("branchVectorIndex", &ParallelPruningAlgorithm2::get_branchVectorIndex )
   ;
 }
 
-class POUMM_Likelihood: public ParallelPruningAlgorithm {
+class POUMM_abc: public ParallelPruningAlgorithm2 {
 protected:
   arma::vec z;
   arma::vec se;
@@ -518,16 +592,38 @@ protected:
   arma::vec z1, z1z1;
 
 public:
-  POUMM_Likelihood(Rcpp::List const& tree,
+  POUMM_abc(Rcpp::List const& tree,
             Rcpp::NumericVector const& z,
-            Rcpp::NumericVector const& se): ParallelPruningAlgorithm(tree) {
+            Rcpp::NumericVector const& se): ParallelPruningAlgorithm2(tree) {
     if(z.size() != N) {
       Rcpp::stop("The trait vector z must be the same length as the number of tips.");
     } else {
       arma::vec zArma = z;
-      this->z = zArma((this->orderNodes)(span(0, N - 1)));
       arma::vec seArma = se;
-      this->se = seArma((this->orderNodes)(span(0, N - 1)));
+      this->z = zArma;
+      this->se = seArma;
+
+      cout<<"orderNodes.size()"<<orderNodes.size()<<": ";
+      for(auto i : orderNodes) cout<<i<<" ";
+      cout<<endl;
+
+      cout<<"zArma.size()"<<zArma.size()<<": ";
+      for(auto i : zArma) cout<<i<<" ";
+      cout<<endl;
+
+      cout<<"seArma.size()"<<seArma.size()<<": ";
+      for(auto i : seArma) cout<<i<<" ";
+      cout<<endl;
+
+      cout<<"N:"<<N<<endl;
+      for(int i = 0; i < N; ++i) {
+        cout<<i<<" "<<endl;
+        this->z(i) = zArma(orderNodes[i]);
+        this->se(i) = seArma(orderNodes[i]);
+      }
+      cout<<"dot7"<<endl;
+      // this->z = zArma((this->orderNodes)(arma::span(0, N - 1)));
+      // this->se = seArma((this->orderNodes)(arma::span(0, N - 1)));
 
       this->a = arma::vec(M);
       this->b = arma::vec(M);
@@ -622,25 +718,25 @@ public:
   }
 };
 
-RCPP_MODULE(POUMM_Likelihood) {
-  Rcpp::class_<ParallelPruningAlgorithm>( "ParallelPruningAlgorithm" )
-  .constructor<Rcpp::List const&>()
-  .method( "do_pruning", &ParallelPruningAlgorithm::do_pruning )
-  .property("nLevels", &ParallelPruningAlgorithm::get_nLevels )
-  .property("M", &ParallelPruningAlgorithm::get_M )
-  .property("N", &ParallelPruningAlgorithm::get_N )
-  .property("t", &ParallelPruningAlgorithm::get_t )
-  .property("parentNode", &ParallelPruningAlgorithm::get_parentNode )
-  .property("branches", &ParallelPruningAlgorithm::get_branches )
-  .property("tipsVector", &ParallelPruningAlgorithm::get_tipsVector )
-  .property("tipsVectorIndex", &ParallelPruningAlgorithm::get_tipsVectorIndex )
-  .property("branchVector", &ParallelPruningAlgorithm::get_branchVector )
-  .property("branchVectorIndex", &ParallelPruningAlgorithm::get_branchVectorIndex )
+RCPP_MODULE(POUMM_abc) {
+  Rcpp::class_<ParallelPruningAlgorithm2>( "ParallelPruningAlgorithm2" )
+    .constructor<Rcpp::List const&>()
+    .method( "do_pruning", &ParallelPruningAlgorithm2::do_pruning )
+    .property("nLevels", &ParallelPruningAlgorithm2::get_nLevels )
+    .property("M", &ParallelPruningAlgorithm2::get_M )
+    .property("N", &ParallelPruningAlgorithm2::get_N )
+    .property("t", &ParallelPruningAlgorithm2::get_t )
+    .property("parentNode", &ParallelPruningAlgorithm2::get_parentNode )
+    .property("tipsVector", &ParallelPruningAlgorithm2::get_tipsVector )
+    .property("tipsVectorIndex", &ParallelPruningAlgorithm2::get_tipsVectorIndex )
+    .property("branchVector", &ParallelPruningAlgorithm2::get_branchVector )
+    .property("branchVectorIndex", &ParallelPruningAlgorithm2::get_branchVectorIndex )
   ;
-  Rcpp::class_<POUMM_Likelihood>( "POUMM_Likelihood" )
-    .derives<ParallelPruningAlgorithm>("ParallelPruningAlgorithm")
+  Rcpp::class_<POUMM_abc>( "POUMM_abc" )
+    .derives<ParallelPruningAlgorithm2>("ParallelPruningAlgorithm2")
     .constructor<Rcpp::List const&, Rcpp::NumericVector const&, Rcpp::NumericVector const&>()
-    .method( "abcMat", &POUMM_Likelihood::get_abcMat )
-    .method( "abc", &POUMM_Likelihood::get_abc )
+    .method( "abcMat", &POUMM_abc::get_abcMat )
+    .method( "abc", &POUMM_abc::get_abc )
   ;
+}
 }

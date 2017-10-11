@@ -3,11 +3,32 @@ library(ParallelPruning)
 library(microbenchmark)
 
 
+lik_POUMM <- function(
+  poummObj,
+  g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae) {
+
+  poummObj$do_pruning(
+    list(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
+
+  POUMM:::loglik_abc_g0_g0Prior(
+    abc = poummObj$abc(), g0Prior = NA,
+    g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik
+}
+
+lik_POUMM_old <- function(
+  pruneInfo,
+  g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae) {
+
+  POUMM::likPOUMMGivenTreeVTipsC4(
+    integrator = pruneInfo$integrator,
+    g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
+}
+
 context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 2000
+N <- 10
 tree <- ape::rtree(N)
 
 g0 <- 16
@@ -16,38 +37,32 @@ theta <- 4
 sigma <- .2
 sigmae <- .7
 se = rexp(N, 1/.01)
-z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sqrt(sigmae^2+se^2))
-
-pruneInfo2 <- POUMM::pruneTree(tree, z, se)
-pruneInfo <- ParallelPruning::prepare(tree)
-
-ppa <- ParallelPruning:::ParallelPruningAlgorithm$new()
-
-poummLikelihood <- ParallelPruning:::POUMM_Likelihood$new()
-
-poummLikelihood$set_treeAndData(tree = tree, z = z[1:N], se = se[1:N])
-
-poummLikelihood$do_pruning(
-  list(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
+z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
 
 
-expect_lt(abs(
-  POUMM:::loglik_abc_g0_g0Prior(
-    abc = poummLikelihood$abc(), g0Prior = NA,
-    g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik -
-    POUMM::likPOUMMGivenTreeVTips(
-      z = z, tree = tree,
-      g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sqrt(sigmae^2+se^2),
-      g0Prior = NA
-    )), EPS)
+microbenchmark(
+  pruneInfo <- POUMM::pruneTree(tree, z, se),
+  poummLikelihood <- ParallelPruning:::POUMM_Likelihood$new(tree, z = z[1:N], se = se),
+  poummabc <- ParallelPruning:::POUMM_abc$new(tree, z = z[1:N], se = se),
+  times = 1)
 
+# test correct value
+test_that("POUMM likelihood", expect_lt(abs(
+  lik_POUMM(poummLikelihood,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae) -
+    lik_POUMM_old(pruneInfo,
+                  g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
+    )), EPS))
 
-#
-# all(pruneInfo2$integrator$eReord-pruneInfo$eReord == -1)
-#
-# all(pruneInfo2$implementationCPP$tReord==pruneInfo$tReord)
-#
-# all(pruneInfo2$implementationCPP$zReord[1:N]==pruneInfo$z[1:N][pruneInfo2$reord])
-#
-# all(pruneInfo2$implementationCPP$seReord==pruneInfo$seReord[pruneInfo2$reord])
-#
+test_that("POUMM abc", expect_lt(abs(
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae) -
+    lik_POUMM_old(pruneInfo,
+                  g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
+    )), EPS))
+
+microbenchmark(
+  lik_POUMM(poummLikelihood,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),
+  lik_POUMM_old(pruneInfo,
+                g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
