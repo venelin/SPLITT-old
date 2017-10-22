@@ -364,11 +364,6 @@ class ParallelPruningTree {
 
         uvec branchEnds = at(branches_1, at(branchesToTips, branchesNext));
 
-        uvec branchEndsNew(branchVectorIndex[jBVI + 1] - branchVectorIndex[jBVI]);
-        std::iota(branchEndsNew.begin(),
-                  branchEndsNew.end(),
-                  branchVectorIndex[jBVI] + M);
-
         auto orderNodesNew = at(orderNodesOriginal, branchEnds);
         std::copy(orderNodesNew.begin(), orderNodesNew.end(),
                   (this->orderNodes).begin() + branchVectorIndex[jBVI]);
