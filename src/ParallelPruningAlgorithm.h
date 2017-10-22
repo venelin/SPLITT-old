@@ -143,26 +143,6 @@ inline VectorValues at(VectorValues const& v, bvec const& mask) {
   return sub;
 }
 
-template<class VectorClass>
-inline VectorClass multiReplace(VectorClass const& x, VectorClass const& a, VectorClass const& b) {
-  auto x2 = x;
-  auto ind = order(x2);
-  auto xInd = at(x2, ind);
-  std::pair<typename VectorClass::iterator, typename VectorClass::iterator> bounds;
-  for(size_t i = 0; i < a.size(); ++i) {
-    bounds = std::equal_range(xInd.begin(), xInd.end(), a.at(i));
-    if(bounds.first != bounds.second) {
-      size_t first = bounds.first - xInd.begin();
-      size_t last = bounds.second - xInd.begin() - 1;
-      for(size_t j = first; j<=last; ++j) {
-        x2[ind[j]] = b[i];
-      }
-    }
-  }
-  return x2;
-}
-
-
 // for each element of x return the index of its first occurence in table or
 // NA_UINT if the element is not found in table or is equal to NA_UINT.
 // It is assumed that x does not have duplicated elements or NA_UINT elements.
