@@ -51,6 +51,10 @@ ppa::ParallelPruningTree* create_ParallelPruningTree(Rcpp::List const& tree) {
   return new ppa::ParallelPruningTree(phylo(tree));
 }
 
+ppa::ParallelPruningTree* create_ParallelPruningTree2(Rcpp::List const& tree, int dummy) {
+  return new ppa::ParallelPruningTree(phylo(tree), dummy);
+}
+
 ppa::POUMM_abc* create_POUMM_abc(Rcpp::List const& tree, ppa::vec const& z, ppa::vec const& se) {
   return new ppa::POUMM_abc(phylo(tree), z, se);
 }
@@ -62,6 +66,7 @@ ppa::POUMM_lnDetV_Q_1d* create_POUMM_lnDetV_Q_1d(Rcpp::List const& tree, ppa::ve
 RCPP_MODULE(ParallelPruningTree) {
   Rcpp::class_<ppa::ParallelPruningTree>( "ParallelPruningTree" )
   .factory<Rcpp::List const&>( &create_ParallelPruningTree )
+  .factory<Rcpp::List const&, int>( &create_ParallelPruningTree2 )
   .property("nLevels", &ppa::ParallelPruningTree::get_nLevels )
   .property("M", &ppa::ParallelPruningTree::get_M )
   .property("N", &ppa::ParallelPruningTree::get_N )

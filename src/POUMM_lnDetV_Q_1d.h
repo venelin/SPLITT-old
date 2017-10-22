@@ -5,7 +5,7 @@
 
 namespace ppa {
 class POUMM_lnDetV_Q_1d: public ThreePointV_lnDetV_Q_1d {
-  ParallelPruningAlgorithm<POUMM_lnDetV_Q_1d> ppalgorithm;
+  const ParallelPruningAlgorithm<POUMM_lnDetV_Q_1d> ppalgorithm;
 public:
   // univariate trait vector
   ppa::vec z;
@@ -15,7 +15,7 @@ public:
 
 
   POUMM_lnDetV_Q_1d(Tree const& tree, vec const& z):
-    ThreePointV_lnDetV_Q_1d(tree), ppalgorithm(&this->pptree, this), z(z) {
+    ThreePointV_lnDetV_Q_1d(tree), ppalgorithm(this->pptree, *this), z(z) {
 
     if(z.size() != pptree.N ) {
       throw std::invalid_argument("The trait vector must have N elements (N is the number of tips).");

@@ -19,15 +19,15 @@
 
 namespace ppa {
 class POUMM_abc {
-  ParallelPruningTree pptree;
-  ParallelPruningAlgorithm<POUMM_abc> ppalgorithm;
+  const ParallelPruningTree pptree;
+  const ParallelPruningAlgorithm<POUMM_abc> ppalgorithm;
 public:
   double alpha, theta, sigma, sigmae, sigmae2, sigma2, logsigma;
   vec z, se, a, b, c, sum_se2_sigmae2, talpha, etalpha,
   e2talpha, fe2talpha, gutalphasigma2;
 
   POUMM_abc(Tree const& tree, vec const& z, vec const& se):
-    pptree(tree), ppalgorithm(&this->pptree, this), z(z), se(se) {
+    pptree(tree), ppalgorithm(this->pptree, *this), z(z), se(se) {
 
     if(z.size() != pptree.N || se.size() != pptree.N) {
       throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");

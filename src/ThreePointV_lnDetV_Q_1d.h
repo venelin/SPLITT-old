@@ -32,8 +32,8 @@ namespace ppa {
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
 class ThreePointV_lnDetV_Q_1d {
 protected:
-  ParallelPruningTree pptree;
-  ParallelPruningAlgorithm<ThreePointV_lnDetV_Q_1d> ppalgorithm;
+  const ParallelPruningTree pptree;
+  const ParallelPruningAlgorithm<ThreePointV_lnDetV_Q_1d> ppalgorithm;
   void init() {
     this->tTransf = vec(pptree.M - 1);
     this->lnDetV = vec(pptree.M, 0);
@@ -48,7 +48,7 @@ public:
   vec lnDetV, p, Q;
 
   ThreePointV_lnDetV_Q_1d(Tree const& tree):
-    pptree(tree), ppalgorithm(&this->pptree, this) {
+    pptree(tree), ppalgorithm(this->pptree, *this) {
     init();
   };
 
