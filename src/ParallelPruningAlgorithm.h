@@ -259,7 +259,6 @@ class ParallelPruningTree {
     // start by pruning the tips
     uvec tips = seq(0, N-1);
 
-    auto start_ = std::chrono::steady_clock::now();
     while(tips[0] != N) { // while the root has not become a tip itself
 
       tipsVectorIndex.push_back(
@@ -334,10 +333,6 @@ class ParallelPruningTree {
         nBranchesDone += branchesNext.size();
       }
     }
-    auto end_ = std::chrono::steady_clock::now();
-    std::cout << "Duration: while(tips[0]!=N):" <<
-      std::chrono::duration <double, milli> (end_ - start_).count() <<
-        " ms" << std::endl;
 
     this->nLevels = tipsVectorIndex.size() - 1;
     this->tipsVector = tipsVector;
@@ -346,14 +341,7 @@ class ParallelPruningTree {
     this->branchVectorIndex = branchVectorIndex;
     this->orderNodes = seq(0, M - 1);
 
-    start_ = std::chrono::steady_clock::now();
-
     reorderBranches(branchEnds, endingAt);
-
-    end_ = std::chrono::steady_clock::now();
-    std::cout << "Duration: reorderBranches:" <<
-      std::chrono::duration <double, milli> (end_ - start_).count() <<
-        " ms" << std::endl;
   }
 
   void reorderBranches(uvec const& branchEnds, uvec const& endingAt) {
@@ -513,21 +501,6 @@ public:
     this->nThreads = 1;
 #endif // #ifdef _OPENMP
   }
-
-  // void initSpecialData() {}
-  //
-  // void prepareBranch(uint i) {
-  //   std::cout<<"preapareBranch("<<i<<")"<<std::endl;
-  // };
-  //
-  // void pruneBranch(uint i) {
-  //   std::cout<<"pruneBranch("<<i<<")"<<std::endl;
-  // };
-  //
-  // void addToParent(uint i, uint iParent) {
-  //   std::cout<<"addToParent("<<i<<","<<iParent<<")"<<std::endl;
-  // };
-
 
   uint get_nThreads() const {
     return nThreads;
