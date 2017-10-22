@@ -381,51 +381,14 @@ class ParallelPruningTree {
     vec tOriginalOrder = (this->t);
     uvec orderNodesOriginal = (this->orderNodes);
 
-    // branches pointing to tips
-    uvec branchesToTips = at(
-      endingAt, uvec(tipsVector.begin() + tipsVectorIndex[0],
-                     tipsVector.begin() + tipsVectorIndex[1]));
-
     uint jBVI = 0;
-
     uint nBranchesDone = 0;
-    auto start_ = std::chrono::steady_clock::now();
-    while(nBranchesDone != branchesToTips.size()) {
-      uvec branchesNext(branchVector.begin() + branchVectorIndex[jBVI],
-                        branchVector.begin() + branchVectorIndex[jBVI + 1]);
-
-
-      uvec branchEnds = at(branches_1, at(branchesToTips, branchesNext));
-
-      uvec branchEndsNew(branchVectorIndex[jBVI + 1] - branchVectorIndex[jBVI]);
-      std::iota(branchEndsNew.begin(),
-                branchEndsNew.end(),
-                branchVectorIndex[jBVI] + M);
-
-      auto tNew = at(tOriginalOrder, at(branchesToTips, branchesNext));
-      std::copy(tNew.begin(), tNew.end(),
-                (this->t).begin() + branchVectorIndex[jBVI]);
-
-      auto orderNodesNew = at(orderNodesOriginal, branchEnds);
-      std::copy(orderNodesNew.begin(), orderNodesNew.end(),
-                (this->orderNodes).begin() + branchVectorIndex[jBVI]);
-
-      ++jBVI;
-      nBranchesDone += branchesNext.size();
-    }
-    auto end_ = std::chrono::steady_clock::now();
-    std::cout << "  Duration: while(nBranchesDone != branchesToTips.size()):" <<
-      std::chrono::duration <double, milli> (end_ - start_).count() <<
-        " ms" << std::endl;
-
 
     // branches pointing to internal nodes that have become tips
-    for(int i = 1; i < nLevels; ++i) {
-      branchesToTips = at(
+    for(int i = 0; i < nLevels; ++i) {
+      uvec branchesToTips = at(
         endingAt, uvec(tipsVector.begin() + tipsVectorIndex[i],
                        tipsVector.begin() + tipsVectorIndex[i + 1]));
-
-
 
       uint nBranchesDone = 0;
       while(nBranchesDone != branchesToTips.size()) {
