@@ -377,8 +377,7 @@ class ParallelPruningTree {
   }
 
   void reorderBranches(uvec const& branchEnds, uvec const& endingAt) {
-    // duplicate t and orderNodes since it will be shuffled during the reordering
-    vec tOriginalOrder = (this->t);
+    // duplicate orderNodes since it will be shuffled during the reordering
     uvec orderNodesOriginal = (this->orderNodes);
 
     uint jBVI = 0;
@@ -402,13 +401,7 @@ class ParallelPruningTree {
                   branchEndsNew.end(),
                   branchVectorIndex[jBVI] + M);
 
-        auto tNew = at(tOriginalOrder, at(branchesToTips, branchesNext));
-
-        std::copy(tNew.begin(), tNew.end(),
-                  (this->t).begin() + branchVectorIndex[jBVI]);
-
         auto orderNodesNew = at(orderNodesOriginal, branchEnds);
-
         std::copy(orderNodesNew.begin(), orderNodesNew.end(),
                   (this->orderNodes).begin() + branchVectorIndex[jBVI]);
 
@@ -417,10 +410,12 @@ class ParallelPruningTree {
       }
     }
 
-    uvec branchEndsReord = at(branches_1, get_orderBranches());
-    branchEndsReord.push_back(N);
+    auto orderBranches = get_orderBranches();
+    this->t = at(this->t, orderBranches);
 
-    this->parentNode = match(at(branches_0, get_orderBranches()), branchEndsReord);
+    uvec branchEndsReord = at(branches_1, orderBranches);
+    branchEndsReord.push_back(N);
+    this->parentNode = match(at(branches_0, orderBranches), branchEndsReord);
   }
 
   // private default constructor;
