@@ -1,7 +1,7 @@
 Package: ParallelPruning
 Type: Package
 Title: A General Parallel Pruning Framework for Phylogenetic Trees
-Version: 1.4.0
+Version: 0.6.0
 Date: 2017-10-02
 Authors@R: person("Venelin", "Mitov", email = "vmitov@gmail.com",
                  role = c("aut", "cre", "cph"))
@@ -22,5 +22,4 @@ RoxygenNote: 5.0.1
 VignetteBuilder: knitr
 ByteCompile: yes
 NeedsCompilation: yes
-SystemRequirements: C++11
 
