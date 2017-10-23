@@ -49,6 +49,7 @@
 #include <limits>
 #include <numeric>
 #include <chrono>
+#include <map>
 
 // TODO: 1.  don't use Rcpp and arma classes but rely only on STL; done
 // TODO: 2. create a wrapper interface with Rcpp; done
@@ -185,7 +186,6 @@ inline bvec not_is_na(uvec const& x) {
   return res;
 }
 
-
 struct Tree {
   uint N;
   uvec branches_0, branches_1;
@@ -224,6 +224,162 @@ struct Tree {
     }
   }
 };
+
+template<class Node>
+class TreeTopology {
+protected:
+  uint N;
+  uint M;
+  uvec branches_0, branches_1;
+  std::map<Node, uint> mapNodeToId;
+  std::vector<Node> mapIdToNode;
+
+  TreeTopology(vector<Node> const& brStarts, vector<Node> const& brEnds) {
+    if(brStarts.size() != brEnds.size()) {
+      std::ostringstream oss;
+      oss<<"brStarts and brEnds should be the same size, but were "
+         <<brStarts.size()<<" and "<<brEnds.size()<<" respectively.";
+      throw std::length_error(oss.str());
+    }
+
+    // There should be exactly M = number-of-branches+1 distinct nodes
+    // This is because each branch can be mapped to its ending node. The +1
+    // corresponds to the root node, to which no branch points.
+    this->M = brStarts.size() + 1;
+
+    // we distinguish three types of nodes:
+    enum NodeType { ROOT, INTERNAL, TIP };
+
+    // initially, we traverse the list of branches and order the nodes as they
+    // appear during the traversal from 0 to M-1. This order is done by
+    // incrementing nodeIdTemp.
+    uint nodeIdTemp = 0;
+
+    std::vector<NodeType> nodeTypes(M, ROOT);
+    this->mapIdToNode = std::vector<Node>(M);
+    uvec branchStartsTemp(brStarts.size(), NA_UINT);
+    uvec branchEndsTemp(brStarts.size(), NA_UINT);
+    uvec endingAt(M - 1, NA_UINT);
+
+    for(uint i = 0; i < brStarts.size(); ++i) {
+      if(brStarts[i] == brEnds[i]) {
+        std::ostringstream oss;
+        oss<<"Found a branch with the same start and end node ("<<
+          brStarts[i]<<"). Not allowed. ";
+        throw std::logic_error(oss.str());
+      }
+
+      auto it1 = mapNodeToId.find(brStarts[i]);
+      if(it1 == mapNodeToId.end()) {
+        // node encountered for the first time
+        mapNodeToId[brStarts[i]] = nodeIdTemp; // insert brStarts[i] in the map
+        mapIdToNode[nodeIdTemp] = brStarts[i];
+        if(nodeTypes[nodeIdTemp] == TIP) {
+          nodeTypes[nodeIdTemp] = INTERNAL;
+        }
+        branchStartsTemp[i] = nodeIdTemp;
+        nodeIdTemp++;
+      } else {
+        // node encountered in a previous branch
+        if(nodeTypes[it1->second] == TIP) {
+          // the previous encounter of the node was as a branch-end
+          nodeTypes[it1->second] = INTERNAL;
+        } else {
+          // do nothing
+        }
+        branchStartsTemp[i] = it1->second;
+      }
+
+      auto it2 = mapNodeToId.find(brEnds[i]);
+      if(it2 == mapNodeToId.end()) {
+        // node encountered for the first time
+        mapNodeToId[brEnds[i]] = nodeIdTemp;
+        mapIdToNode[nodeIdTemp] = brEnds[i];
+
+        if(nodeTypes[nodeIdTemp] == ROOT) {
+          // not known if the node has descendants, so we set its type to TIP.
+          nodeTypes[nodeIdTemp] = TIP;
+        }
+        branchEndsTemp[i] = nodeIdTemp;
+        endingAt[nodeIdTemp] = i;
+        nodeIdTemp++;
+      } else {
+        // node has been previously encountered
+        if(endingAt[it2->second] != NA_UINT) {
+          std::ostringstream oss;
+          oss<<"Found at least two branches ending at the same node ("<<
+            it2->first<<"). Check for cycles or repeated branches. ";
+          throw std::logic_error(oss.str());
+        } else {
+          if(nodeTypes[it2->second] == ROOT) {
+            // the previous enounters of the node were as branch-start -> set
+            // the node's type to INTERNAL, because we know for sure that it
+            // has descendants.
+            nodeTypes[it2->second] = INTERNAL;
+          }
+          branchEndsTemp[i] = it2->second;
+          endingAt[it2->second] = i;
+        }
+      }
+    }
+
+    if(mapNodeToId.size() != M) {
+      std::ostringstream oss;
+      oss<<"The number of distinct nodes ("<<mapNodeToId.size()<<
+        ") should equal the number-of-branches+1 ("<<M<<").";
+      throw std::logic_error(oss.str());
+    }
+
+    auto countRoots = count(nodeTypes.begin(), nodeTypes.end(), ROOT);
+    if(countRoots != 1) {
+      std::ostringstream oss;
+      oss<<"There should be exactly one ROOT node, but "<<countRoots<<
+        " were found. Check for cycles or for multiple trees.";
+      throw std::logic_error(oss.str());
+    }
+
+    auto countTips = count(nodeTypes.begin(), nodeTypes.end(), TIP);
+    if(countTips == 0) {
+      std::ostringstream oss;
+      oss<<"There should be at least one TIP node, but none"<<
+        " was found. Check for cycles.";
+      throw std::logic_error(oss.str());
+    }
+    this->N = countTips;
+
+    // assign new ids according to the following convention:
+    // tips are numbered from 0 to N - 1;
+    // internal nodes are numbered from N to M - 2;
+    // root is numbered M - 1;
+    std::vector<uint> nodeIds(M, NA_UINT);
+
+    uint tipNo = 0, internalNo = N, rootNo = M - 1;
+    for(uint i = 0; i < M; i++) {
+      if(nodeTypes[i] == TIP) {
+        nodeIds[i] = tipNo;
+        tipNo ++;
+      } else if(nodeTypes[i] == INTERNAL) {
+        nodeIds[i] = internalNo;
+        internalNo++;
+      } else {
+        // nodeTypes[i] == ROOT
+        nodeIds[i] = M - 1;
+      }
+      mapNodeToId[mapIdToNode[i]] = nodeIds[i];
+    }
+
+    this->mapIdToNode = at(mapIdToNode, order(nodeIds));
+
+    this->branches_0 = uvec(M - 1);
+    this->branches_1 = uvec(M - 1);
+
+    for(uint i = 0; i < M - 1; i++) {
+      branches_0[i] = nodeIds[branchStartsTemp[i]];
+      branches_1[i] = nodeIds[branchEndsTemp[i]];
+    }
+  }
+};
+
 
 class ParallelPruningTree {
 
