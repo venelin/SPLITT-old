@@ -186,55 +186,61 @@ inline bvec not_is_na(uvec const& x) {
   return res;
 }
 
-struct Tree {
-  uint N;
-  uvec branches_0, branches_1;
-  vec t;
-  Tree(uint N, uvec const& branches_0, uvec const& branches_1, vec const& t):
-    N(N), branches_0(branches_0), branches_1(branches_1), t(t) {
-    // check the parameters
-    if(branches_0.size() != branches_1.size()) {
-      std::ostringstream oss;
-      oss<<"branches_0 and branches_1 should be the same size, but were "
-         <<branches_0.size()<<" and "<<branches_1.size()<<" respectively.";
-      throw std::length_error(oss.str());
-    }
+// struct Tree {
+//   uint N;
+//   uvec branches_0, branches_1;
+//   vec t;
+//   Tree(uint N, uvec const& branches_0, uvec const& branches_1, vec const& t):
+//     N(N), branches_0(branches_0), branches_1(branches_1), t(t) {
+//     // check the parameters
+//     if(branches_0.size() != branches_1.size()) {
+//       std::ostringstream oss;
+//       oss<<"branches_0 and branches_1 should be the same size, but were "
+//          <<branches_0.size()<<" and "<<branches_1.size()<<" respectively.";
+//       throw std::length_error(oss.str());
+//     }
+//
+//     if(t.size() != branches_0.size()) {
+//       std::ostringstream oss;
+//       oss<<"The size of t should be the same size as branches_0 and branches_1 ("
+//          <<branches_0.size()<<"), but was "<<t.size()<<".";
+//       throw std::length_error(oss.str());
+//     }
+//     if(N < 2) {
+//       std::ostringstream oss;
+//       oss<<"Trees with less than two tips are currently not supported. Check N.";
+//       throw std::length_error(oss.str());
+//     }
+//     if(*(min_element(branches_1.begin(), branches_1.end())) != 0) {
+//       std::ostringstream oss;
+//       oss<<"Tip 0 is not the min element in branches_1. "
+//          <<"The tips of the tree should be numerated from 0 to N-1.";
+//       throw std::invalid_argument(oss.str());
+//     }
+//     if(*(min_element(branches_0.begin(), branches_0.end())) != N) {
+//       std::ostringstream oss;
+//       oss<<"Node N should correspond to the root and be the min element in branches_0.";
+//       throw std::invalid_argument(oss.str());
+//     }
+//   }
+// };
 
-    if(t.size() != branches_0.size()) {
-      std::ostringstream oss;
-      oss<<"The size of t should be the same size as branches_0 and branches_1 ("
-         <<branches_0.size()<<"), but was "<<t.size()<<".";
-      throw std::length_error(oss.str());
-    }
-    if(N < 2) {
-      std::ostringstream oss;
-      oss<<"Trees with less than two tips are currently not supported. Check N.";
-      throw std::length_error(oss.str());
-    }
-    if(*(min_element(branches_1.begin(), branches_1.end())) != 0) {
-      std::ostringstream oss;
-      oss<<"Tip 0 is not the min element in branches_1. "
-         <<"The tips of the tree should be numerated from 0 to N-1.";
-      throw std::invalid_argument(oss.str());
-    }
-    if(*(min_element(branches_0.begin(), branches_0.end())) != N) {
-      std::ostringstream oss;
-      oss<<"Node N should correspond to the root and be the min element in branches_0.";
-      throw std::invalid_argument(oss.str());
-    }
-  }
-};
-
-template<class Node>
-class TreeTopology {
+// A tree topology is a tree without branch-lengths. Still, for our purposes,
+// it has named nodes. Permuting the nodes results in a different topology.
+template<class Node, class BranchWeight>
+class Tree {
 protected:
   uint N;
   uint M;
   uvec branches_0, branches_1;
   std::map<Node, uint> mapNodeToId;
   std::vector<Node> mapIdToNode;
+  std::vector<BranchWeight> t;
 
-  TreeTopology(vector<Node> const& brStarts, vector<Node> const& brEnds) {
+public:
+  Tree(std::vector<Node> const& brStarts,
+               std::vector<Node> const& brEnds,
+               std::vector<BranchWeight> const& t): t(t) {
     if(brStarts.size() != brEnds.size()) {
       std::ostringstream oss;
       oss<<"brStarts and brEnds should be the same size, but were "
@@ -378,8 +384,31 @@ protected:
       branches_1[i] = nodeIds[branchEndsTemp[i]];
     }
   }
-};
 
+  uint get_M() const {
+    return M;
+  }
+
+  uint get_N() const {
+    return N;
+  }
+
+  vec get_t() const {
+    return t;
+  }
+
+  Node get_node(uint id) const {
+    return mapIdToNode[id];
+  }
+
+  vector<Node> get_nodes() const {
+    return mapIdToNode;
+  }
+
+  uint get_id(Node const& node) const {
+    return mapNodeToId[node];
+  }
+};
 
 class ParallelPruningTree {
 
@@ -571,18 +600,6 @@ public:
 
   uint get_nLevels() const {
     return nLevels;
-  }
-
-  uint get_M() const {
-    return M;
-  }
-
-  uint get_N() const {
-    return N;
-  }
-
-  vec get_t() const {
-    return (t);
   }
 
   uvec get_parentNode() const {
