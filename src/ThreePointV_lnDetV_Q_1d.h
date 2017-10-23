@@ -30,10 +30,12 @@ namespace ppa {
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
+template<class Node>
 class ThreePointV_lnDetV_Q_1d {
 protected:
+  typedef ParallelPruningTree<Node, double> ParallelPruningTree;
   const ParallelPruningTree pptree;
-  const ParallelPruningAlgorithm<ThreePointV_lnDetV_Q_1d> ppalgorithm;
+  const ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
   void init() {
     this->tTransf = vec(pptree.M - 1);
     this->lnDetV = vec(pptree.M, 0);
@@ -47,8 +49,9 @@ public:
   vec hat_mu_Y, tilde_mu_X_prime;
   vec lnDetV, p, Q;
 
-  ThreePointV_lnDetV_Q_1d(Tree const& tree):
-    pptree(tree), ppalgorithm(this->pptree, *this) {
+  ThreePointV_lnDetV_Q_1d(
+    std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t):
+    pptree(brStarts, brEnds, t), ppalgorithm(this->pptree, *this) {
     init();
   };
 

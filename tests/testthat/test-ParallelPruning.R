@@ -48,6 +48,14 @@ sigma <- .2
 sigmae <- .7
 se = rep(0, N); #rexp(N, 1/.01)
 z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
+
+# load("../../../poummBayesianValidation/DATA/Microbenchmark/Trees.RData")
+# tree<-trees$tree[[24]]
+# z<-trees$z[[24]]
+
+
+ppt<-ParallelPruning:::ParallelPruningTree$new(tree)
+
 pruneInfo <- POUMM::pruneTree(tree, z, se)
 
 poummabc <- ParallelPruning:::POUMM_abc$new(tree, z = z[1:N], se = se)

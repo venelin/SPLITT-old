@@ -11,7 +11,6 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 //   limitations under the License.
-
 #ifndef POUMM_ABC_H_
 #define POUMM_ABC_H_
 
@@ -39,15 +38,6 @@ public:
       uvec ordNodes = pptree.order_nodes(keys);
       this->z = at(z, ordNodes);
       this->se = at(se, ordNodes);
-
-      // vec z2 = z;
-      // vec se2 = se;
-      //
-      // for(int i = 0; i < pptree.N; ++i) {
-      //   this->z[i] = z2[pptree.orderNodes[i]];
-      //   this->se[i] = se2[pptree.orderNodes[i]];
-      // }
-
       this->a = vec(pptree.M);
       this->b = vec(pptree.M);
       this->c = vec(pptree.M);

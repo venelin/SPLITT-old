@@ -190,7 +190,7 @@ inline bvec not_is_na(uvec const& x) {
 // it has named nodes. Permuting the nodes results in a different topology.
 template<class Node, class BranchWeight>
 class Tree {
-protected:
+public:
   uint N;
   uint M;
   uvec branches_0, branches_1;
@@ -372,7 +372,7 @@ public:
   }
 
   // get the internally stored id of node
-  uint get_id(Node const& node) const {
+  uint get_id(Node const& node) {
     return mapNodeToId[node];
   }
 };
@@ -580,7 +580,7 @@ public:
 
   // The order in which the node ids get processed during the pruning, including
   // tips, internal and root nodes. Each element of the returned
-  // vector is an internal node-id. See also get_orderNodes.
+  // vector is a node-id. See also get_orderNodes.
   uvec get_orderNodeIds() const {
     return uvec(orderNodeIds.begin(), orderNodeIds.end());
   }
@@ -603,7 +603,7 @@ public:
   // returns a vector of positions in nodes in the order of pruning.
   // See also get_orderNodeIds.
   uvec order_nodes(std::vector<Node> const& nodes) const {
-    uvec ordIds(nodes.size());
+    uvec ids(nodes.size());
     for(uint i = 0; i < nodes.size(); ++i) {
       auto it = this->mapNodeToId.find(nodes[i]);
       if(it == this->mapNodeToId.end()) {
@@ -611,10 +611,11 @@ public:
         oss<<"At least one of the nodes is not present in the tree.";
         throw std::invalid_argument(oss.str());
       } else {
-        ordIds[i] = orderNodeIds[it->second];
+        ids[i] = it->second;
       }
     }
-    return order(ordIds);
+    uvec m = match(orderNodeIds, ids);
+    return at(m, not_is_na(m));
   }
 };
 
