@@ -18,27 +18,35 @@
 #include "./ParallelPruningAlgorithm.h"
 
 namespace ppa {
+template<class Node>
 class POUMM_abc {
+  typedef ParallelPruningTree<Node, double> ParallelPruningTree;
   const ParallelPruningTree pptree;
-  const ParallelPruningAlgorithm<POUMM_abc> ppalgorithm;
+  const ParallelPruningAlgorithm<ParallelPruningTree, POUMM_abc> ppalgorithm;
 public:
   double alpha, theta, sigma, sigmae, sigmae2, sigma2, logsigma;
   vec z, se, a, b, c, sum_se2_sigmae2, talpha, etalpha,
   e2talpha, fe2talpha, gutalphasigma2;
 
-  POUMM_abc(Tree const& tree, vec const& z, vec const& se):
-    pptree(tree), ppalgorithm(this->pptree, *this), z(z), se(se) {
+  POUMM_abc(std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t,
+            std::vector<Node> const& keys, vec const& z, vec const& se):
+    pptree(brStarts, brEnds, t), ppalgorithm(this->pptree, *this), z(z), se(se) {
 
     if(z.size() != pptree.N || se.size() != pptree.N) {
       throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");
     } else {
-      vec z2 = z;
-      vec se2 = se;
 
-      for(int i = 0; i < pptree.N; ++i) {
-        this->z[i] = z2[pptree.orderNodes[i]];
-        this->se[i] = se2[pptree.orderNodes[i]];
-      }
+      uvec ordNodes = pptree.order_nodes(keys);
+      this->z = at(z, ordNodes);
+      this->se = at(se, ordNodes);
+
+      // vec z2 = z;
+      // vec se2 = se;
+      //
+      // for(int i = 0; i < pptree.N; ++i) {
+      //   this->z[i] = z2[pptree.orderNodes[i]];
+      //   this->se[i] = se2[pptree.orderNodes[i]];
+      // }
 
       this->a = vec(pptree.M);
       this->b = vec(pptree.M);

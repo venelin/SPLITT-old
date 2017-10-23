@@ -101,10 +101,10 @@ typedef std::vector<bool> bvec;
 const uint NA_UINT = std::numeric_limits<uint>::max();
 
 template <class VectorClass>
-inline std::vector<size_t> order(VectorClass const& v) {
+inline std::vector<uint> order(VectorClass const& v) {
 
   // initialize original index locations
-  std::vector<size_t> idx(v.size());
+  std::vector<uint> idx(v.size());
   std::iota(idx.begin(), idx.end(), 0);
 
   // sort indexes based on comparing values in v
@@ -186,45 +186,6 @@ inline bvec not_is_na(uvec const& x) {
   return res;
 }
 
-// struct Tree {
-//   uint N;
-//   uvec branches_0, branches_1;
-//   vec t;
-//   Tree(uint N, uvec const& branches_0, uvec const& branches_1, vec const& t):
-//     N(N), branches_0(branches_0), branches_1(branches_1), t(t) {
-//     // check the parameters
-//     if(branches_0.size() != branches_1.size()) {
-//       std::ostringstream oss;
-//       oss<<"branches_0 and branches_1 should be the same size, but were "
-//          <<branches_0.size()<<" and "<<branches_1.size()<<" respectively.";
-//       throw std::length_error(oss.str());
-//     }
-//
-//     if(t.size() != branches_0.size()) {
-//       std::ostringstream oss;
-//       oss<<"The size of t should be the same size as branches_0 and branches_1 ("
-//          <<branches_0.size()<<"), but was "<<t.size()<<".";
-//       throw std::length_error(oss.str());
-//     }
-//     if(N < 2) {
-//       std::ostringstream oss;
-//       oss<<"Trees with less than two tips are currently not supported. Check N.";
-//       throw std::length_error(oss.str());
-//     }
-//     if(*(min_element(branches_1.begin(), branches_1.end())) != 0) {
-//       std::ostringstream oss;
-//       oss<<"Tip 0 is not the min element in branches_1. "
-//          <<"The tips of the tree should be numerated from 0 to N-1.";
-//       throw std::invalid_argument(oss.str());
-//     }
-//     if(*(min_element(branches_0.begin(), branches_0.end())) != N) {
-//       std::ostringstream oss;
-//       oss<<"Node N should correspond to the root and be the min element in branches_0.";
-//       throw std::invalid_argument(oss.str());
-//     }
-//   }
-// };
-
 // A tree topology is a tree without branch-lengths. Still, for our purposes,
 // it has named nodes. Permuting the nodes results in a different topology.
 template<class Node, class BranchWeight>
@@ -239,8 +200,8 @@ protected:
 
 public:
   Tree(std::vector<Node> const& brStarts,
-               std::vector<Node> const& brEnds,
-               std::vector<BranchWeight> const& t): t(t) {
+       std::vector<Node> const& brEnds,
+       std::vector<BranchWeight> const& t): t(t) {
     if(brStarts.size() != brEnds.size()) {
       std::ostringstream oss;
       oss<<"brStarts and brEnds should be the same size, but were "
@@ -397,38 +358,42 @@ public:
     return t;
   }
 
+  // return the node at position id;
   Node get_node(uint id) const {
     return mapIdToNode[id];
   }
 
+  // returns the vector of nodes in order of their ids:
+  // tips at positions from 0 to N-1;
+  // internal nodes ath positions from N to M-2;
+  // rot at position M-1;
   vector<Node> get_nodes() const {
     return mapIdToNode;
   }
 
+  // get the internally stored id of node
   uint get_id(Node const& node) const {
     return mapNodeToId[node];
   }
 };
 
-class ParallelPruningTree {
+template<class Node, class BranchWeight>
+class ParallelPruningTree: public Tree<Node, BranchWeight> {
 
   void createPruningOrder() {
-    uvec branchEnds = branches_1;
+    uvec branchEnds = this->branches_1;
     // insert a fictive branch leading to the root of the tree.
-    branchEnds.push_back(N);
+    branchEnds.push_back(this->M - 1);
 
-    uvec endingAt = match(seq(0, M - 1), branchEnds);
+    uvec endingAt = match(seq(0, this->M - 1), branchEnds);
 
 
-    uvec nonPrunedChildren(M);
-    uvec ee1 = branches_0;
+    uvec nonPrunedChildren(this->M);
+    uvec ee1 = this->branches_0;
 
     while(ee1.size() > 0) {
-
-      uvec matchp = match(seq(N, M - 1), ee1);
-
+      uvec matchp = match(seq(this->N, this->M - 1), ee1);
       matchp = at(matchp, not_is_na(matchp));
-
       for(auto m : matchp) nonPrunedChildren[ee1[m]]++;
       for(auto m : matchp) ee1[m] = NA_UINT;
       ee1 = at(ee1, not_is_na(ee1));
@@ -442,9 +407,9 @@ class ParallelPruningTree {
     uvec branchVectorIndex(1, 0);
 
     // start by pruning the tips
-    uvec tips = seq(0, N-1);
+    uvec tips = seq(0, this->N-1);
 
-    while(tips[0] != N) { // while the root has not become a tip itself
+    while(tips[0] != this->M-1) { // while the root has not become a tip itself
 
       tipsVectorIndex.push_back(
         tipsVectorIndex[tipsVectorIndex.size() - 1] + tips.size());
@@ -464,10 +429,10 @@ class ParallelPruningTree {
         // vectorized update of the parent nodes.
         // resolving order of sibling branches being pruned at the same time
         if(nBranchesDone == 0) {
-          remainingParents = branches_0;
+          remainingParents = this->branches_0;
           remainingParents = at(remainingParents, branchesToTips);
         } else {
-          remainingParents = branches_0;
+          remainingParents = this->branches_0;
           remainingParents = at(remainingParents,
                                 at(branchesToTips, not_is_na(branchesToTips)));
         }
@@ -484,7 +449,7 @@ class ParallelPruningTree {
 
         for(int iett = 0; iett < branchesToTips.size(); iett++) {
           if(branchesToTips[iett] != NA_UINT) {
-            branchStarts[iett] = branches_0[branchesToTips[iett]];
+            branchStarts[iett] = this->branches_0[branchesToTips[iett]];
           } else {
             branchStarts[iett] = NA_UINT;
           }
@@ -507,9 +472,9 @@ class ParallelPruningTree {
         // For the parent nodes, decrement the amount of non-visited
         // children
         for(int u : branchesNext) {
-          nonPrunedChildren[branches_0[branchesToTips[u]]]--;
-          if(nonPrunedChildren[branches_0[branchesToTips[u]]] == 0) {
-            tips.push_back(branches_0[branchesToTips[u]]);
+          nonPrunedChildren[this->branches_0[branchesToTips[u]]]--;
+          if(nonPrunedChildren[this->branches_0[branchesToTips[u]]] == 0) {
+            tips.push_back(this->branches_0[branchesToTips[u]]);
           }
         }
 
@@ -524,14 +489,14 @@ class ParallelPruningTree {
     this->tipsVectorIndex = tipsVectorIndex;
     this->branchVector = branchVector;
     this->branchVectorIndex = branchVectorIndex;
-    this->orderNodes = seq(0, M - 1);
+    this->orderNodeIds = seq(0, this->M - 1);
 
     reorderBranches(branchEnds, endingAt);
   }
 
   void reorderBranches(uvec const& branchEnds, uvec const& endingAt) {
-    // duplicate orderNodes since it will be shuffled during the reordering
-    uvec orderNodesOriginal = (this->orderNodes);
+    // duplicate orderNodeIds since it will be shuffled during the reordering
+    uvec orderNodesOriginal = (this->orderNodeIds);
 
     uint jBVI = 0;
     uint nBranchesDone = 0;
@@ -547,11 +512,11 @@ class ParallelPruningTree {
         uvec branchesNext(branchVector.begin() + branchVectorIndex[jBVI],
                           branchVector.begin() + branchVectorIndex[jBVI + 1]);
 
-        uvec branchEnds = at(branches_1, at(branchesToTips, branchesNext));
+        uvec branchEnds = at(this->branches_1, at(branchesToTips, branchesNext));
 
         auto orderNodesNew = at(orderNodesOriginal, branchEnds);
         std::copy(orderNodesNew.begin(), orderNodesNew.end(),
-                  (this->orderNodes).begin() + branchVectorIndex[jBVI]);
+                  (this->orderNodeIds).begin() + branchVectorIndex[jBVI]);
 
         ++jBVI;
         nBranchesDone += branchesNext.size();
@@ -561,29 +526,19 @@ class ParallelPruningTree {
     auto orderBranches = get_orderBranches();
     this->t = at(this->t, orderBranches);
 
-    uvec branchEndsReord = at(branches_1, orderBranches);
-    branchEndsReord.push_back(N);
-    this->parentNode = match(at(branches_0, orderBranches), branchEndsReord);
+    uvec branchEndsReord = at(this->branches_1, orderBranches);
+    branchEndsReord.push_back(this->M - 1);
+    this->parentNode = match(at(this->branches_0, orderBranches), branchEndsReord);
   }
 
   // private default constructor;
-  ParallelPruningTree(): M(NA_UINT), N(NA_UINT), nLevels(NA_UINT) {};
+  ParallelPruningTree() {};
 public:
-  // number of all nodes including the root
-  const uint M;
-  // number of tips
-  const uint N;
-
   // number of pruning steps
   uint nLevels;
 
-  // branches matrix
-  const uvec branches_0, branches_1;
-
-  vec t;
-
   uvec parentNode;
-  uvec orderNodes;
+  uvec orderNodeIds;
 
   uvec tipsVector;
   uvec tipsVectorIndex;
@@ -591,9 +546,10 @@ public:
   uvec branchVectorIndex;
 
 public:
-  ParallelPruningTree(Tree const& tree):
-    N(tree.N), M(tree.branches_0.size() + 1),
-    branches_0(tree.branches_0), branches_1(tree.branches_1), t(tree.t) {
+  ParallelPruningTree(
+    std::vector<Node> const& brStarts,
+    std::vector<Node> const& brEnds,
+    std::vector<BranchWeight> const& t): Tree<Node, BranchWeight>(brStarts, brEnds, t) {
 
     createPruningOrder();
   }
@@ -622,32 +578,49 @@ public:
     return branchVectorIndex;
   }
 
-  // The order in which the nodes get processed during the pruning, including
-  // internal and tip-nodes.
-  uvec get_orderNodes() const {
-    return uvec(orderNodes.begin(), orderNodes.end() - 1);
+  // The order in which the node ids get processed during the pruning, including
+  // tips, internal and root nodes. Each element of the returned
+  // vector is an internal node-id. See also get_orderNodes.
+  uvec get_orderNodeIds() const {
+    return uvec(orderNodeIds.begin(), orderNodeIds.end());
   }
 
   // The order in which the branches get processed during the pruning.
   uvec get_orderBranches() const {
-    uvec orderBranchEnds(orderNodes.begin(), orderNodes.end() - 1);
-    return match(orderBranchEnds, branches_1);
+    uvec orderBranchEnds(orderNodeIds.begin(), orderNodeIds.end() - 1);
+    return match(orderBranchEnds, this->branches_1);
   }
 
   // A root-to-node distance vector in the order of pruning processing
   vec get_nodeHeights() const {
-    vec h(M, 0);
-    for(int i = M - 2; i >= 0; i--) {
-      h[i] = h[parentNode[i]] + t[i];
+    vec h(this->M, 0);
+    for(int i = this->M - 2; i >= 0; i--) {
+      h[i] = h[parentNode[i]] + this->t[i];
     }
     return h;
   }
 
+  // returns a vector of positions in nodes in the order of pruning.
+  // See also get_orderNodeIds.
+  uvec order_nodes(std::vector<Node> const& nodes) const {
+    uvec ordIds(nodes.size());
+    for(uint i = 0; i < nodes.size(); ++i) {
+      auto it = this->mapNodeToId.find(nodes[i]);
+      if(it == this->mapNodeToId.end()) {
+        std::ostringstream oss;
+        oss<<"At least one of the nodes is not present in the tree.";
+        throw std::invalid_argument(oss.str());
+      } else {
+        ordIds[i] = orderNodeIds[it->second];
+      }
+    }
+    return order(ordIds);
+  }
 };
 
 //  a skeleton for a ParallelPruningSpec class
 // Curiously recurring template pattern -  static polymorphism
-template<class PruningSpec>
+template<class ParallelPruningTree, class PruningSpec>
 class ParallelPruningAlgorithm {
   uint nThreads;
 protected:
