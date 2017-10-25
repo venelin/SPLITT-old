@@ -56,8 +56,6 @@
 // TODO: 3. support for other tree descriptions (don't rely only on the phylo).
 // TODO: 4. use std::exception to check arguments - done.
 
-const uint MIN_CHUNK_SIZE = 10;
-
 #ifdef _OPENMP
 
 // Need to decide wheter to use '#pragma omp for' or '#pragma omp for simd'
@@ -387,18 +385,8 @@ class ParallelPruningTree: public Tree<Node, BranchWeight> {
 
     uvec endingAt = match(seq(0, this->M - 1), branchEnds);
 
-
-    uvec nonPrunedChildren(this->M);
-    uvec ee1 = this->branches_0;
-
-    while(ee1.size() > 0) {
-      uvec matchp = match(seq(this->N, this->M - 1), ee1);
-      matchp = at(matchp, not_is_na(matchp));
-      for(auto m : matchp) nonPrunedChildren[ee1[m]]++;
-      for(auto m : matchp) ee1[m] = NA_UINT;
-      ee1 = at(ee1, not_is_na(ee1));
-
-    }
+    uvec nonPrunedChildren(this->M, 0);
+    for(auto b : this->branches_0) nonPrunedChildren[b]++;
 
     uvec tipsVector;
     uvec tipsVectorIndex(1, 0);
@@ -623,13 +611,35 @@ public:
 // Curiously recurring template pattern -  static polymorphism
 template<class ParallelPruningTree, class PruningSpec>
 class ParallelPruningAlgorithm {
-  uint nThreads;
 protected:
+  uint nThreads;
   const ParallelPruningTree& pptree;
   PruningSpec& spec;
+
+  // a for loop in do_pruning_hybrid will be omp-for-ed if the number of
+  // iterations is bigger than nThreads * minChunkSizeForHybrid.
+  uint minChunkSizeForHybrid = 2;
+  uint bestMinChunkSizeForHybrid = 2;
+  bool minChunkSizeGrowing = 1;
+  enum PruningModeAuto { SINGLE_THREAD = 1, MULTI_THREAD = 2, HYBRID = 3 };
+
+  uint pmaCurrentStep = 0;
+  const uint PRUNING_MODE_AUTO_MAX_STEPS = 20;
+
+  double pmaMinDuration = std::numeric_limits<double>::max();
+  double pmaHybridMinDuration = std::numeric_limits<double>::max();
+  std::vector<double> pmaTuningDurations;
+  PruningModeAuto pmaBestMode = MULTI_THREAD;
+  std::vector<PruningModeAuto> pmaTuningModes;
+  std::vector<uint> pmaTuningMinChunkSizes;
 public:
   ParallelPruningAlgorithm(const ParallelPruningTree& _pptree, PruningSpec& _spec):
-  pptree(_pptree), spec(_spec) {
+  pptree(_pptree), spec(_spec),
+  pmaTuningModes(PRUNING_MODE_AUTO_MAX_STEPS + 1, HYBRID),
+  pmaTuningDurations(
+    PRUNING_MODE_AUTO_MAX_STEPS + 1, std::numeric_limits<double>::max()),
+  pmaTuningMinChunkSizes(PRUNING_MODE_AUTO_MAX_STEPS + 1, 2) {
+
 #ifdef _OPENMP
 #pragma omp parallel
 {
@@ -642,21 +652,129 @@ public:
 #else
     this->nThreads = 1;
 #endif // #ifdef _OPENMP
+    minChunkSizeForHybrid = 2;
+    pmaCurrentStep = 0;
+    pmaTuningModes[0] = SINGLE_THREAD;
+    pmaTuningModes[1] = MULTI_THREAD;
+    pmaTuningModes[11] = SINGLE_THREAD;
+    pmaTuningModes[PRUNING_MODE_AUTO_MAX_STEPS-1] = SINGLE_THREAD;
   }
 
   uint get_nThreads() const {
     return nThreads;
   }
 
-  void do_pruning(int mode) const {
+  uint get_bestMinChunkSizeForHybrid() const {
+    return bestMinChunkSizeForHybrid;
+  }
+
+
+  std::vector<double>  get_pmaTuningDurations() const {
+    return pmaTuningDurations;
+  }
+
+  PruningModeAuto get_pmaBestMode() const {
+    return pmaBestMode;
+  }
+
+  std::vector<uint> get_pmaTuningMinChunkSizes() const {
+    return pmaTuningMinChunkSizes;
+  }
+
+  void do_pruning(int mode) {
     switch(mode) {
-    case 1: do_pruning_serial(); break;
-    case 2: do_pruning_parallel(); break;
-    default: do_pruning_hybrid();
+    case 0: do_pruning_auto(); break;
+    case 1: do_pruning_single_thread(); break;
+    case 2: do_pruning_multi_thread(); break;
+    case 3: do_pruning_hybrid(); break;
+    default: do_pruning_auto();
     }
   }
 
-  void do_pruning_serial() const {
+protected:
+  void do_pruning_auto() {
+    PruningModeAuto mode;
+    std::chrono::steady_clock::time_point start, end;
+    double duration;
+    bool isTuning = false;
+    if(pmaCurrentStep < PRUNING_MODE_AUTO_MAX_STEPS) {
+      mode = pmaTuningModes[pmaCurrentStep];
+      isTuning = true;
+    } else {
+      mode = pmaBestMode;
+      minChunkSizeForHybrid = bestMinChunkSizeForHybrid;
+      isTuning = false;
+    }
+
+    if( isTuning ) {
+      switch(mode) {
+
+      case SINGLE_THREAD:
+        start = std::chrono::steady_clock::now();
+        do_pruning(1);
+        end = std::chrono::steady_clock::now();
+        duration = std::chrono::duration<double, milli>(end - start).count();
+        pmaTuningDurations[pmaCurrentStep] = duration;
+        if(duration < pmaMinDuration) {
+          pmaMinDuration = duration;
+          pmaBestMode = SINGLE_THREAD;
+        }
+        pmaCurrentStep++;
+        break;
+
+      case MULTI_THREAD:
+        start = std::chrono::steady_clock::now();
+        do_pruning(2);
+        end = std::chrono::steady_clock::now();
+        duration = std::chrono::duration<double, milli>(end - start).count();
+        pmaTuningDurations[pmaCurrentStep] = duration;
+        if(duration < pmaMinDuration) {
+          pmaMinDuration = duration;
+          pmaBestMode = MULTI_THREAD;
+        }
+        pmaCurrentStep++;
+        break;
+
+      case HYBRID:
+        start = std::chrono::steady_clock::now();
+        do_pruning(3);
+        end = std::chrono::steady_clock::now();
+        duration = std::chrono::duration<double, milli>(end - start).count();
+        pmaTuningDurations[pmaCurrentStep] = duration;
+        pmaTuningMinChunkSizes[pmaCurrentStep] = minChunkSizeForHybrid;
+
+        if(duration < pmaMinDuration) {
+          pmaMinDuration = duration;
+          pmaBestMode = HYBRID;
+        }
+        if(duration < pmaHybridMinDuration) {
+          pmaHybridMinDuration = duration;
+          bestMinChunkSizeForHybrid = minChunkSizeForHybrid;
+        } else if(duration > pmaTuningDurations[pmaCurrentStep - 1]) {
+          // not improving from the current step, so change direction of minChunkSize
+          if(!minChunkSizeGrowing) {
+            minChunkSizeGrowing = 1;
+          } else if(minChunkSizeGrowing & minChunkSizeForHybrid > 2) {
+            // if minChunkSizeForHybrid is hitting the bottom, keep growing
+            minChunkSizeGrowing = 0;
+          }
+        }
+        minChunkSizeForHybrid += minChunkSizeForHybrid * minChunkSizeGrowing -
+          (minChunkSizeForHybrid / 4) * (!minChunkSizeGrowing);
+        pmaCurrentStep++;
+        break;
+      }
+    } else {
+      switch(mode) {
+      case HYBRID: do_pruning(3); pmaCurrentStep++; break;
+      case SINGLE_THREAD: do_pruning(1); pmaCurrentStep++; break;
+      case MULTI_THREAD: do_pruning(2); pmaCurrentStep++; break;
+      }
+    }
+
+  }
+
+  void do_pruning_single_thread() {
     spec.initSpecialData();
 
     _PRAGMA_OMP_SIMD
@@ -665,6 +783,7 @@ public:
       // This is the ideal place to do transformation of branch lengths, etc.
       spec.prepareBranch(i);
     }
+
     uint jBVI = 0;
     for(int j = 0; j < pptree.nLevels; j++) {
       const uint bFirst = pptree.tipsVectorIndex[j];
@@ -695,7 +814,7 @@ public:
     }
   }
 
-  void do_pruning_parallel() const {
+  void do_pruning_multi_thread() {
     spec.initSpecialData();
 
 #pragma omp parallel
@@ -742,7 +861,7 @@ public:
 }
   }
 
-  void do_pruning_hybrid() const {
+  void do_pruning_hybrid() {
     spec.initSpecialData();
 
     uint tid;
@@ -763,6 +882,7 @@ public:
     }
   } else {
     // only one (master) thread executes this
+    _PRAGMA_OMP_SIMD
     for(uint i = 0; i < pptree.M - 1; i++) {
       // calculate and store cache information for branch i
       // This is the ideal place to do transformation of branch lengths, etc.
@@ -776,7 +896,7 @@ public:
     const uint bFirst = pptree.tipsVectorIndex[j];
     const uint bLast = pptree.tipsVectorIndex[j + 1] - 1;
 
-    if(bLast - bFirst + 1 > nThreads * MIN_CHUNK_SIZE) {
+    if(bLast - bFirst + 1 > nThreads * minChunkSizeForHybrid) {
       _PRAGMA_OMP_FOR_SIMD
       for(uint i = bFirst; i < bLast + 1; i++) {
         // perform the main calculation for branch i based on the pruning
@@ -785,6 +905,7 @@ public:
       }
     } else if(tid == 0) {
       // only one (master) thread executes this
+      _PRAGMA_OMP_SIMD
       for(uint i = bFirst; i < bLast + 1; i++) {
         // perform the main calculation for branch i based on the pruning
         // results from its daughter branches.
@@ -798,7 +919,7 @@ public:
       const uint unFirst = pptree.branchVectorIndex[jBVI];
       const uint unLast = pptree.branchVectorIndex[jBVI + 1] - 1;
 
-      if(unLast - unFirst + 1 > nThreads * MIN_CHUNK_SIZE) {
+      if(unLast - unFirst + 1 > nThreads * minChunkSizeForHybrid) {
         _PRAGMA_OMP_FOR_SIMD
         for(uint i = unFirst; i < unLast + 1; i++) {
           // store or add up the result from branch i to the results from its
@@ -808,6 +929,7 @@ public:
         }
       } else if(tid == 0) {
         // only one (master) thread executes this
+        _PRAGMA_OMP_SIMD
         for(uint i = unFirst; i < unLast + 1; i++) {
           // store or add up the result from branch i to the results from its
           // sibling branches, so that these results can be used for the

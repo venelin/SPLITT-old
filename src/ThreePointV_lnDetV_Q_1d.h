@@ -35,7 +35,7 @@ class ThreePointV_lnDetV_Q_1d {
 protected:
   typedef ParallelPruningTree<Node, double> ParallelPruningTree;
   const ParallelPruningTree pptree;
-  const ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
+  ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
   void init() {
     this->tTransf = vec(pptree.M - 1);
     this->lnDetV = vec(pptree.M, 0);

@@ -21,7 +21,7 @@ template<class Node>
 class POUMM_abc {
   typedef ParallelPruningTree<Node, double> ParallelPruningTree;
   const ParallelPruningTree pptree;
-  const ParallelPruningAlgorithm<ParallelPruningTree, POUMM_abc> ppalgorithm;
+  ParallelPruningAlgorithm<ParallelPruningTree, POUMM_abc> ppalgorithm;
 public:
   double alpha, theta, sigma, sigmae, sigmae2, sigma2, logsigma;
   vec z, se, a, b, c, sum_se2_sigmae2, talpha, etalpha,
@@ -71,7 +71,28 @@ public:
     for(size_t i = 0; i < se.size(); ++i) {
       sum_se2_sigmae2[i] = sigmae2 + se[i]*se[i];
     }
-  };
+  }
+
+  uint get_nThreads() const {
+    return ppalgorithm.get_nThreads();
+  }
+
+  uint get_bestMinChunkSizeForHybrid() const {
+    return ppalgorithm.get_bestMinChunkSizeForHybrid();
+  }
+
+
+  std::vector<double>  get_pmaTuningDurations() const {
+    return ppalgorithm.get_pmaTuningDurations();
+  }
+
+  uint get_pmaBestMode() const {
+    return ppalgorithm.get_pmaBestMode();
+  }
+
+  std::vector<uint> get_pmaTuningMinChunkSizes() const {
+    return ppalgorithm.get_pmaTuningMinChunkSizes();
+  }
 
   inline void initSpecialData() {
     std::fill(a.begin(), a.end(), 0);

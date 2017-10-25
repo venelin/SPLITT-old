@@ -6,7 +6,7 @@
 namespace ppa {
 template<class Node>
 class POUMM_lnDetV_Q_1d: public ThreePointV_lnDetV_Q_1d<Node> {
-  const ParallelPruningAlgorithm<ParallelPruningTree<Node, double>, POUMM_lnDetV_Q_1d> ppalgorithm;
+  ParallelPruningAlgorithm<ParallelPruningTree<Node, double>, POUMM_lnDetV_Q_1d> ppalgorithm;
 public:
   // univariate trait vector
   ppa::vec z;
