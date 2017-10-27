@@ -38,7 +38,7 @@ context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 20
+N <- 10000
 tree <- ape::rtree(N)
 
 g0 <- 16
