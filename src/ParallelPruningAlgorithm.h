@@ -394,9 +394,6 @@ protected:
     uvec num_children_remaining(this->num_all_nodes_, 0);
     for(uint i : this->id_parent_node_) num_children_remaining[i]++;
 
-    uvec nodes;
-    uvec branches;
-
     this->nodes_to_prune_ = uvec(1, 0);
     this->nodes_to_update_parent_ = uvec(1, 0);
 
@@ -413,9 +410,6 @@ protected:
       nodes_to_prune_.push_back(
         nodes_to_prune_[nodes_to_prune_.size() - 1] + tips_this_level.size());
 
-
-      // add the tips to be pruned to the nodes-vector
-      nodes.insert(nodes.end(), tips_this_level.begin(), tips_this_level.end());
 
       // unique parents at this level
       uvec parents_this_level;
@@ -435,14 +429,13 @@ protected:
 
       uint num_parents_remaining = parents_this_level.size();
       while( num_parents_remaining ) {
-        uvec branchesNext;
-        branchesNext.reserve(num_parents_remaining);
 
+        uint num_parent_updates = 0;
         for(auto i_parent: parents_this_level) {
           if(!pos_of_parent[i_parent - this->num_tips_].empty()) {
             uint i = pos_of_parent[i_parent - this->num_tips_].back();
-            branchesNext.push_back(i);
 
+            num_parent_updates ++;
             this->orderNodeIds.push_back(tips_this_level[i]);
 
             num_children_remaining[i_parent]--;
@@ -456,10 +449,8 @@ protected:
           }
         }
 
-        branches.insert(branches.end(),
-                        branchesNext.begin(), branchesNext.end());
         nodes_to_update_parent_.push_back(
-          nodes_to_update_parent_[nodes_to_update_parent_.size() - 1] + branchesNext.size());
+          nodes_to_update_parent_[nodes_to_update_parent_.size() - 1] + num_parent_updates);
       }
 
       tips_this_level = tips_next_level;
@@ -467,30 +458,6 @@ protected:
 
     this->num_levels_ = nodes_to_prune_.size() - 1;
     this->orderNodeIds.push_back(this->num_all_nodes_ - 1);
-
-    // this->orderNodeIds = Seq(0, this->num_all_nodes_ - 1);
-    //
-    // // reordering of the nodes, so that SIMD instructions can be used
-    // uint jBI = 0;
-    // for(int i = 0; i < this->num_levels_; ++i) {
-    //   uvec branchesToTipsAtThisLevel =
-    //     uvec(nodes.begin() + nodes_to_prune_[i],
-    //          nodes.begin() + nodes_to_prune_[i + 1]);
-    //
-    //   uint nBranchesDone = 0;
-    //   while(nBranchesDone != branchesToTipsAtThisLevel.size()) {
-    //     uvec branchesNext(branches.begin() + nodes_to_update_parent_[jBI],
-    //                       branches.begin() + nodes_to_update_parent_[jBI + 1]);
-    //
-    //     auto orderNodesNew = At(branchesToTipsAtThisLevel, branchesNext);
-    //
-    //     std::copy(orderNodesNew.begin(), orderNodesNew.end(),
-    //               (this->orderNodeIds).begin() + nodes_to_update_parent_[jBI]);
-    //
-    //     ++jBI;
-    //     nBranchesDone += branchesNext.size();
-    //   }
-    // }
 
     auto orderBranches = get_orderBranches();
     this->branch_lengths_ = At(this->branch_lengths_, orderBranches);
