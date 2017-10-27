@@ -16,29 +16,31 @@ public:
 
 
   POUMM_lnDetV_Q_1d(
-    std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t,
+    std::vector<Node> const& brStarts, std::vector<Node> const& brEnds,
+    vec const& t,
     std::vector<Node> const& keys, vec const& z):
-    ThreePointV_lnDetV_Q_1d<Node>(brStarts, brEnds, t), ppalgorithm(this->pptree, *this), z(z) {
+    ThreePointV_lnDetV_Q_1d<Node>(brStarts, brEnds, t),
+    ppalgorithm(this->pptree, *this), z(z) {
 
-    if(z.size() != this->pptree.N ) {
+    if(z.size() != this->pptree.num_tips() ) {
       throw std::invalid_argument("The trait vector must have N elements (N is the number of tips).");
     } else {
       uvec ordNodes = this->pptree.order_nodes(keys);
-      this->z = at(z, ordNodes);
+      this->z = At(z, ordNodes);
 
       // vec z2 = z;
       // for(int i = 0; i < this->pptree.N; ++i) {
       //   this->z[i] = z2[this->pptree.orderNodes[i]];
       // }
-      vec X(this->pptree.N);
+      vec X(this->pptree.num_tips());
       this->set_X_and_Y(X, X);
     }
 
     this->h = this->pptree.get_nodeHeights();
 
-    this->T = *std::max_element(h.begin(), h.begin()+this->pptree.N);
-    this->u = ppa::vec(this->pptree.N);
-    for(int i = 0; i < this->pptree.N; i++) u[i] = T - h[i];
+    this->T = *std::max_element(h.begin(), h.begin()+this->pptree.num_tips());
+    this->u = ppa::vec(this->pptree.num_tips());
+    for(int i = 0; i < this->pptree.num_tips(); i++) u[i] = T - h[i];
   }
 
   void set_parameters(double g0, double alpha, double theta, double sigma, double sigmae) {
@@ -51,7 +53,7 @@ public:
   }
 
   void prepareBranch(uint i) {
-    uint iParent = this->pptree.parentNode[i];
+    uint iParent = this->pptree.ParentPruneIndex(i);
     // tTransf[i] =
     //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -
     //     (1-exp(-2*alpha*h[iParent]))*exp(-2*alpha*(T-h[iParent])) );
@@ -61,7 +63,7 @@ public:
     this->tTransf[i] = sigma*sigma/(2*alpha) *
       (e2alphaT*(ealphahi*ealphahi - exp(2*alpha*h[iParent])));
 
-    if(i < this->pptree.N) {
+    if(i < this->pptree.num_tips()) {
       //double mu = exp(-alpha*h[i])*g0 + (1-exp(-alpha*h[i]))*theta;
       double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
 

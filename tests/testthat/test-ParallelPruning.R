@@ -22,7 +22,7 @@ lik_POUMM_lnDetV_Q <- function(
   poummObj$set_parameters(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
   poummObj$do_pruning(mode)
 
-  -1/2*(poummObj$N*log(2*pi) + 2*poummObj$lnDetD + poummObj$lnDetV+poummObj$Q)
+  -1/2*(poummObj$num_tips*log(2*pi) + 2*poummObj$lnDetD + poummObj$lnDetV+poummObj$Q)
 }
 
 lik_POUMM_old <- function(
@@ -38,7 +38,7 @@ context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 10000
+N <- 20
 tree <- ape::rtree(N)
 
 g0 <- 16

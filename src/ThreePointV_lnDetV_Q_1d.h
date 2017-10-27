@@ -37,10 +37,10 @@ protected:
   const ParallelPruningTree pptree;
   ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
   void init() {
-    this->tTransf = vec(pptree.M - 1);
-    this->lnDetV = vec(pptree.M, 0);
-    this->p = vec(pptree.M, 0);
-    this->Q = vec(pptree.M, 0);
+    this->tTransf = vec(pptree.num_all_nodes() - 1);
+    this->lnDetV = vec(pptree.num_all_nodes(), 0);
+    this->p = vec(pptree.num_all_nodes(), 0);
+    this->Q = vec(pptree.num_all_nodes(), 0);
   }
 public:
   // define fields as public in order to access them easily from R.
@@ -56,26 +56,27 @@ public:
   };
 
   void set_X_and_Y(vec const& X, vec const& Y) {
-    if(X.size() != pptree.N || Y.size() != pptree.N) {
+    if(X.size() != pptree.num_tips() || Y.size() != pptree.num_tips()) {
       Rcpp::stop("The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 
-      this->hat_mu_Y = vec(pptree.M, 0);
-      this->tilde_mu_X_prime = vec(pptree.M, 0);
+      this->hat_mu_Y = vec(pptree.num_all_nodes(), 0);
+      this->tilde_mu_X_prime = vec(pptree.num_all_nodes(), 0);
     }
   }
 
-  uint get_N() const {
-    return pptree.get_N();
+
+  uint num_tips() const {
+    return this->pptree.num_tips();
   }
 
   double get_Q() const {
-    return this->Q[pptree.M-1];
+    return this->Q[pptree.num_all_nodes()-1];
   }
 
   double get_lnDetV() const {
-    return this->lnDetV[pptree.M-1];
+    return this->lnDetV[pptree.num_all_nodes()-1];
   }
 
   inline void initSpecialData() {
@@ -86,12 +87,8 @@ public:
     std::fill(Q.begin(), Q.end(), 0);
   }
 
-  virtual void prepareBranch(uint i) {
-    tTransf[i] = pptree.t[i];
-  }
-
   inline void pruneBranch(uint i) {
-    if(i < pptree.N) {
+    if(i < pptree.num_tips()) {
       // branch leading to a tip
       lnDetV[i] = log(tTransf[i]);
       p[i] = 1 / tTransf[i];

@@ -29,31 +29,33 @@ public:
 
   POUMM_abc(std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t,
             std::vector<Node> const& keys, vec const& z, vec const& se):
-    pptree(brStarts, brEnds, t), ppalgorithm(this->pptree, *this), z(z), se(se) {
+    pptree(brStarts, brEnds, t),
+    ppalgorithm(this->pptree, *this),
+    z(z), se(se) {
 
-    if(z.size() != pptree.N || se.size() != pptree.N) {
+    if(z.size() != pptree.num_tips() || se.size() != pptree.num_tips()) {
       throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");
     } else {
 
       uvec ordNodes = pptree.order_nodes(keys);
-      this->z = at(z, ordNodes);
-      this->se = at(se, ordNodes);
-      this->a = vec(pptree.M);
-      this->b = vec(pptree.M);
-      this->c = vec(pptree.M);
-      this->talpha = vec(pptree.M - 1);
-      this->etalpha = vec(pptree.M - 1);
-      this->e2talpha = vec(pptree.M - 1);
-      this->fe2talpha = vec(pptree.M - 1);
-      this->gutalphasigma2 = vec(pptree.M - 1);
+      this->z = At(z, ordNodes);
+      this->se = At(se, ordNodes);
+      this->a = vec(pptree.num_all_nodes());
+      this->b = vec(pptree.num_all_nodes());
+      this->c = vec(pptree.num_all_nodes());
+      this->talpha = vec(pptree.num_all_nodes() - 1);
+      this->etalpha = vec(pptree.num_all_nodes() - 1);
+      this->e2talpha = vec(pptree.num_all_nodes() - 1);
+      this->fe2talpha = vec(pptree.num_all_nodes() - 1);
+      this->gutalphasigma2 = vec(pptree.num_all_nodes() - 1);
     }
   };
 
   vec get_abc() const {
     vec res(3);
-    res[0] = a[pptree.M - 1];
-    res[1] = b[pptree.M - 1];
-    res[2] = c[pptree.M - 1];
+    res[0] = a[pptree.num_all_nodes() - 1];
+    res[1] = b[pptree.num_all_nodes() - 1];
+    res[2] = c[pptree.num_all_nodes() - 1];
     return res;
   };
 
@@ -95,29 +97,31 @@ public:
   }
 
   inline void initSpecialData() {
-    std::fill(a.begin(), a.end(), 0);
-    std::fill(b.begin(), b.end(), 0);
-    std::fill(c.begin(), c.end(), 0);
+    // std::fill(a.begin(), a.end(), 0);
+    // std::fill(b.begin(), b.end(), 0);
+    // std::fill(c.begin(), c.end(), 0);
+    a[pptree.num_all_nodes() - 1] = b[pptree.num_all_nodes() - 1] = c[pptree.num_all_nodes() - 1] = 0;
   }
 
   inline void prepareBranch(uint i) {
     //std::cout<<"prepareBranch("<<i<<")"<<std::endl;
+    a[i] = b[i] = c[i] = 0;
     if(alpha != 0) {
-      talpha[i] = pptree.t[i] * alpha;
+      talpha[i] = pptree.branch_length(i) * alpha;
       etalpha[i] = exp(talpha[i]);
       e2talpha[i] = etalpha[i] * etalpha[i];
       fe2talpha[i] = alpha / (1 - e2talpha[i]);
     } else {
-      talpha[i] = pptree.t[i] * alpha;
+      talpha[i] = pptree.branch_length(i) * alpha;
       etalpha[i] = exp(talpha[i]);
       e2talpha[i] = etalpha[i] * etalpha[i];
-      fe2talpha[i] = -0.5 / pptree.t[i];
+      fe2talpha[i] = -0.5 / pptree.branch_length(i);
     }
   };
 
   inline void pruneBranch(uint i) {
     //std::cout<<"pruneBranch("<<i<<")"<<std::endl;
-    if(i < pptree.N) {
+    if(i < pptree.num_tips()) {
       // branch leading to a tip
       gutalphasigma2[i] = e2talpha[i] +
         ((-0.5 / sum_se2_sigmae2[i]) * sigma2) / fe2talpha[i];
