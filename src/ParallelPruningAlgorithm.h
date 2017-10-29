@@ -768,7 +768,7 @@ protected:
 
     if(range_prune.second - range_prune.first + 1 >
          //num_threads_ * min_size_chunk_prune()) {
-         num_threads_ * 32) {
+         num_threads_ * 36) {
 
       _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_prune.first; i <= range_prune.second; i++) {
@@ -792,7 +792,7 @@ protected:
       auto range_update = pptree_.RangeIdUpdateParent(i_update);
 
       if (range_update.second - range_update.first + 1 >
-            num_threads_ * 0) {
+            num_threads_ * 36) {
         //num_threads_ * min_size_chunk_prune()) {
 
         _PRAGMA_OMP_FOR_SIMD
