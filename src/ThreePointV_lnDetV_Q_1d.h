@@ -37,10 +37,10 @@ protected:
   const ParallelPruningTree pptree;
   ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
   void init() {
-    this->tTransf = vec(pptree.num_all_nodes() - 1);
-    this->lnDetV = vec(pptree.num_all_nodes(), 0);
-    this->p = vec(pptree.num_all_nodes(), 0);
-    this->Q = vec(pptree.num_all_nodes(), 0);
+    this->tTransf = vec(pptree.num_nodes() - 1);
+    this->lnDetV = vec(pptree.num_nodes(), 0);
+    this->p = vec(pptree.num_nodes(), 0);
+    this->Q = vec(pptree.num_nodes(), 0);
   }
 public:
   // define fields as public in order to access them easily from R.
@@ -61,8 +61,8 @@ public:
     } else {
       this->X = X; this->Y = Y;
 
-      this->hat_mu_Y = vec(pptree.num_all_nodes(), 0);
-      this->tilde_mu_X_prime = vec(pptree.num_all_nodes(), 0);
+      this->hat_mu_Y = vec(pptree.num_nodes(), 0);
+      this->tilde_mu_X_prime = vec(pptree.num_nodes(), 0);
     }
   }
 
@@ -72,11 +72,11 @@ public:
   }
 
   double get_Q() const {
-    return this->Q[pptree.num_all_nodes()-1];
+    return this->Q[pptree.num_nodes()-1];
   }
 
   double get_lnDetV() const {
-    return this->lnDetV[pptree.num_all_nodes()-1];
+    return this->lnDetV[pptree.num_nodes()-1];
   }
 
   inline void initSpecialData() {
@@ -112,8 +112,8 @@ public:
     p[iParent] += p[i];
     Q[iParent] += Q[i];
   }
-  void do_pruning(int mode) {
-    ppalgorithm.do_pruning(mode);
+  void DoPruning(int mode) {
+    ppalgorithm.DoPruning(mode);
   }
 };
 };

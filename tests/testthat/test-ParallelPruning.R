@@ -8,7 +8,7 @@ lik_POUMM <- function(
   g0, alpha, theta, sigma, sigmae, mode) {
 
   poummObj$set_parameters(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
-  poummObj$do_pruning(mode)
+  poummObj$DoPruning(mode)
 
   POUMM:::loglik_abc_g0_g0Prior(
     abc = poummObj$abc(), g0Prior = NA,
@@ -20,7 +20,7 @@ lik_POUMM_lnDetV_Q <- function(
   g0, alpha, theta, sigma, sigmae, mode) {
 
   poummObj$set_parameters(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
-  poummObj$do_pruning(mode)
+  poummObj$DoPruning(mode)
 
   -1/2*(poummObj$num_tips*log(2*pi) + 2*poummObj$lnDetD + poummObj$lnDetV+poummObj$Q)
 }
@@ -38,7 +38,7 @@ context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 10000
+N <- 100
 tree <- ape::rtree(N)
 
 g0 <- 16
@@ -62,7 +62,7 @@ poummabc <- ParallelPruning:::POUMM_abc$new(tree, z = z[1:N], se = se)
 
 poummabc$set_parameters( alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
 
-poummabc$do_pruning(0)
+poummabc$DoPruning(0)
 poummabc$abc()
 
 poummlnDetVQ <- ParallelPruning:::POUMM_lnDetV_Q_1d$new(tree, z = z[1:N])
@@ -70,7 +70,7 @@ poummlnDetVQ <- ParallelPruning:::POUMM_lnDetV_Q_1d$new(tree, z = z[1:N])
 # test correct value
 test_that("POUMM abc", expect_lt(abs(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 2) -
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 0) -
     lik_POUMM_old(pruneInfo,
                   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
     )), EPS))

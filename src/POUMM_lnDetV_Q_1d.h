@@ -11,7 +11,7 @@ public:
   // univariate trait vector
   ppa::vec z;
   ppa::vec h, u;
-  double g0, alpha, theta, sigma, sigmae, e2alphaT;
+  double g0, alpha, theta, sigma, sigmae, e2alphaT, sum_u;
   double T; // tree height
 
 
@@ -25,7 +25,7 @@ public:
     if(z.size() != this->pptree.num_tips() ) {
       throw std::invalid_argument("The trait vector must have N elements (N is the number of tips).");
     } else {
-      uvec ordNodes = this->pptree.order_nodes(keys);
+      uvec ordNodes = this->pptree.OrderNodes(keys);
       this->z = At(z, ordNodes);
 
       // vec z2 = z;
@@ -36,11 +36,13 @@ public:
       this->set_X_and_Y(X, X);
     }
 
-    this->h = this->pptree.get_nodeHeights();
+    this->h = this->pptree.CalculateHeights();
 
     this->T = *std::max_element(h.begin(), h.begin()+this->pptree.num_tips());
     this->u = ppa::vec(this->pptree.num_tips());
     for(int i = 0; i < this->pptree.num_tips(); i++) u[i] = T - h[i];
+    sum_u = 0;
+    for(auto uu : u) sum_u += uu;
   }
 
   void set_parameters(double g0, double alpha, double theta, double sigma, double sigmae) {
@@ -53,7 +55,7 @@ public:
   }
 
   void prepareBranch(uint i) {
-    uint iParent = this->pptree.ParentPruneIndex(i);
+    uint iParent = this->pptree.FindIdOfParent(i);
     // tTransf[i] =
     //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -
     //     (1-exp(-2*alpha*h[iParent]))*exp(-2*alpha*(T-h[iParent])) );
@@ -66,23 +68,18 @@ public:
     if(i < this->pptree.num_tips()) {
       //double mu = exp(-alpha*h[i])*g0 + (1-exp(-alpha*h[i]))*theta;
       double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
-
       double ealphaui = exp(alpha*u[i]);
-
       this->X[i] = this->Y[i] = (z[i] - mu)/ealphaui;
-
       this->tTransf[i] += sigmae*sigmae / (ealphaui*ealphaui);
     }
   }
 
   double get_lnDetD() const {
-    double sum_u = 0;
-    for(auto uu : u) sum_u += uu;
     return alpha*sum_u;
   }
 
-  void do_pruning(int mode) {
-    ppalgorithm.do_pruning(mode);
+  void DoPruning(int mode) {
+    ppalgorithm.DoPruning(mode);
   }
 };
 };

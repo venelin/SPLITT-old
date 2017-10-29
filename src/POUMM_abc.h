@@ -37,25 +37,25 @@ public:
       throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");
     } else {
 
-      uvec ordNodes = pptree.order_nodes(keys);
+      uvec ordNodes = pptree.OrderNodes(keys);
       this->z = At(z, ordNodes);
       this->se = At(se, ordNodes);
-      this->a = vec(pptree.num_all_nodes());
-      this->b = vec(pptree.num_all_nodes());
-      this->c = vec(pptree.num_all_nodes());
-      this->talpha = vec(pptree.num_all_nodes() - 1);
-      this->etalpha = vec(pptree.num_all_nodes() - 1);
-      this->e2talpha = vec(pptree.num_all_nodes() - 1);
-      this->fe2talpha = vec(pptree.num_all_nodes() - 1);
-      this->gutalphasigma2 = vec(pptree.num_all_nodes() - 1);
+      this->a = vec(pptree.num_nodes());
+      this->b = vec(pptree.num_nodes());
+      this->c = vec(pptree.num_nodes());
+      this->talpha = vec(pptree.num_nodes() - 1);
+      this->etalpha = vec(pptree.num_nodes() - 1);
+      this->e2talpha = vec(pptree.num_nodes() - 1);
+      this->fe2talpha = vec(pptree.num_nodes() - 1);
+      this->gutalphasigma2 = vec(pptree.num_nodes() - 1);
     }
   };
 
   vec get_abc() const {
     vec res(3);
-    res[0] = a[pptree.num_all_nodes() - 1];
-    res[1] = b[pptree.num_all_nodes() - 1];
-    res[2] = c[pptree.num_all_nodes() - 1];
+    res[0] = a[pptree.num_nodes() - 1];
+    res[1] = b[pptree.num_nodes() - 1];
+    res[2] = c[pptree.num_nodes() - 1];
     return res;
   };
 
@@ -75,47 +75,58 @@ public:
     }
   }
 
-  uint get_nThreads() const {
-    return ppalgorithm.get_nThreads();
+  uint num_threads() const {
+    return ppalgorithm.num_threads();
   }
 
-  uint get_bestMinChunkSizeForHybrid() const {
-    return ppalgorithm.get_bestMinChunkSizeForHybrid();
+  uint min_size_chunk_prune() const {
+    return ppalgorithm.min_size_chunk_prune();
   }
 
-
-  std::vector<double>  get_pmaTuningDurations() const {
-    return ppalgorithm.get_pmaTuningDurations();
+  uint min_size_chunk_update() const {
+    return ppalgorithm.min_size_chunk_update();
   }
 
-  uint get_pmaBestMode() const {
-    return ppalgorithm.get_pmaBestMode();
+  std::vector<double>  durations_tuning() const {
+    return ppalgorithm.durations_tuning();
   }
 
-  std::vector<uint> get_pmaTuningMinChunkSizes() const {
-    return ppalgorithm.get_pmaTuningMinChunkSizes();
+  uint ModeTuning() const {
+    return ppalgorithm.ModeTuning();
+  }
+
+  uint IndexMinSizeChunkPrune() const {
+    return ppalgorithm.IndexMinSizeChunkPrune();
+  }
+
+  uint IndexMinSizeChunkUpdate() const {
+    return ppalgorithm.IndexMinSizeChunkUpdate();
+  }
+
+  uint fastest_step_tuning() const {
+    return ppalgorithm.fastest_step_tuning();
   }
 
   inline void initSpecialData() {
     // std::fill(a.begin(), a.end(), 0);
     // std::fill(b.begin(), b.end(), 0);
     // std::fill(c.begin(), c.end(), 0);
-    a[pptree.num_all_nodes() - 1] = b[pptree.num_all_nodes() - 1] = c[pptree.num_all_nodes() - 1] = 0;
+    a[pptree.num_nodes() - 1] = b[pptree.num_nodes() - 1] = c[pptree.num_nodes() - 1] = 0;
   }
 
   inline void prepareBranch(uint i) {
     //std::cout<<"prepareBranch("<<i<<")"<<std::endl;
     a[i] = b[i] = c[i] = 0;
     if(alpha != 0) {
-      talpha[i] = pptree.branch_length(i) * alpha;
+      talpha[i] = pptree.LengthOfBranch(i) * alpha;
       etalpha[i] = exp(talpha[i]);
       e2talpha[i] = etalpha[i] * etalpha[i];
       fe2talpha[i] = alpha / (1 - e2talpha[i]);
     } else {
-      talpha[i] = pptree.branch_length(i) * alpha;
+      talpha[i] = pptree.LengthOfBranch(i) * alpha;
       etalpha[i] = exp(talpha[i]);
       e2talpha[i] = etalpha[i] * etalpha[i];
-      fe2talpha[i] = -0.5 / pptree.branch_length(i);
+      fe2talpha[i] = -0.5 / pptree.LengthOfBranch(i);
     }
   };
 
@@ -151,8 +162,8 @@ public:
     c[iParent] += c[i];
   }
 
-  void do_pruning(int mode) {
-    ppalgorithm.do_pruning(mode);
+  void DoPruning(int mode) {
+    ppalgorithm.DoPruning(mode);
   }
 
 };
