@@ -54,7 +54,7 @@ public:
     this->e2alphaT = exp(-2*alpha*T);
   }
 
-  void prepareBranch(uint i) {
+  void TransformBranch(uint i) {
     uint iParent = this->pptree.FindIdOfParent(i);
     // tTransf[i] =
     //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -

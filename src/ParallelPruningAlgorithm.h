@@ -27,9 +27,9 @@
 //    4.3 implement the following virtual methods:
 //       4.3.1 A constructor MyPruningAlgorithm() that calls the parent class
 //        constructor ParallelPruningMeta(N, branch_starts_, branch_ends_, t).
-//       4.3.2 void prepareBranch(uint i)
-//       4.3.3 void pruneBranch(uint i)
-//       4.3.4 void addToParent(uint i, uint iParent)
+//       4.3.2 void TransformBranch(uint i)
+//       4.3.3 void PrePruneNode(uint i)
+//       4.3.4 void PruneNode(uint i, uint iParent)
 //    4.4 If you allocated dynamic resources or memory, you might need to implement
 //      a destructor ~MyPruningAlgorithm.
 // 5. In your user code, create instances of your class, set the data fields and
@@ -384,8 +384,8 @@ public:
 template<class Node, class Length>
 class ParallelPruningTree: public Tree<Node, Length> {
 protected:
+  uvec ranges_id_pre_prune_;
   uvec ranges_id_prune_;
-  uvec ranges_id_update_parent_;
 
   // private default constructor;
   ParallelPruningTree() {}
@@ -401,8 +401,8 @@ public:
       uvec num_children_remaining(this->num_nodes_, 0);
       for(uint i : this->id_parent_) num_children_remaining[i]++;
 
+      this->ranges_id_pre_prune_ = uvec(1, 0);
       this->ranges_id_prune_ = uvec(1, 0);
-      this->ranges_id_update_parent_ = uvec(1, 0);
 
       // start by pruning the tips of the tree
       uvec tips_this_level = Seq(0, this->num_tips_ - 1);
@@ -417,8 +417,8 @@ public:
 
       while(tips_this_level[0] != this->num_nodes_ - 1) {
         // while the root has not become a tip itself
-        ranges_id_prune_.push_back(
-          ranges_id_prune_[ranges_id_prune_.size() - 1] + tips_this_level.size());
+        ranges_id_pre_prune_.push_back(
+          ranges_id_pre_prune_[ranges_id_pre_prune_.size() - 1] + tips_this_level.size());
 
 
         // unique parents at this level
@@ -458,8 +458,8 @@ public:
             }
           }
 
-          ranges_id_update_parent_.push_back(
-            ranges_id_update_parent_[ranges_id_update_parent_.size() - 1] + num_parent_updates);
+          ranges_id_prune_.push_back(
+            ranges_id_prune_[ranges_id_prune_.size() - 1] + num_parent_updates);
         }
 
         tips_this_level = tips_next_level;
@@ -483,25 +483,29 @@ public:
     }
 
   uint num_levels() const {
+    return ranges_id_pre_prune_.size() - 1;
+  }
+
+  uint num_parallel_ranges_prune() const {
     return ranges_id_prune_.size() - 1;
+  }
+
+  uvec const& ranges_id_pre_prune() const {
+    return ranges_id_pre_prune_;
+  }
+
+  std::pair<uint, uint> RangeIdPrePruneNode(uint i_level) const {
+    return std::pair<uint, uint>(ranges_id_pre_prune_[i_level],
+                                 ranges_id_pre_prune_[i_level+1] - 1);
   }
 
   uvec const& ranges_id_prune() const {
     return ranges_id_prune_;
   }
 
-  std::pair<uint, uint> RangeIdPrune(uint i_level) const {
-    return std::pair<uint, uint>(ranges_id_prune_[i_level],
-                                 ranges_id_prune_[i_level+1] - 1);
-  }
-
-  uvec const& ranges_id_update_parent() const {
-    return ranges_id_update_parent_;
-  }
-
-  std::pair<uint, uint> RangeIdUpdateParent(uint i_step) const {
-    return std::pair<uint, uint>(ranges_id_update_parent_[i_step],
-                                 ranges_id_update_parent_[i_step+1] - 1);
+  std::pair<uint, uint> RangeIdPruneNodeFromParent(uint i_step) const {
+    return std::pair<uint, uint>(ranges_id_prune_[i_step],
+                                 ranges_id_prune_[i_step+1] - 1);
   }
 
   // A root-to-node distance vector in the order of pruning processing
@@ -541,7 +545,6 @@ protected:
   const ParallelPruningTree& pptree_;
   PruningSpec& spec_;
 
-
   uint num_threads_;
 
   uint current_step_tuning_ = 0;
@@ -550,7 +553,13 @@ protected:
   double min_duration_tuning_ = std::numeric_limits<double>::max();
   std::vector<double> durations_tuning_;
 
-  enum PruningModeAuto { SINGLE_THREAD = 1, MULTI_THREAD = 2, HYBRID = 3 };
+  enum PruningModeAuto {
+    SINGLE_THREAD_ONE_LOOP = 1,
+    MULTI_THREAD_ONE_LOOP = 2,
+    MULTI_THREAD_NESTED_LOOPS = 3,
+    HYBRID_ONE_LOOP = 4,
+    HYBRID_NESTED_LOOPS = 5
+    };
 
   const uvec min_sizes_chunk_ = {1, 2, 4, 8, 16, 32, 64};
 
@@ -581,33 +590,49 @@ this->num_threads_ = 1;
     return current_step_tuning_ < min_sizes_chunk_.size() * min_sizes_chunk_.size() + 4;
   }
 
-  uint IndexMinSizeChunkPrune() const {
+  uint IndexMinSizeChunkPrePrune() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
     return ((step - 4) / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
   }
 
-  uint IndexMinSizeChunkUpdate() const {
+  uint IndexMinSizeChunkPrune() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
     return ((step - 4) % min_sizes_chunk_.size()) % min_sizes_chunk_.size();
   }
 
-  PruningModeAuto ModeTuning() const {
+  PruningModeAuto ModeAuto() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    if(step < 2) {
-      return SINGLE_THREAD;
-    } else if(step < 4) {
-      return MULTI_THREAD;
+    PruningModeAuto mode;
+    if( (pptree_.num_parallel_ranges_prune() + 1) /
+        (pptree_.num_levels() + 1) < 4 ) {
+      if(step < 2) {
+        mode = SINGLE_THREAD_ONE_LOOP;
+      } else if(step < 4) {
+        mode =  MULTI_THREAD_ONE_LOOP;
+      } else {
+        mode = HYBRID_ONE_LOOP;
+      }
     } else {
-      return HYBRID;
+      // possibly highly polytomic tree or a star-tree. This will result in
+      // splitting the PrePrune and Prune operations into two separate
+      // loops.
+      if(step < 2) {
+        mode = SINGLE_THREAD_ONE_LOOP; // no difference in single_thread mode
+      } else if(step < 4) {
+        mode =  MULTI_THREAD_NESTED_LOOPS;
+      } else {
+        mode = HYBRID_NESTED_LOOPS;
+      }
     }
+    return mode;
+  }
+
+  uint min_size_chunk_pre_prune() const {
+    return min_sizes_chunk_[IndexMinSizeChunkPrePrune()];
   }
 
   uint min_size_chunk_prune() const {
     return min_sizes_chunk_[IndexMinSizeChunkPrune()];
-  }
-
-  uint min_size_chunk_update() const {
-    return min_sizes_chunk_[IndexMinSizeChunkUpdate()];
   }
 
   uint fastest_step_tuning() const {
@@ -620,46 +645,30 @@ this->num_threads_ = 1;
 
   void DoPruning(int mode) {
     switch(mode) {
-    case 0: DoPruningAuto(); break;
-    case 1: DoPruningSingleThread(); break;
-    case 2: DoPruningMultiThread(); break;
-    case 3: DoPruningHybrid(); break;
-    default: DoPruningAuto();
+      case SINGLE_THREAD_ONE_LOOP: DoPruningSingleThreadOneLoop(); break;
+      case MULTI_THREAD_ONE_LOOP: DoPruningMultiThreadOneLoop(); break;
+      case MULTI_THREAD_NESTED_LOOPS: DoPruningMultiThreadNestedLoops(); break;
+      case HYBRID_ONE_LOOP: DoPruningHybridOneLoop(); break;
+      case HYBRID_NESTED_LOOPS: DoPruningHybridNestedLoops(); break;
+      default: DoPruningAuto();
     }
   }
 
 protected:
+
   void DoPruningAuto() {
-    PruningModeAuto mode;
+
     std::chrono::steady_clock::time_point start, end;
     double duration;
 
-    if( /*IsTuning()*/ false ) {
-      auto mode = ModeTuning();
+    PruningModeAuto mode = ModeAuto();
 
-      switch(mode) {
-      case SINGLE_THREAD:
-        start = std::chrono::steady_clock::now();
-        DoPruning(1);
-        end = std::chrono::steady_clock::now();
-        duration = std::chrono::duration<double, std::milli>(end - start).count();
-        break;
+    if( IsTuning() ) {
 
-      case MULTI_THREAD:
-        start = std::chrono::steady_clock::now();
-        DoPruning(2);
-        end = std::chrono::steady_clock::now();
-        duration = std::chrono::duration<double, std::milli>(end - start).count();
-        break;
-
-      case HYBRID:
-        start = std::chrono::steady_clock::now();
-        DoPruning(3);
-        end = std::chrono::steady_clock::now();
-        duration = std::chrono::duration<double, std::milli>(end - start).count();
-        break;
-      }
-
+      start = std::chrono::steady_clock::now();
+      DoPruning(mode);
+      end = std::chrono::steady_clock::now();
+      duration = std::chrono::duration<double, std::milli>(end - start).count();
       durations_tuning_.push_back(duration);
       if(duration < min_duration_tuning_) {
         min_duration_tuning_ = duration;
@@ -668,84 +677,104 @@ protected:
       current_step_tuning_++;
 
     } else {
-      auto mode = HYBRID; //ModeTuning();
-
-      switch(mode) {
-      case HYBRID: DoPruning(3); break;
-      case SINGLE_THREAD: DoPruning(1); break;
-      case MULTI_THREAD: DoPruning(2); break;
-      }
+      DoPruning(mode);
     }
 
   }
 
-  void DoPruningSingleThread() {
-    spec_.initSpecialData();
+  void DoPruningSingleThreadOneLoop() {
 
+    // init data for the root node
+    spec_.InitNode(pptree_.num_nodes() - 1);
     _PRAGMA_OMP_SIMD
       for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-        spec_.prepareBranch(i);
+        spec_.InitNode(i);
+        spec_.TransformBranch(i);
       }
 
-      uint i_update = 0;
-    for(uint i_level = 0; i_level < pptree_.num_levels(); i_level++) {
-      auto range_prune = pptree_.RangeIdPrune(i_level);
+    for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
+      auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
+
       _PRAGMA_OMP_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.pruneBranch(i);
+          spec_.PrePruneNode(i);
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
         }
-
-        uint num_branches_done = 0;
-      while(num_branches_done != range_prune.second - range_prune.first + 1) {
-        auto range_update = pptree_.RangeIdUpdateParent(i_update);
-
-        _PRAGMA_OMP_SIMD
-          for(uint i = range_update.first; i <= range_update.second; i++) {
-            spec_.addToParent(i, pptree_.FindIdOfParent(i));
-          }
-
-          num_branches_done +=  range_update.second - range_update.first + 1;
-        ++i_update;
-      }
     }
   }
 
-  void DoPruningMultiThread() {
-    spec_.initSpecialData();
+
+  void DoPruningMultiThreadNestedLoops() {
+    // init data for the root node
+    spec_.InitNode(pptree_.num_nodes() - 1);
 
 #pragma omp parallel
 {
   _PRAGMA_OMP_FOR_SIMD
   for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-    spec_.prepareBranch(i);
+    spec_.InitNode(i);
+    spec_.TransformBranch(i);
   }
 
-  uint i_update = 0;
+  uint i_prune = 0;
   for(uint i_level = 0; i_level < pptree_.num_levels(); i_level++) {
-    auto range_prune = pptree_.RangeIdPrune(i_level);
+
+#pragma omp barrier
+
+    auto range_pre_prune = pptree_.RangeIdPrePruneNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        spec_.pruneBranch(i);
+      for(uint i = range_pre_prune.first; i <= range_pre_prune.second; i++) {
+        spec_.PrePruneNode(i);
       }
 
       uint num_branches_done = 0;
-    while(num_branches_done != range_prune.second - range_prune.first + 1) {
-      auto range_update = pptree_.RangeIdUpdateParent(i_update);
+
+    while(num_branches_done != range_pre_prune.second - range_pre_prune.first + 1) {
+#pragma omp barrier
+      auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
 
       _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_update.first; i <= range_update.second; i++) {
-          spec_.addToParent(i, pptree_.FindIdOfParent(i));
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
         }
 
-        num_branches_done +=  range_update.second - range_update.first + 1;
-      ++i_update;
+        num_branches_done +=  range_prune.second - range_prune.first + 1;
+      ++i_prune;
     }
   }
 }
   }
 
-  void DoPruningHybrid() {
-    spec_.initSpecialData();
+  void DoPruningMultiThreadOneLoop() {
+    // init data for the root node
+    spec_.InitNode(pptree_.num_nodes() - 1);
+
+#pragma omp parallel
+{
+  _PRAGMA_OMP_FOR_SIMD
+  for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
+    spec_.InitNode(i);
+    spec_.TransformBranch(i);
+  }
+
+  for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
+    auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
+
+    _PRAGMA_OMP_FOR_SIMD
+      for(uint i = range_prune.first; i <= range_prune.second; i++) {
+        spec_.PrePruneNode(i);
+        spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
+      }
+  }
+}
+  }
+
+  void DoPruningHybridNestedLoops() {
+    // init data for the root
+    spec_.InitNode(pptree_.num_nodes() - 1);
+
+    uint min_size_chunk_pre_prune = this->min_size_chunk_pre_prune();
+    uint min_size_chunk_prune = this->min_size_chunk_prune();
 #pragma omp parallel
 {
   uint tid;
@@ -755,66 +784,93 @@ protected:
   tid = 0;
 #endif
 
-
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-      spec_.prepareBranch(i);
+      spec_.InitNode(i);
+      spec_.TransformBranch(i);
     }
 
-    uint i_update = 0;
-
+    uint i_prune = 0;
   for(int i_level = 0; i_level < pptree_.num_levels(); i_level++) {
-    auto range_prune = pptree_.RangeIdPrune(i_level);
-
-    if(range_prune.second - range_prune.first + 1 >
-         //num_threads_ * min_size_chunk_prune()) {
-         num_threads_ * 36) {
-
+    auto range_pre_prune = pptree_.RangeIdPrePruneNode(i_level);
+#pragma omp barrier
+      if(range_pre_prune.second - range_pre_prune.first + 1 >
+        num_threads_ * min_size_chunk_pre_prune) {
       _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        spec_.pruneBranch(i);
-      }
-
+        for(uint i = range_pre_prune.first; i <= range_pre_prune.second; i++) {
+          spec_.PrePruneNode(i);
+        }
     } else if(tid == 0) {
-
-      // only one (master) thread executes this
+      // only the master thread executes this
       _PRAGMA_OMP_SIMD
-      for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        spec_.pruneBranch(i);
+      for(uint i = range_pre_prune.first; i <= range_pre_prune.second; i++) {
+        spec_.PrePruneNode(i);
       }
-
     }
 
     uint num_branches_done = 0;
-
-    while(num_branches_done != range_prune.second - range_prune.first + 1) {
-
-      auto range_update = pptree_.RangeIdUpdateParent(i_update);
-
-      if (range_update.second - range_update.first + 1 >
-            num_threads_ * 36) {
-        //num_threads_ * min_size_chunk_prune()) {
-
+    while(num_branches_done != range_pre_prune.second - range_pre_prune.first + 1) {
+      auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
+#pragma omp barrier
+      if (range_prune.second - range_prune.first + 1 >
+            num_threads_ * min_size_chunk_prune) {
         _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_update.first; i <= range_update.second; i++) {
-          spec_.addToParent(i, pptree_.FindIdOfParent(i));
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
         }
-
       } else if (tid == 0) {
-
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
-        for(uint i = range_update.first; i <= range_update.second; i++) {
-          spec_.addToParent(i, pptree_.FindIdOfParent(i));
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
         }
-
       }
-
-      num_branches_done +=  range_update.second - range_update.first + 1;
-      ++i_update;
-#pragma omp barrier
+      num_branches_done +=  range_prune.second - range_prune.first + 1;
+      ++i_prune;
     }
   }
+}
+  }
+
+  void DoPruningHybridOneLoop() {
+    // init data for the root
+    spec_.InitNode(pptree_.num_nodes() - 1);
+
+    uint min_size_chunk_prune = this->min_size_chunk_prune();
+#pragma omp parallel
+{
+  uint tid;
+#ifdef _OPENMP
+  tid = omp_get_thread_num();
+#else
+  tid = 0;
+#endif
+
+  _PRAGMA_OMP_FOR_SIMD
+    for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
+      spec_.InitNode(i);
+      spec_.TransformBranch(i);
+    }
+
+  for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
+      auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
+#pragma omp barrier
+      if (range_prune.second - range_prune.first + 1 >
+            num_threads_ * min_size_chunk_prune) {
+        _PRAGMA_OMP_FOR_SIMD
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.PrePruneNode(i);
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
+        }
+      } else if (tid == 0) {
+        // only one (master) thread executes this
+        _PRAGMA_OMP_SIMD
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.PrePruneNode(i);
+          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
+        }
+      }
+    }
 }
   }
 };

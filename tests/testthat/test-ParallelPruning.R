@@ -1,7 +1,7 @@
 library(testthat)
 library(ParallelPruning)
 library(microbenchmark)
-
+library(ape)
 
 lik_POUMM <- function(
   poummObj,

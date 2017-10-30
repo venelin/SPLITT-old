@@ -79,44 +79,42 @@ public:
     return ppalgorithm.num_threads();
   }
 
-  uint min_size_chunk_prune() const {
-    return ppalgorithm.min_size_chunk_prune();
+  uint min_size_chunk_pre_prune() const {
+    return ppalgorithm.min_size_chunk_pre_prune();
   }
 
-  uint min_size_chunk_update() const {
-    return ppalgorithm.min_size_chunk_update();
+  uint min_size_chunk_prune() const {
+    return ppalgorithm.min_size_chunk_prune();
   }
 
   std::vector<double>  durations_tuning() const {
     return ppalgorithm.durations_tuning();
   }
 
-  uint ModeTuning() const {
-    return ppalgorithm.ModeTuning();
+  uint ModeAuto() const {
+    return ppalgorithm.ModeAuto();
+  }
+
+  bool IsTuning() const {
+    return ppalgorithm.IsTuning();
+  }
+  uint IndexMinSizeChunkPrePrune() const {
+    return ppalgorithm.IndexMinSizeChunkPrePrune();
   }
 
   uint IndexMinSizeChunkPrune() const {
     return ppalgorithm.IndexMinSizeChunkPrune();
   }
 
-  uint IndexMinSizeChunkUpdate() const {
-    return ppalgorithm.IndexMinSizeChunkUpdate();
-  }
-
   uint fastest_step_tuning() const {
     return ppalgorithm.fastest_step_tuning();
   }
 
-  inline void initSpecialData() {
-    // std::fill(a.begin(), a.end(), 0);
-    // std::fill(b.begin(), b.end(), 0);
-    // std::fill(c.begin(), c.end(), 0);
-    a[pptree.num_nodes() - 1] = b[pptree.num_nodes() - 1] = c[pptree.num_nodes() - 1] = 0;
+  inline void InitNode(uint i) {
+    a[i] = b[i] = c[i] = 0;
   }
 
-  inline void prepareBranch(uint i) {
-    //std::cout<<"prepareBranch("<<i<<")"<<std::endl;
-    a[i] = b[i] = c[i] = 0;
+  inline void TransformBranch(uint i) {
     if(alpha != 0) {
       talpha[i] = pptree.LengthOfBranch(i) * alpha;
       etalpha[i] = exp(talpha[i]);
@@ -128,10 +126,33 @@ public:
       e2talpha[i] = etalpha[i] * etalpha[i];
       fe2talpha[i] = -0.5 / pptree.LengthOfBranch(i);
     }
-  };
+  }
 
-  inline void pruneBranch(uint i) {
-    //std::cout<<"pruneBranch("<<i<<")"<<std::endl;
+  inline void PrePruneNode(uint i) const {
+    // if(i < pptree.num_tips()) {
+    //   // branch leading to a tip
+    //   gutalphasigma2[i] = e2talpha[i] +
+    //     ((-0.5 / sum_se2_sigmae2[i]) * sigma2) / fe2talpha[i];
+    //   double z1 = z[i] - theta;
+    //
+    //   // integration over g1 including e1 = z1 - g1
+    //   c[i] = -0.5 * log(gutalphasigma2[i]) -
+    //     0.25 * sigma2 * z1*z1 / (sum_se2_sigmae2[i]*sum_se2_sigmae2[i]) /
+    //       (fe2talpha[i] - alpha + (-0.5 / sum_se2_sigmae2[i]) * sigma2) +
+    //         talpha[i] + (-0.5 * (M_LN_2PI  + z1*z1 / sum_se2_sigmae2[i]) -
+    //         log(sqrt(sum_se2_sigmae2[i])));
+    //   b[i] = (etalpha[i] * (z1 / sum_se2_sigmae2[i])) / gutalphasigma2[i];
+    //   a[i] = (-0.5 / sum_se2_sigmae2[i]) / gutalphasigma2[i];
+    // } else {
+    //   gutalphasigma2[i] = e2talpha[i] + (a[i] * sigma2) / fe2talpha[i];
+    //   c[i] = -0.5 * log(gutalphasigma2[i]) - 0.25 * sigma2 * b[i] * b[i] /
+    //     (fe2talpha[i] - alpha + a[i] * sigma2) + talpha[i] + c[i];
+    //   b[i] = (etalpha[i] * b[i]) / gutalphasigma2[i];
+    //   a[i] /= gutalphasigma2[i];
+    // }
+  }
+
+  inline void PruneNodeFromParent(uint i, uint iParent) {
     if(i < pptree.num_tips()) {
       // branch leading to a tip
       gutalphasigma2[i] = e2talpha[i] +
@@ -153,10 +174,7 @@ public:
       b[i] = (etalpha[i] * b[i]) / gutalphasigma2[i];
       a[i] /= gutalphasigma2[i];
     }
-  };
 
-  inline void addToParent(uint i, uint iParent) {
-    //std::cout<<"addToParent("<<i<<", "<<iParent<<")"<<std::endl;
     a[iParent] += a[i];
     b[iParent] += b[i];
     c[iParent] += c[i];

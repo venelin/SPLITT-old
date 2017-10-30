@@ -79,15 +79,11 @@ public:
     return this->lnDetV[pptree.num_nodes()-1];
   }
 
-  inline void initSpecialData() {
-    std::fill(hat_mu_Y.begin(), hat_mu_Y.end(), 0);
-    std::fill(tilde_mu_X_prime.begin(), tilde_mu_X_prime.end(), 0);
-    std::fill(lnDetV.begin(), lnDetV.end(), 0);
-    std::fill(p.begin(), p.end(), 0);
-    std::fill(Q.begin(), Q.end(), 0);
+  inline void InitNode(uint i) {
+    hat_mu_Y[i] = tilde_mu_X_prime[i] = lnDetV[i] = p[i] = Q[i] = 0;
   }
 
-  inline void pruneBranch(uint i) {
+  inline void PrePruneNode(uint i) {
     if(i < pptree.num_tips()) {
       // branch leading to a tip
       lnDetV[i] = log(tTransf[i]);
@@ -105,7 +101,7 @@ public:
     }
   }
 
-  inline void addToParent(uint i, uint iParent) {
+  inline void PruneNodeFromParent(uint i, uint iParent) {
     hat_mu_Y[iParent] += p[i]*hat_mu_Y[i];
     tilde_mu_X_prime[iParent] += p[i]*tilde_mu_X_prime[i];
     lnDetV[iParent] += lnDetV[i];
