@@ -587,44 +587,34 @@ this->num_threads_ = 1;
   }
 
   bool IsTuning() const {
-    return current_step_tuning_ < min_sizes_chunk_.size() * min_sizes_chunk_.size() + 4;
+    return current_step_tuning_ < min_sizes_chunk_.size() * 3;
   }
 
   uint IndexMinSizeChunkPrePrune() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    return ((step - 4) / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
+    //return (step / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
+    return step % min_sizes_chunk_.size();
   }
 
   uint IndexMinSizeChunkPrune() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    return ((step - 4) % min_sizes_chunk_.size()) % min_sizes_chunk_.size();
+    return step % min_sizes_chunk_.size();
   }
 
   PruningModeAuto ModeAuto() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    PruningModeAuto mode;
-    if( (pptree_.num_parallel_ranges_prune() + 1) /
-        (pptree_.num_levels() + 1) < 4 ) {
-      if(step < 2) {
-        mode = SINGLE_THREAD_ONE_LOOP;
-      } else if(step < 4) {
-        mode =  MULTI_THREAD_ONE_LOOP;
-      } else {
-        mode = HYBRID_ONE_LOOP;
-      }
+
+    if(step < min_sizes_chunk_.size()/3) {
+      return SINGLE_THREAD_ONE_LOOP;
+    } else if(step < min_sizes_chunk_.size()/3 * 2) {
+      return MULTI_THREAD_ONE_LOOP;
+    } else if(step < min_sizes_chunk_.size()) {
+      return MULTI_THREAD_NESTED_LOOPS;
+    } else if(step < min_sizes_chunk_.size() * 2) {
+      return HYBRID_ONE_LOOP;
     } else {
-      // possibly highly polytomic tree or a star-tree. This will result in
-      // splitting the PrePrune and Prune operations into two separate
-      // loops.
-      if(step < 2) {
-        mode = SINGLE_THREAD_ONE_LOOP; // no difference in single_thread mode
-      } else if(step < 4) {
-        mode =  MULTI_THREAD_NESTED_LOOPS;
-      } else {
-        mode = HYBRID_NESTED_LOOPS;
-      }
+      return HYBRID_NESTED_LOOPS;
     }
-    return mode;
   }
 
   uint min_size_chunk_pre_prune() const {
@@ -794,7 +784,7 @@ protected:
   for(int i_level = 0; i_level < pptree_.num_levels(); i_level++) {
     auto range_pre_prune = pptree_.RangeIdPrePruneNode(i_level);
 #pragma omp barrier
-      if(range_pre_prune.second - range_pre_prune.first + 1 >
+    if(range_pre_prune.second - range_pre_prune.first + 1 >
         num_threads_ * min_size_chunk_pre_prune) {
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_pre_prune.first; i <= range_pre_prune.second; i++) {
@@ -808,25 +798,19 @@ protected:
       }
     }
 
-    uint num_branches_done = 0;
-    while(num_branches_done != range_pre_prune.second - range_pre_prune.first + 1) {
-      auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
-#pragma omp barrier
-      if (range_prune.second - range_prune.first + 1 >
-            num_threads_ * min_size_chunk_prune) {
-        _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
-        }
-      } else if (tid == 0) {
-        // only one (master) thread executes this
+    if (tid == 0) {
+      // only one (master) thread executes this
+      uint num_branches_done = 0;
+      while(num_branches_done != range_pre_prune.second - range_pre_prune.first + 1) {
+        auto range_prune = pptree_.RangeIdPruneNodeFromParent(i_prune);
         _PRAGMA_OMP_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
-        }
+          for(uint i = range_prune.first; i <= range_prune.second; i++) {
+            spec_.PruneNodeFromParent(i, pptree_.FindIdOfParent(i));
+          }
+
+          num_branches_done +=  range_prune.second - range_prune.first + 1;
+        ++i_prune;
       }
-      num_branches_done +=  range_prune.second - range_prune.first + 1;
-      ++i_prune;
     }
   }
 }

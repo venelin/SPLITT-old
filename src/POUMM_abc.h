@@ -128,31 +128,7 @@ public:
     }
   }
 
-  inline void PrePruneNode(uint i) const {
-    // if(i < pptree.num_tips()) {
-    //   // branch leading to a tip
-    //   gutalphasigma2[i] = e2talpha[i] +
-    //     ((-0.5 / sum_se2_sigmae2[i]) * sigma2) / fe2talpha[i];
-    //   double z1 = z[i] - theta;
-    //
-    //   // integration over g1 including e1 = z1 - g1
-    //   c[i] = -0.5 * log(gutalphasigma2[i]) -
-    //     0.25 * sigma2 * z1*z1 / (sum_se2_sigmae2[i]*sum_se2_sigmae2[i]) /
-    //       (fe2talpha[i] - alpha + (-0.5 / sum_se2_sigmae2[i]) * sigma2) +
-    //         talpha[i] + (-0.5 * (M_LN_2PI  + z1*z1 / sum_se2_sigmae2[i]) -
-    //         log(sqrt(sum_se2_sigmae2[i])));
-    //   b[i] = (etalpha[i] * (z1 / sum_se2_sigmae2[i])) / gutalphasigma2[i];
-    //   a[i] = (-0.5 / sum_se2_sigmae2[i]) / gutalphasigma2[i];
-    // } else {
-    //   gutalphasigma2[i] = e2talpha[i] + (a[i] * sigma2) / fe2talpha[i];
-    //   c[i] = -0.5 * log(gutalphasigma2[i]) - 0.25 * sigma2 * b[i] * b[i] /
-    //     (fe2talpha[i] - alpha + a[i] * sigma2) + talpha[i] + c[i];
-    //   b[i] = (etalpha[i] * b[i]) / gutalphasigma2[i];
-    //   a[i] /= gutalphasigma2[i];
-    // }
-  }
-
-  inline void PruneNodeFromParent(uint i, uint iParent) {
+  inline void PrePruneNode(uint i) {
     if(i < pptree.num_tips()) {
       // branch leading to a tip
       gutalphasigma2[i] = e2talpha[i] +
@@ -174,6 +150,9 @@ public:
       b[i] = (etalpha[i] * b[i]) / gutalphasigma2[i];
       a[i] /= gutalphasigma2[i];
     }
+  }
+
+  inline void PruneNodeFromParent(uint i, uint iParent) {
 
     a[iParent] += a[i];
     b[iParent] += b[i];
