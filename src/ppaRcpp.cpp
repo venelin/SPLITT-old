@@ -38,6 +38,14 @@ ppa::ParallelPruningTree<std::string, double>* create_ParallelPruningTree(
   return new ppa::ParallelPruningTree<std::string, double>(br_0, br_1, t);
 }
 
+ppa::ParallelPruningTreeFindChildren<uint, double>* create_ParallelPruningTreeFindChildren(Rcpp::List const& tree) {
+  arma::umat branches = tree["edge"];
+  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
+  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
+  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
+  return new ppa::ParallelPruningTreeFindChildren<uint, double>(br_0, br_1, t);
+}
+
 ppa::POUMM_abc<uint>* create_POUMM_abc(Rcpp::List const& tree, ppa::vec const& z, ppa::vec const& se) {
   arma::umat branches = tree["edge"];
   ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
@@ -74,7 +82,7 @@ RCPP_MODULE(ParallelPruningTreeStringNodes) {
     .method("CalculateHeights", &ppa::ParallelPruningTree<std::string, double>::CalculateHeights )
     .property("num_levels", &ppa::ParallelPruningTree<std::string, double>::num_levels )
     .property("num_parallel_ranges_prune", &ppa::ParallelPruningTree<std::string, double>::num_parallel_ranges_prune )
-    .property("ranges_id_pre_prune", &ppa::ParallelPruningTree<std::string, double>::ranges_id_pre_prune )
+    .property("ranges_id_visit", &ppa::ParallelPruningTree<std::string, double>::ranges_id_visit )
     .property("ranges_id_prune", &ppa::ParallelPruningTree<std::string, double>::ranges_id_prune )
   ;
 }
@@ -96,10 +104,37 @@ RCPP_MODULE(ParallelPruningTree) {
     //.method("RangeIdUpdateParent", &ppa::ParallelPruningTree<uint, double>::RangeIdUpdateParent )
     .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
     .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
-    .property("ranges_id_pre_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_pre_prune )
+    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
     .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
   ;
 }
+
+RCPP_MODULE(ParallelPruningTreeFindChildren) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
+  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
+  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+  ;
+  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
+    .derives<ppa::Tree<uint, double>> ( "Tree" )
+    .factory<Rcpp::List const&>( &create_ParallelPruningTree )
+    .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
+  //.method("RangeIdPrune", &ppa::ParallelPruningTree<uint, double>::RangeIdPrune )
+  //.method("RangeIdUpdateParent", &ppa::ParallelPruningTree<uint, double>::RangeIdUpdateParent )
+    .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
+    .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
+    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
+    .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
+  ;
+  Rcpp::class_<ppa::ParallelPruningTreeFindChildren<uint, double>>( "ParallelPruningTreeFindChildren" )
+    .derives<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
+    .factory<Rcpp::List const&>( &create_ParallelPruningTreeFindChildren )
+    .method( "FindChildren", &ppa::ParallelPruningTreeFindChildren<uint, double>::FindChildren )
+  ;
+  }
 
 RCPP_MODULE(POUMM_abc) {
   Rcpp::class_<ppa::POUMM_abc<uint>>( "POUMM_abc" )
@@ -108,11 +143,11 @@ RCPP_MODULE(POUMM_abc) {
   .method( "set_parameters", &ppa::POUMM_abc<uint>::set_parameters )
   .method( "abc", &ppa::POUMM_abc<uint>::get_abc )
   .property( "ModeAuto", &ppa::POUMM_abc<uint>::ModeAuto )
-  .property( "IndexMinSizeChunkPrePrune", &ppa::POUMM_abc<uint>::IndexMinSizeChunkPrePrune )
+  .property( "IndexMinSizeChunkVisit", &ppa::POUMM_abc<uint>::IndexMinSizeChunkVisit )
   .property( "IndexMinSizeChunkPrune", &ppa::POUMM_abc<uint>::IndexMinSizeChunkPrune )
   .property( "IsTuning", &ppa::POUMM_abc<uint>::IsTuning )
   .property( "num_threads", &ppa::POUMM_abc<uint>::num_threads )
-  .property( "min_size_chunk_pre_prune", &ppa::POUMM_abc<uint>::min_size_chunk_pre_prune )
+  .property( "min_size_chunk_visit", &ppa::POUMM_abc<uint>::min_size_chunk_visit )
   .property( "min_size_chunk_prune", &ppa::POUMM_abc<uint>::min_size_chunk_prune )
   .property( "durations_tuning", &ppa::POUMM_abc<uint>::durations_tuning )
   .property( "fastest_step_tuning", &ppa::POUMM_abc<uint>::fastest_step_tuning )

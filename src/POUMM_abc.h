@@ -79,8 +79,8 @@ public:
     return ppalgorithm.num_threads();
   }
 
-  uint min_size_chunk_pre_prune() const {
-    return ppalgorithm.min_size_chunk_pre_prune();
+  uint min_size_chunk_visit() const {
+    return ppalgorithm.min_size_chunk_visit();
   }
 
   uint min_size_chunk_prune() const {
@@ -98,8 +98,8 @@ public:
   bool IsTuning() const {
     return ppalgorithm.IsTuning();
   }
-  uint IndexMinSizeChunkPrePrune() const {
-    return ppalgorithm.IndexMinSizeChunkPrePrune();
+  uint IndexMinSizeChunkVisit() const {
+    return ppalgorithm.IndexMinSizeChunkVisit();
   }
 
   uint IndexMinSizeChunkPrune() const {
@@ -128,7 +128,7 @@ public:
     }
   }
 
-  inline void PrePruneNode(uint i) {
+  inline void VisitNode(uint i) {
     if(i < pptree.num_tips()) {
       // branch leading to a tip
       gutalphasigma2[i] = e2talpha[i] +
@@ -152,8 +152,7 @@ public:
     }
   }
 
-  inline void PruneNodeFromParent(uint i, uint iParent) {
-
+  inline void PruneNode(uint i, uint iParent) {
     a[iParent] += a[i];
     b[iParent] += b[i];
     c[iParent] += c[i];

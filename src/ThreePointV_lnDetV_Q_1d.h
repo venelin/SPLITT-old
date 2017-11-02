@@ -83,7 +83,7 @@ public:
     hat_mu_Y[i] = tilde_mu_X_prime[i] = lnDetV[i] = p[i] = Q[i] = 0;
   }
 
-  inline void PrePruneNode(uint i) {
+  inline void VisitNode(uint i) {
     if(i < pptree.num_tips()) {
       // branch leading to a tip
       lnDetV[i] = log(tTransf[i]);
@@ -101,7 +101,7 @@ public:
     }
   }
 
-  inline void PruneNodeFromParent(uint i, uint iParent) {
+  inline void PruneNode(uint i, uint iParent) {
     hat_mu_Y[iParent] += p[i]*hat_mu_Y[i];
     tilde_mu_X_prime[iParent] += p[i]*tilde_mu_X_prime[i];
     lnDetV[iParent] += lnDetV[i];
