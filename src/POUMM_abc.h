@@ -112,19 +112,18 @@ public:
 
   inline void InitNode(uint i) {
     a[i] = b[i] = c[i] = 0;
-  }
-
-  inline void TransformBranch(uint i) {
-    if(alpha != 0) {
-      talpha[i] = pptree.LengthOfBranch(i) * alpha;
-      etalpha[i] = exp(talpha[i]);
-      e2talpha[i] = etalpha[i] * etalpha[i];
-      fe2talpha[i] = alpha / (1 - e2talpha[i]);
-    } else {
-      talpha[i] = pptree.LengthOfBranch(i) * alpha;
-      etalpha[i] = exp(talpha[i]);
-      e2talpha[i] = etalpha[i] * etalpha[i];
-      fe2talpha[i] = -0.5 / pptree.LengthOfBranch(i);
+    if(i < this->pptree.num_nodes() - 1) {
+      if(alpha != 0) {
+        talpha[i] = pptree.LengthOfBranch(i) * alpha;
+        etalpha[i] = exp(talpha[i]);
+        e2talpha[i] = etalpha[i] * etalpha[i];
+        fe2talpha[i] = alpha / (1 - e2talpha[i]);
+      } else {
+        talpha[i] = pptree.LengthOfBranch(i) * alpha;
+        etalpha[i] = exp(talpha[i]);
+        e2talpha[i] = etalpha[i] * etalpha[i];
+        fe2talpha[i] = -0.5 / pptree.LengthOfBranch(i);
+      }
     }
   }
 

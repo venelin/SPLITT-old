@@ -36,7 +36,7 @@ public:
       this->set_X_and_Y(X, X);
     }
 
-    this->h = this->pptree.CalculateHeights();
+    this->h = this->pptree.CalculateHeights(0);
 
     this->T = *std::max_element(h.begin(), h.begin()+this->pptree.num_tips());
     this->u = ppa::vec(this->pptree.num_tips());
@@ -54,23 +54,27 @@ public:
     this->e2alphaT = exp(-2*alpha*T);
   }
 
-  void TransformBranch(uint i) {
-    uint iParent = this->pptree.FindIdOfParent(i);
-    // tTransf[i] =
-    //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -
-    //     (1-exp(-2*alpha*h[iParent]))*exp(-2*alpha*(T-h[iParent])) );
+  void InitNode(uint i) {
+    ThreePointV_lnDetV_Q_1d<Node>::InitNode(i);
+    if(i < this->pptree.num_nodes() - 1) {
+      // if an internal node or a tip transform the branch length leading to this tip
+      uint iParent = this->pptree.FindIdOfParent(i);
+      // tTransf[i] =
+      //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -
+      //     (1-exp(-2*alpha*h[iParent]))*exp(-2*alpha*(T-h[iParent])) );
 
-    double ealphahi = exp(alpha*h[i]);
+      double ealphahi = exp(alpha*h[i]);
 
-    this->tTransf[i] = sigma*sigma/(2*alpha) *
-      (e2alphaT*(ealphahi*ealphahi - exp(2*alpha*h[iParent])));
+      this->tTransf[i] = sigma*sigma/(2*alpha) *
+        (e2alphaT*(ealphahi*ealphahi - exp(2*alpha*h[iParent])));
 
-    if(i < this->pptree.num_tips()) {
-      //double mu = exp(-alpha*h[i])*g0 + (1-exp(-alpha*h[i]))*theta;
-      double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
-      double ealphaui = exp(alpha*u[i]);
-      this->X[i] = this->Y[i] = (z[i] - mu)/ealphaui;
-      this->tTransf[i] += sigmae*sigmae / (ealphaui*ealphaui);
+      if(i < this->pptree.num_tips()) {
+        //double mu = exp(-alpha*h[i])*g0 + (1-exp(-alpha*h[i]))*theta;
+        double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
+        double ealphaui = exp(alpha*u[i]);
+        this->X[i] = this->Y[i] = (z[i] - mu)/ealphaui;
+        this->tTransf[i] += sigmae*sigmae / (ealphaui*ealphaui);
+      }
     }
   }
 

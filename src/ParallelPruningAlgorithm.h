@@ -19,7 +19,7 @@
 //
 // 1. Use a C++11 enabled compiler (option -std=c++11).
 // 2. Include this header file in your code.
-// 3. Create a class that inherits from ParallelPruningMeta:
+// 3. Create a class that implements the following
 // class MyPruningAlgorithm: public ParallelPruningMeta {...};
 // 4. In the definition of your class, e.g. MyPruningAlgorithm:
 //    4.1 add relevant data fields;
@@ -513,8 +513,8 @@ public:
   }
 
   // A root-to-node distance vector in the order of pruning processing
-  std::vector<Length> CalculateHeights() const {
-    std::vector<Length> h(this->num_nodes_, 0);
+  std::vector<Length> CalculateHeights(Length const& zero) const {
+    std::vector<Length> h(this->num_nodes_, zero);
     for(int i = this->num_nodes_ - 2; i >= 0; i--) {
       h[i] = h[this->id_parent_[i]] + this->lengths_[i];
     }
@@ -683,7 +683,6 @@ protected:
     _PRAGMA_OMP_SIMD
       for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
         spec_.InitNode(i);
-        spec_.TransformBranch(i);
       }
 
       for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
@@ -706,7 +705,6 @@ protected:
   _PRAGMA_OMP_FOR_SIMD
   for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
     spec_.InitNode(i);
-    spec_.TransformBranch(i);
   }
 
   uint i_prune = 0;
@@ -747,7 +745,6 @@ protected:
   _PRAGMA_OMP_FOR_SIMD
   for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
     spec_.InitNode(i);
-    spec_.TransformBranch(i);
   }
 
   for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
@@ -780,7 +777,6 @@ protected:
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
       spec_.InitNode(i);
-      spec_.TransformBranch(i);
     }
 
     uint i_prune = 0;
@@ -836,7 +832,6 @@ protected:
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
       spec_.InitNode(i);
-      spec_.TransformBranch(i);
     }
 
   for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
@@ -874,7 +869,6 @@ class ParallelPruningTreeFindChildren: public ParallelPruningTree<Node, Length> 
   std::vector<uvec> id_child_nodes_;
 
   void InitNode(uint i) const {}
-  void TransformBranch(uint i) const {}
   void VisitNode(uint i) const {}
   void PruneNode(uint i, uint iParent) {
     id_child_nodes_[iParent - this->num_tips()].push_back(i);
