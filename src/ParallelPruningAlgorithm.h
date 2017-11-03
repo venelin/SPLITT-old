@@ -64,7 +64,7 @@
 
 #else // #if _OPENMP >= 201307
 
-#define _PRAGMA_OMP_FOR_SIMD _Pragma("omp for")
+#define _PRAGMA_OMP_FOR_SIMD _Pragma("omp for simd")
 #define _PRAGMA_OMP_FOR _Pragma("omp for")
 #define _PRAGMA_OMP_SIMD _Pragma("omp simd")
 
@@ -80,6 +80,7 @@
 #define _PRAGMA_OMP_SIMD _Pragma("omp simd")
 
 #endif // #ifdef _OPENMP
+
 
 // all functions and classes defined in the namespace ppa
 // (stays for parallel pruning algorithm)
@@ -688,11 +689,11 @@ protected:
       for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
         auto range_prune = pptree_.RangeIdPruneNode(i_prune);
 
-        _PRAGMA_OMP_SIMD
-          for(uint i = range_prune.first; i <= range_prune.second; i++) {
-            spec_.VisitNode(i);
-            spec_.PruneNode(i, pptree_.FindIdOfParent(i));
-          }
+    _PRAGMA_OMP_SIMD
+        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          spec_.VisitNode(i);
+          spec_.PruneNode(i);
+        }
       }
   }
 
@@ -726,7 +727,7 @@ protected:
 
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.PruneNode(i, pptree_.FindIdOfParent(i));
+          spec_.PruneNode(i);
         }
 
         num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -753,7 +754,7 @@ protected:
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_prune.first; i <= range_prune.second; i++) {
         spec_.VisitNode(i);
-        spec_.PruneNode(i, pptree_.FindIdOfParent(i));
+        spec_.PruneNode(i);
       }
   }
 }
@@ -804,7 +805,7 @@ protected:
         auto range_prune = pptree_.RangeIdPruneNode(i_prune);
         _PRAGMA_OMP_SIMD
           for(uint i = range_prune.first; i <= range_prune.second; i++) {
-            spec_.PruneNode(i, pptree_.FindIdOfParent(i));
+            spec_.PruneNode(i);
           }
 
           num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -834,6 +835,7 @@ protected:
       spec_.InitNode(i);
     }
 
+
   for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
       auto range_prune = pptree_.RangeIdPruneNode(i_prune);
 #pragma omp barrier
@@ -842,14 +844,14 @@ protected:
         _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
           spec_.VisitNode(i);
-          spec_.PruneNode(i, pptree_.FindIdOfParent(i));
+          spec_.PruneNode(i);
         }
       } else if (tid == 0) {
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
           spec_.VisitNode(i);
-          spec_.PruneNode(i, pptree_.FindIdOfParent(i));
+          spec_.PruneNode(i);
         }
       }
     }
@@ -870,8 +872,8 @@ class ParallelPruningTreeFindChildren: public ParallelPruningTree<Node, Length> 
 
   void InitNode(uint i) const {}
   void VisitNode(uint i) const {}
-  void PruneNode(uint i, uint iParent) {
-    id_child_nodes_[iParent - this->num_tips()].push_back(i);
+  void PruneNode(uint i) {
+    id_child_nodes_[this->FindIdOfParent(i) - this->num_tips()].push_back(i);
   }
 
   friend class ParallelPruningAlgorithm<ThisType, ThisType>;
@@ -896,6 +898,23 @@ public:
       throw std::invalid_argument("i must be smaller than the number of nodes.");
     }
   }
+};
+
+template<class Node, class Length, class Tree, class Data, class PruningSpec>
+class ParallelPruningInstance:
+  public Tree,
+  public PruningSpec,
+  public ParallelPruningAlgorithm<Tree, PruningSpec> {
+
+public:
+  ParallelPruningInstance(
+    std::vector<Node> const& branch_start_nodes,
+    std::vector<Node> const& branch_end_nodes,
+    std::vector<Length> const& branch_lengths,
+    Data const& data):
+  Tree(branch_start_nodes, branch_end_nodes, branch_lengths),
+  PruningSpec(*this, data),
+  ParallelPruningAlgorithm<Tree, PruningSpec>(*this, *this) {}
 };
 }
 #endif // ParallelPruning_ParallelPruningAlgorithm_H_

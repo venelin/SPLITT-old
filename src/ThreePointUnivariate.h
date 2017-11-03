@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 //   limitations under the License.
 
-#ifndef ParallelPruning_ThreePointV_lnDetV_Q_1D_H_
-#define ParallelPruning_ThreePointV_lnDetV_Q_1D_H_
+#ifndef ParallelPruning_ThreePointUnivariate_H_
+#define ParallelPruning_ThreePointUnivariate_H_
 
 #include "./ParallelPruningAlgorithm.h"
 #include <iostream>
@@ -30,17 +30,19 @@ namespace ppa {
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
-template<class Node>
-class ThreePointV_lnDetV_Q_1d {
+template<class ParallelPruningTree>
+class ThreePointUnivariate {
 protected:
-  typedef ParallelPruningTree<Node, double> ParallelPruningTree;
-  const ParallelPruningTree pptree;
-  ParallelPruningAlgorithm<ParallelPruningTree, ThreePointV_lnDetV_Q_1d> ppalgorithm;
-  void init() {
-    this->tTransf = vec(pptree.num_nodes() - 1);
-    this->lnDetV = vec(pptree.num_nodes(), 0);
-    this->p = vec(pptree.num_nodes(), 0);
-    this->Q = vec(pptree.num_nodes(), 0);
+  ParallelPruningTree const* pptree_;
+  void InitFromTree(ParallelPruningTree const& pptree) {
+    this->pptree_ = &pptree;
+    this->tTransf = vec(pptree_->num_nodes() - 1);
+    this->lnDetV = vec(pptree_->num_nodes(), 0);
+    this->p = vec(pptree_->num_nodes(), 0);
+    this->Q = vec(pptree_->num_nodes(), 0);
+  }
+  ThreePointUnivariate() {
+    this->pptree_ = NULL;
   }
 public:
   // define fields as public in order to access them easily from R.
@@ -49,34 +51,32 @@ public:
   vec hat_mu_Y, tilde_mu_X_prime;
   vec lnDetV, p, Q;
 
-  ThreePointV_lnDetV_Q_1d(
-    std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t):
-    pptree(brStarts, brEnds, t), ppalgorithm(this->pptree, *this) {
-    init();
+  ThreePointUnivariate(ParallelPruningTree const* pptree) {
+    InitFromTree(pptree);
   };
 
   void set_X_and_Y(vec const& X, vec const& Y) {
-    if(X.size() != pptree.num_tips() || Y.size() != pptree.num_tips()) {
+    if(X.size() != pptree_->num_tips() || Y.size() != pptree_->num_tips()) {
       Rcpp::stop("The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 
-      this->hat_mu_Y = vec(pptree.num_nodes(), 0);
-      this->tilde_mu_X_prime = vec(pptree.num_nodes(), 0);
+      this->hat_mu_Y = vec(pptree_->num_nodes(), 0);
+      this->tilde_mu_X_prime = vec(pptree_->num_nodes(), 0);
     }
   }
 
 
   uint num_tips() const {
-    return this->pptree.num_tips();
+    return this->pptree_->num_tips();
   }
 
   double get_Q() const {
-    return this->Q[pptree.num_nodes()-1];
+    return this->Q[pptree_->num_nodes()-1];
   }
 
   double get_lnDetV() const {
-    return this->lnDetV[pptree.num_nodes()-1];
+    return this->lnDetV[pptree_->num_nodes()-1];
   }
 
   inline void InitNode(uint i) {
@@ -84,7 +84,7 @@ public:
   }
 
   inline void VisitNode(uint i) {
-    if(i < pptree.num_tips()) {
+    if(i < pptree_->num_tips()) {
       // branch leading to a tip
       lnDetV[i] = log(tTransf[i]);
       p[i] = 1 / tTransf[i];
@@ -101,17 +101,15 @@ public:
     }
   }
 
-  inline void PruneNode(uint i, uint iParent) {
+  inline void PruneNode(uint i) {
+    uint iParent = this->pptree_->FindIdOfParent(i);
     hat_mu_Y[iParent] += p[i]*hat_mu_Y[i];
     tilde_mu_X_prime[iParent] += p[i]*tilde_mu_X_prime[i];
     lnDetV[iParent] += lnDetV[i];
     p[iParent] += p[i];
     Q[iParent] += Q[i];
   }
-  void DoPruning(int mode) {
-    ppalgorithm.DoPruning(mode);
-  }
 };
 };
 
-#endif // ParallelPruning_ThreePointV_lnDetV_Q_1D_H_
+#endif // ParallelPruning_ThreePointUnivariate_H_

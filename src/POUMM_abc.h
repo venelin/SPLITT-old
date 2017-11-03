@@ -20,147 +20,129 @@ namespace ppa {
 template<class Node>
 class POUMM_abc {
   typedef ParallelPruningTree<Node, double> ParallelPruningTree;
-  const ParallelPruningTree pptree;
-  ParallelPruningAlgorithm<ParallelPruningTree, POUMM_abc> ppalgorithm;
+  const ParallelPruningTree pptree_;
+  ParallelPruningAlgorithm<ParallelPruningTree, POUMM_abc> ppalgorithm_;
 public:
-  double alpha, theta, sigma, sigmae, sigmae2, sigma2, logsigma;
-  vec z, se, a, b, c, sum_se2_sigmae2, talpha, etalpha,
-  e2talpha, fe2talpha, gutalphasigma2;
+  double alpha, theta, sigmae2, sigma2;
+  vec z, se, a, b, c;
 
   POUMM_abc(std::vector<Node> const& brStarts, std::vector<Node> const& brEnds, vec const& t,
             std::vector<Node> const& keys, vec const& z, vec const& se):
-    pptree(brStarts, brEnds, t),
-    ppalgorithm(this->pptree, *this),
+    pptree_(brStarts, brEnds, t),
+    ppalgorithm_(this->pptree_, *this),
     z(z), se(se) {
 
-    if(z.size() != pptree.num_tips() || se.size() != pptree.num_tips()) {
+    if(z.size() != pptree_.num_tips() || se.size() != pptree_.num_tips()) {
       throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");
     } else {
 
-      uvec ordNodes = pptree.OrderNodes(keys);
+      uvec ordNodes = pptree_.OrderNodes(keys);
       this->z = At(z, ordNodes);
       this->se = At(se, ordNodes);
-      this->a = vec(pptree.num_nodes());
-      this->b = vec(pptree.num_nodes());
-      this->c = vec(pptree.num_nodes());
-      this->talpha = vec(pptree.num_nodes() - 1);
-      this->etalpha = vec(pptree.num_nodes() - 1);
-      this->e2talpha = vec(pptree.num_nodes() - 1);
-      this->fe2talpha = vec(pptree.num_nodes() - 1);
-      this->gutalphasigma2 = vec(pptree.num_nodes() - 1);
+      this->a = vec(pptree_.num_nodes());
+      this->b = vec(pptree_.num_nodes());
+      this->c = vec(pptree_.num_nodes());
     }
   };
 
   vec get_abc() const {
     vec res(3);
-    res[0] = a[pptree.num_nodes() - 1];
-    res[1] = b[pptree.num_nodes() - 1];
-    res[2] = c[pptree.num_nodes() - 1];
+    res[0] = a[pptree_.num_nodes() - 1];
+    res[1] = b[pptree_.num_nodes() - 1];
+    res[2] = c[pptree_.num_nodes() - 1];
     return res;
   };
 
   void set_parameters(double alpha, double theta, double sigma, double sigmae) {
     this->alpha = alpha;
     this->theta = theta;
-    this->sigma = sigma;
-    this->sigmae = sigmae;
     this->sigmae2 = sigmae*sigmae;
-
     this->sigma2 = sigma*sigma;
-    this->logsigma = log(sigma);
 
-    this->sum_se2_sigmae2 = se;
-    for(size_t i = 0; i < se.size(); ++i) {
-      sum_se2_sigmae2[i] = sigmae2 + se[i]*se[i];
-    }
   }
 
   uint num_threads() const {
-    return ppalgorithm.num_threads();
+    return ppalgorithm_.num_threads();
   }
 
   uint min_size_chunk_visit() const {
-    return ppalgorithm.min_size_chunk_visit();
+    return ppalgorithm_.min_size_chunk_visit();
   }
 
   uint min_size_chunk_prune() const {
-    return ppalgorithm.min_size_chunk_prune();
+    return ppalgorithm_.min_size_chunk_prune();
   }
 
   std::vector<double>  durations_tuning() const {
-    return ppalgorithm.durations_tuning();
+    return ppalgorithm_.durations_tuning();
   }
 
   uint ModeAuto() const {
-    return ppalgorithm.ModeAuto();
+    return ppalgorithm_.ModeAuto();
   }
 
   bool IsTuning() const {
-    return ppalgorithm.IsTuning();
+    return ppalgorithm_.IsTuning();
   }
   uint IndexMinSizeChunkVisit() const {
-    return ppalgorithm.IndexMinSizeChunkVisit();
+    return ppalgorithm_.IndexMinSizeChunkVisit();
   }
 
   uint IndexMinSizeChunkPrune() const {
-    return ppalgorithm.IndexMinSizeChunkPrune();
+    return ppalgorithm_.IndexMinSizeChunkPrune();
   }
 
   uint fastest_step_tuning() const {
-    return ppalgorithm.fastest_step_tuning();
+    return ppalgorithm_.fastest_step_tuning();
   }
 
   inline void InitNode(uint i) {
-    a[i] = b[i] = c[i] = 0;
-    if(i < this->pptree.num_nodes() - 1) {
-      if(alpha != 0) {
-        talpha[i] = pptree.LengthOfBranch(i) * alpha;
-        etalpha[i] = exp(talpha[i]);
-        e2talpha[i] = etalpha[i] * etalpha[i];
-        fe2talpha[i] = alpha / (1 - e2talpha[i]);
-      } else {
-        talpha[i] = pptree.LengthOfBranch(i) * alpha;
-        etalpha[i] = exp(talpha[i]);
-        e2talpha[i] = etalpha[i] * etalpha[i];
-        fe2talpha[i] = -0.5 / pptree.LengthOfBranch(i);
-      }
+    if(i < this->pptree_.num_tips()) {
+      double sum_se2_sigmae2 = sigmae2 + se[i]*se[i];
+      double z1 = z[i] - theta;
+      a[i] = -0.5 / sum_se2_sigmae2;
+      b[i] = z1 / sum_se2_sigmae2;
+      c[i] = -0.5 * (M_LN_2PI  + z1 * b[i] + log(sum_se2_sigmae2));
+    } else {
+      a[i] = b[i] = c[i] = 0;
     }
   }
 
   inline void VisitNode(uint i) {
-    if(i < pptree.num_tips()) {
-      // branch leading to a tip
-      gutalphasigma2[i] = e2talpha[i] +
-        ((-0.5 / sum_se2_sigmae2[i]) * sigma2) / fe2talpha[i];
-      double z1 = z[i] - theta;
 
-      // integration over g1 including e1 = z1 - g1
-      c[i] = -0.5 * log(gutalphasigma2[i]) -
-        0.25 * sigma2 * z1*z1 / (sum_se2_sigmae2[i]*sum_se2_sigmae2[i]) /
-          (fe2talpha[i] - alpha + (-0.5 / sum_se2_sigmae2[i]) * sigma2) +
-            talpha[i] + (-0.5 * (M_LN_2PI  + z1*z1 / sum_se2_sigmae2[i]) -
-            log(sqrt(sum_se2_sigmae2[i])));
-      b[i] = (etalpha[i] * (z1 / sum_se2_sigmae2[i])) / gutalphasigma2[i];
-      a[i] = (-0.5 / sum_se2_sigmae2[i]) / gutalphasigma2[i];
+    double t = pptree_.LengthOfBranch(i);
+    double talpha = t * alpha;
+    double etalpha = exp(talpha);
+    double e2talpha = etalpha * etalpha;
+    double fe2talpha;
+    if(alpha != 0) {
+      fe2talpha = alpha / (1 - e2talpha);
     } else {
-      gutalphasigma2[i] = e2talpha[i] + (a[i] * sigma2) / fe2talpha[i];
-      c[i] = -0.5 * log(gutalphasigma2[i]) - 0.25 * sigma2 * b[i] * b[i] /
-        (fe2talpha[i] - alpha + a[i] * sigma2) + talpha[i] + c[i];
-      b[i] = (etalpha[i] * b[i]) / gutalphasigma2[i];
-      a[i] /= gutalphasigma2[i];
+      fe2talpha = -0.5 / t;
     }
+    double gutalphasigma2 = e2talpha + (a[i] * sigma2) / fe2talpha;
+
+    c[i] = -0.5 * log(gutalphasigma2) - 0.25 * sigma2 * b[i] * b[i] /
+      (fe2talpha - alpha + a[i] * sigma2) + talpha + c[i];
+    b[i] = (etalpha * b[i]) / gutalphasigma2;
+    a[i] /= gutalphasigma2;
   }
 
-  inline void PruneNode(uint i, uint iParent) {
+  inline void PruneNode(uint i) {
+    uint iParent = this->pptree_.FindIdOfParent(i);
     a[iParent] += a[i];
     b[iParent] += b[i];
     c[iParent] += c[i];
   }
 
-  void DoPruning(int mode) {
-    ppalgorithm.DoPruning(mode);
+  inline void DoPruning(int mode) {
+    ppalgorithm_.DoPruning(mode);
   }
+};
 
-};
-};
+// typedef ParallelPruningInstance<
+//   uint, double, ParallelPruningTree<uint, double>, AbcPOUMM::Data, AbcPOUMM> ParallelPruningAbcPOUMM;
+//
+//
+}
 #endif //POUMM_ABC_H_
