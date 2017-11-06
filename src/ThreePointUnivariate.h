@@ -31,52 +31,43 @@ namespace ppa {
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
 template<class ParallelPruningTree>
-class ThreePointUnivariate {
-protected:
-  ParallelPruningTree const* pptree_;
-  void InitFromTree(ParallelPruningTree const& pptree) {
-    this->pptree_ = &pptree;
-    this->tTransf = vec(pptree_->num_nodes() - 1);
-    this->lnDetV = vec(pptree_->num_nodes(), 0);
-    this->p = vec(pptree_->num_nodes(), 0);
-    this->Q = vec(pptree_->num_nodes(), 0);
-  }
-  ThreePointUnivariate() {
-    this->pptree_ = NULL;
-  }
+class ThreePointUnivariate: public PruningSpec<ParallelPruningTree> {
+
 public:
+  typedef PruningSpec<ParallelPruningTree> BaseType;
+  typedef ParallelPruningTree TreeType;
+  typedef vec NodeStateType;
+  typedef vec ParameterType;
+
   // define fields as public in order to access them easily from R.
   vec X, Y;
   vec tTransf;
   vec hat_mu_Y, tilde_mu_X_prime;
   vec lnDetV, p, Q;
 
-  ThreePointUnivariate(ParallelPruningTree const* pptree) {
-    InitFromTree(pptree);
+  ThreePointUnivariate(ParallelPruningTree const& tree): BaseType(tree) {
+    this->tTransf = vec(this->ref_tree_.num_nodes() - 1);
+    this->lnDetV = vec(this->ref_tree_.num_nodes(), 0);
+    this->p = vec(this->ref_tree_.num_nodes(), 0);
+    this->Q = vec(this->ref_tree_.num_nodes(), 0);
   };
 
   void set_X_and_Y(vec const& X, vec const& Y) {
-    if(X.size() != pptree_->num_tips() || Y.size() != pptree_->num_tips()) {
+    if(X.size() != this->ref_tree_.num_tips() || Y.size() != this->ref_tree_.num_tips()) {
       Rcpp::stop("The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 
-      this->hat_mu_Y = vec(pptree_->num_nodes(), 0);
-      this->tilde_mu_X_prime = vec(pptree_->num_nodes(), 0);
+      this->hat_mu_Y = vec(this->ref_tree_.num_nodes(), 0);
+      this->tilde_mu_X_prime = vec(this->ref_tree_.num_nodes(), 0);
     }
   }
 
-
-  uint num_tips() const {
-    return this->pptree_->num_tips();
-  }
-
-  double get_Q() const {
-    return this->Q[pptree_->num_nodes()-1];
-  }
-
-  double get_lnDetV() const {
-    return this->lnDetV[pptree_->num_nodes()-1];
+  NodeStateType StateAtRoot() const {
+    vec res(2);
+    res[0] = this->lnDetV[this->ref_tree_.num_nodes()-1];
+    res[1] = this->Q[this->ref_tree_.num_nodes()-1];
+    return res;
   }
 
   inline void InitNode(uint i) {
@@ -84,7 +75,7 @@ public:
   }
 
   inline void VisitNode(uint i) {
-    if(i < pptree_->num_tips()) {
+    if(i < this->ref_tree_.num_tips()) {
       // branch leading to a tip
       lnDetV[i] = log(tTransf[i]);
       p[i] = 1 / tTransf[i];
@@ -102,7 +93,7 @@ public:
   }
 
   inline void PruneNode(uint i) {
-    uint iParent = this->pptree_->FindIdOfParent(i);
+    uint iParent = this->ref_tree_.FindIdOfParent(i);
     hat_mu_Y[iParent] += p[i]*hat_mu_Y[i];
     tilde_mu_X_prime[iParent] += p[i]*tilde_mu_X_prime[i];
     lnDetV[iParent] += lnDetV[i];

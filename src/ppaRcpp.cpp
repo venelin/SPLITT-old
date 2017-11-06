@@ -1,8 +1,8 @@
 #include <RcppArmadillo.h>
 #include <R_ext/Rdynload.h>
 
-#include "POUMM_abc.h"
-#include "POUMM_lnDetV_Q_1d.h"
+#include "AbcPOUMM.h"
+#include "ThreePointPOUMM.h"
 
 // [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::plugins(openmp)]]
@@ -20,9 +20,27 @@ void R_unload_ParallelPruning(DllInfo *info) {
 }
 // END Needed for r-devel (R 3.4)
 
+ppa::Tree<uint, double>* CreateTree(Rcpp::List const& tree) {
+  arma::umat branches = tree["edge"];
+  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
+  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
+  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
+  return new ppa::Tree<uint, double>(br_0, br_1, t);
+}
 
-// Construct a ppa::Tree from a ape::phylo object (represented as Rcpp::List)
-ppa::ParallelPruningTree<uint, double>* create_ParallelPruningTree(Rcpp::List const& tree) {
+RCPP_MODULE(Tree) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+  .factory<Rcpp::List const&>( &CreateTree )
+  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
+  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
+  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+  ;
+}
+
+ppa::ParallelPruningTree<uint, double>* CreateParallelPruningTree(Rcpp::List const& tree) {
   arma::umat branches = tree["edge"];
   ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
   ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
@@ -30,15 +48,30 @@ ppa::ParallelPruningTree<uint, double>* create_ParallelPruningTree(Rcpp::List co
   return new ppa::ParallelPruningTree<uint, double>(br_0, br_1, t);
 }
 
-ppa::ParallelPruningTree<std::string, double>* create_ParallelPruningTree(
-    std::vector<std::string> const& br_0,
-    std::vector<std::string> const& br_1,
-    std::vector<double> const& t) {
 
-  return new ppa::ParallelPruningTree<std::string, double>(br_0, br_1, t);
+RCPP_MODULE(ParallelPruningTree) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+  .factory<Rcpp::List const&>( &CreateTree )
+  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
+  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
+  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+  ;
+  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
+    .derives<ppa::Tree<uint, double>> ( "Tree" )
+    .factory<Rcpp::List const&>( &CreateParallelPruningTree )
+    .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
+    .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
+    .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
+    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
+    .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
+  ;
 }
 
-ppa::ParallelPruningTreeFindChildren<uint, double>* create_ParallelPruningTreeFindChildren(Rcpp::List const& tree) {
+
+ppa::ParallelPruningTreeFindChildren<uint, double>* CreateParallelPruningTreeFindChildren(Rcpp::List const& tree) {
   arma::umat branches = tree["edge"];
   ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
   ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
@@ -46,22 +79,38 @@ ppa::ParallelPruningTreeFindChildren<uint, double>* create_ParallelPruningTreeFi
   return new ppa::ParallelPruningTreeFindChildren<uint, double>(br_0, br_1, t);
 }
 
-ppa::POUMM_abc<uint>* create_POUMM_abc(Rcpp::List const& tree, ppa::vec const& z, ppa::vec const& se) {
-  arma::umat branches = tree["edge"];
-  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
-  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
-  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
-  uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
-  return new ppa::POUMM_abc<uint>(br_0, br_1, t, ppa::Seq(1, num_tips), z, se);
+RCPP_MODULE(ParallelPruningTreeFindChildren) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+  .factory<Rcpp::List const&>( &CreateTree )
+  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
+  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
+  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+  ;
+  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
+    .derives<ppa::Tree<uint, double>> ( "Tree" )
+    .factory<Rcpp::List const&>( &CreateParallelPruningTree )
+    .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
+    .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
+    .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
+    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
+    .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
+  ;
+  Rcpp::class_<ppa::ParallelPruningTreeFindChildren<uint, double>>( "ParallelPruningTreeFindChildren" )
+    .derives<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
+    .factory<Rcpp::List const&>( &CreateParallelPruningTreeFindChildren )
+    .method( "FindChildren", &ppa::ParallelPruningTreeFindChildren<uint, double>::FindChildren )
+  ;
 }
 
-ppa::POUMM_lnDetV_Q_1d<uint>* create_POUMM_lnDetV_Q_1d(Rcpp::List const& tree, ppa::vec const& z) {
-  arma::umat branches = tree["edge"];
-  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
-  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
-  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
-  uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
-  return new ppa::POUMM_lnDetV_Q_1d<uint>(br_0, br_1, t, ppa::Seq(1, num_tips), z);
+ppa::ParallelPruningTree<std::string, double>* CreateParallelPruningTreeStringNodes(
+    std::vector<std::string> const& br_0,
+    std::vector<std::string> const& br_1,
+    std::vector<double> const& t) {
+
+  return new ppa::ParallelPruningTree<std::string, double>(br_0, br_1, t);
 }
 
 RCPP_MODULE(ParallelPruningTreeStringNodes) {
@@ -74,11 +123,9 @@ RCPP_MODULE(ParallelPruningTreeStringNodes) {
   .method("FindIdOfParent", &ppa::Tree<std::string, double>::FindIdOfParent )
   ;
   Rcpp::class_<ppa::ParallelPruningTree<std::string, double>>( "ParallelPruningTreeStringNodes" )
-    .derives<ppa::Tree<uint, double>> ( "TreeStringNodes" )
-    .factory<std::vector<std::string> const&, std::vector<std::string> const&,std::vector<double> const&>( &create_ParallelPruningTree )
+    .derives<ppa::Tree<std::string, double>> ( "TreeStringNodes" )
+    .factory<std::vector<std::string> const&, std::vector<std::string> const&,std::vector<double> const&>( &CreateParallelPruningTreeStringNodes )
     .method("OrderNodes", &ppa::ParallelPruningTree<std::string, double>::OrderNodes )
-  //.method("RangeIdPrune", &ppa::ParallelPruningTree<std::string, double>::RangeIdPrune )
-  //.method("RangeIdUpdateParent", &ppa::ParallelPruningTree<std::string, double>::RangeIdUpdateParent )
     .method("CalculateHeights", &ppa::ParallelPruningTree<std::string, double>::CalculateHeights )
     .property("num_levels", &ppa::ParallelPruningTree<std::string, double>::num_levels )
     .property("num_parallel_ranges_prune", &ppa::ParallelPruningTree<std::string, double>::num_parallel_ranges_prune )
@@ -87,110 +134,195 @@ RCPP_MODULE(ParallelPruningTreeStringNodes) {
   ;
 }
 
-RCPP_MODULE(ParallelPruningTree) {
-  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
-  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
-  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
-  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
-  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
-  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
-  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+
+ppa::ParallelPruningThreePointPOUMM* CreateParallelPruningThreePointPOUMM(
+    Rcpp::List const& tree, ppa::vec const& z, ppa::vec const& se) {
+  arma::umat branches = tree["edge"];
+  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
+  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
+  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
+  uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
+  ppa::uvec node_names = ppa::Seq(1, num_tips);
+  typename ppa::ParallelPruningThreePointPOUMM::InputDataType data(node_names, z, se);
+  return new ppa::ParallelPruningThreePointPOUMM(br_0, br_1, t, data);
+}
+
+RCPP_EXPOSED_CLASS_NODECL(ppa::ParallelPruningThreePointPOUMM::TreeType)
+RCPP_EXPOSED_CLASS_NODECL(ppa::ParallelPruningThreePointPOUMM::PruningSpecType)
+RCPP_EXPOSED_CLASS_NODECL(ppa::ParallelPruningThreePointPOUMM::ParallelPruningAlgorithmType)
+
+
+RCPP_MODULE(ParallelPruningThreePointPOUMM) {
+  Rcpp::class_<ppa::ParallelPruningThreePointPOUMM::TreeType::Tree> ( "Tree" )
+  .property("num_nodes", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::num_nodes )
+  .property("num_tips", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::num_tips )
+  .method("LengthOfBranch", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::ParallelPruningThreePointPOUMM::TreeType::Tree::FindIdOfParent )
   ;
-  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
-    .derives<ppa::Tree<uint, double>> ( "Tree" )
-    .factory<Rcpp::List const&>( &create_ParallelPruningTree )
-    .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
-    //.method("RangeIdPrune", &ppa::ParallelPruningTree<uint, double>::RangeIdPrune )
-    //.method("RangeIdUpdateParent", &ppa::ParallelPruningTree<uint, double>::RangeIdUpdateParent )
-    .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
-    .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
-    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
-    .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
+  Rcpp::class_<ppa::ParallelPruningThreePointPOUMM::TreeType>( "ParallelPruningTree" )
+    .derives<ppa::ParallelPruningThreePointPOUMM::TreeType::Tree> ( "Tree" )
+    .method("OrderNodes", &ppa::ParallelPruningThreePointPOUMM::TreeType::OrderNodes )
+    .method("CalculateHeights", &ppa::ParallelPruningThreePointPOUMM::TreeType::CalculateHeights )
+    .property("num_levels", &ppa::ParallelPruningThreePointPOUMM::TreeType::num_levels )
+    .property("ranges_id_visit", &ppa::ParallelPruningThreePointPOUMM::TreeType::ranges_id_visit )
+    .property("ranges_id_prune", &ppa::ParallelPruningThreePointPOUMM::TreeType::ranges_id_prune )
+  ;
+  Rcpp::class_<ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType>( "ThreePointUnivariate" )
+  .field( "Q", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::Q )
+  .field( "lnDetV_all", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::lnDetV )
+  .field( "p", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::p )
+  .field( "X", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::X )
+  .field( "Y", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::Y )
+  .field( "tTransf", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::tTransf )
+  .field( "hat_mu_Y", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::hat_mu_Y )
+  .field( "tilde_mu_X_prime", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType::tilde_mu_X_prime )
+  ;
+  Rcpp::class_<ppa::ParallelPruningThreePointPOUMM::PruningSpecType>( "ThreePointPOUMM" )
+    .derives<ppa::ParallelPruningThreePointPOUMM::PruningSpecType::BaseType>("ThreePointUnivariate")
+    .field( "h", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::h )
+    .field( "u", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::u )
+    .field( "alpha", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::alpha )
+    .field( "sigma", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::sigma )
+    .field( "sigmae", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::sigmae )
+    .field( "g0", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::g0 )
+    .field( "theta", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::theta )
+    .field( "T", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::T )
+    .field( "e2alphaT", &ppa::ParallelPruningThreePointPOUMM::PruningSpecType::e2alphaT )
+  ;
+  Rcpp::class_<ppa::ParallelPruningThreePointPOUMM>( "ParallelPruningThreePointPOUMM" )
+    .factory<Rcpp::List const&, ppa::vec const&, ppa::vec const&>(&CreateParallelPruningThreePointPOUMM)
+    .method( "DoPruning", &ppa::ParallelPruningThreePointPOUMM::DoPruning )
+    .property( "tree", &ppa::ParallelPruningThreePointPOUMM::tree )
+    .property( "spec", &ppa::ParallelPruningThreePointPOUMM::spec )
+    .property( "algorithm", &ppa::ParallelPruningThreePointPOUMM::algorithm )
   ;
 }
 
-RCPP_MODULE(ParallelPruningTreeFindChildren) {
-  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
-  .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
-  .property("num_tips", &ppa::Tree<uint, double>::num_tips )
-  .method("LengthOfBranch", &ppa::Tree<uint, double>::LengthOfBranch )
-  .method("FindNodeWithId", &ppa::Tree<uint, double>::FindNodeWithId )
-  .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
-  .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
+ppa::ParallelPruningAbcPOUMM* CreateParallelPruningAbcPOUMM(
+    Rcpp::List const& tree, ppa::vec const& z, ppa::vec const& se) {
+  arma::umat branches = tree["edge"];
+  ppa::uvec br_0 = arma::conv_to<ppa::uvec>::from(branches.col(0));
+  ppa::uvec br_1 = arma::conv_to<ppa::uvec>::from(branches.col(1));
+  ppa::vec t = Rcpp::as<ppa::vec>(tree["edge.length"]);
+  uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
+  ppa::uvec node_names = ppa::Seq(1, num_tips);
+  typename ppa::ParallelPruningAbcPOUMM::InputDataType data(node_names, z, se);
+  return new ppa::ParallelPruningAbcPOUMM(br_0, br_1, t, data);
+}
+
+
+
+// template <> SEXP Rcpp::wrap(ppa::ParallelPruningAbcPOUMM::TreeType const& tree) {
+//   using namespace Rcpp;
+//   typedef ppa::ParallelPruningAbcPOUMM::TreeType A;
+//   Rcpp::XPtr<A> xp( &tree, true ) ; // copy and mark as finalizable
+//   Function maker=Environment::Rcpp_namespace()[ "cpp_object_maker"];
+//   return maker ( typeid(A).name() , xp );
+// }
+//
+// template <> SEXP Rcpp::wrap(ppa::ParallelPruningAbcPOUMM::PruningSpecType const& spec) {
+//   using namespace Rcpp;
+//   typedef ppa::ParallelPruningAbcPOUMM::PruningSpecType A;
+//   Rcpp::XPtr<A> xp( &spec, true ) ; // copy and mark as finalizable
+//   Function maker=Environment::Rcpp_namespace()[ "cpp_object_maker"];
+//   return maker ( typeid(A).name() , xp );
+// }
+//
+// template <> SEXP Rcpp::wrap(ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType & algorithm) {
+//   using namespace Rcpp;
+//   typedef ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType A;
+//   Rcpp::XPtr<A> xp( new A(algorithm), true ) ; // copy and mark as finalizable
+//   Function maker=Environment::Rcpp_namespace()[ "cpp_object_maker"];
+//   return maker ( typeid(A).name() , xp );
+// }
+
+RCPP_EXPOSED_CLASS_NODECL(ppa::ParallelPruningAbcPOUMM::PruningSpecType)
+RCPP_EXPOSED_CLASS_NODECL(ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType)
+
+RCPP_MODULE(ParallelPruningAbcPOUMM) {
+  Rcpp::class_<ppa::ParallelPruningAbcPOUMM::TreeType::Tree> ( "Tree" )
+  .property("num_nodes", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::num_nodes )
+  .property("num_tips", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::num_tips )
+  .method("LengthOfBranch", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::LengthOfBranch )
+  .method("FindNodeWithId", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::FindNodeWithId )
+  .method("FindIdOfNode", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::FindIdOfNode )
+  .method("FindIdOfParent", &ppa::ParallelPruningAbcPOUMM::TreeType::Tree::FindIdOfParent )
   ;
-  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
-    .derives<ppa::Tree<uint, double>> ( "Tree" )
-    .factory<Rcpp::List const&>( &create_ParallelPruningTree )
-    .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
+  Rcpp::class_<ppa::ParallelPruningAbcPOUMM::TreeType>( "ParallelPruningTree" )
+    .derives<ppa::ParallelPruningAbcPOUMM::TreeType::Tree> ( "Tree" )
+    .method("OrderNodes", &ppa::ParallelPruningAbcPOUMM::TreeType::OrderNodes )
   //.method("RangeIdPrune", &ppa::ParallelPruningTree<uint, double>::RangeIdPrune )
   //.method("RangeIdUpdateParent", &ppa::ParallelPruningTree<uint, double>::RangeIdUpdateParent )
-    .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )
-    .property("num_levels", &ppa::ParallelPruningTree<uint, double>::num_levels )
-    .property("ranges_id_visit", &ppa::ParallelPruningTree<uint, double>::ranges_id_visit )
-    .property("ranges_id_prune", &ppa::ParallelPruningTree<uint, double>::ranges_id_prune )
+    .method("CalculateHeights", &ppa::ParallelPruningAbcPOUMM::TreeType::CalculateHeights )
+    .property("num_levels", &ppa::ParallelPruningAbcPOUMM::TreeType::num_levels )
+    .property("ranges_id_visit", &ppa::ParallelPruningAbcPOUMM::TreeType::ranges_id_visit )
+    .property("ranges_id_prune", &ppa::ParallelPruningAbcPOUMM::TreeType::ranges_id_prune )
   ;
-  Rcpp::class_<ppa::ParallelPruningTreeFindChildren<uint, double>>( "ParallelPruningTreeFindChildren" )
-    .derives<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
-    .factory<Rcpp::List const&>( &create_ParallelPruningTreeFindChildren )
-    .method( "FindChildren", &ppa::ParallelPruningTreeFindChildren<uint, double>::FindChildren )
+  Rcpp::class_<ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType> ( "ParallelPruningAlgorithm" )
+  .property( "VersionOPENMP", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::VersionOPENMP )
+  .property( "ModeAutoAsInt", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::ModeAutoAsInt )
+  .property( "ModeAutoAsString", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::ModeAutoAsString )
+  .property( "IsTuning", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::IsTuning )
+  .property( "num_threads", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::num_threads )
+  .property( "min_size_chunk_visit", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::min_size_chunk_visit )
+  .property( "min_size_chunk_prune", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::min_size_chunk_prune )
+  .property( "durations_tuning", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::durations_tuning )
+  .property( "fastest_step_tuning", &ppa::ParallelPruningAbcPOUMM::ParallelPruningAlgorithmType::fastest_step_tuning )
   ;
-  }
-
-RCPP_MODULE(POUMM_abc) {
-  Rcpp::class_<ppa::POUMM_abc<uint>>( "POUMM_abc" )
-  .factory<Rcpp::List const&, ppa::vec const&, ppa::vec const&>(&create_POUMM_abc)
-  .method( "DoPruning", &ppa::POUMM_abc<uint>::DoPruning )
-  .method( "set_parameters", &ppa::POUMM_abc<uint>::set_parameters )
-  .method( "abc", &ppa::POUMM_abc<uint>::get_abc )
-  .property( "ModeAuto", &ppa::POUMM_abc<uint>::ModeAuto )
-  .property( "IndexMinSizeChunkVisit", &ppa::POUMM_abc<uint>::IndexMinSizeChunkVisit )
-  .property( "IndexMinSizeChunkPrune", &ppa::POUMM_abc<uint>::IndexMinSizeChunkPrune )
-  .property( "IsTuning", &ppa::POUMM_abc<uint>::IsTuning )
-  .property( "num_threads", &ppa::POUMM_abc<uint>::num_threads )
-  .property( "min_size_chunk_visit", &ppa::POUMM_abc<uint>::min_size_chunk_visit )
-  .property( "min_size_chunk_prune", &ppa::POUMM_abc<uint>::min_size_chunk_prune )
-  .property( "durations_tuning", &ppa::POUMM_abc<uint>::durations_tuning )
-  .property( "fastest_step_tuning", &ppa::POUMM_abc<uint>::fastest_step_tuning )
-  .field( "a", &ppa::POUMM_abc<uint>::a )
-  .field( "b", &ppa::POUMM_abc<uint>::b )
-  .field( "c", &ppa::POUMM_abc<uint>::c )
-  .field( "se", &ppa::POUMM_abc<uint>::se )
-  .field( "z", &ppa::POUMM_abc<uint>::z )
-  .field( "alpha", &ppa::POUMM_abc<uint>::alpha )
-  .field( "sigma2", &ppa::POUMM_abc<uint>::sigma2 )
-  .field( "sigmae2", &ppa::POUMM_abc<uint>::sigmae2 )
-  .field( "theta", &ppa::POUMM_abc<uint>::theta )
+  Rcpp::class_<ppa::ParallelPruningAbcPOUMM::PruningSpecType> ( "PruningSpec" )
+  .field( "a", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::a )
+  .field( "b", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::b )
+  .field( "c", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::c )
+  .field( "se", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::se )
+  .field( "z", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::z )
+  .field( "alpha", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::alpha )
+  .field( "sigma2", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::sigma2 )
+  .field( "sigmae2", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::sigmae2 )
+  .field( "theta", &ppa::ParallelPruningAbcPOUMM::PruningSpecType::theta )
+  ;
+  Rcpp::class_<ppa::ParallelPruningAbcPOUMM>( "ParallelPruningAbcPOUMM" )
+  .factory<Rcpp::List const&, ppa::vec const&, ppa::vec const&>(&CreateParallelPruningAbcPOUMM)
+  .method( "DoPruning", &ppa::ParallelPruningAbcPOUMM::DoPruning )
+  .property( "tree", &ppa::ParallelPruningAbcPOUMM::tree )
+  .property( "spec", &ppa::ParallelPruningAbcPOUMM::spec )
+  .property( "algorithm", &ppa::ParallelPruningAbcPOUMM::algorithm )
   ;
 }
 
-RCPP_MODULE(POUMM_lnDetV_Q_1d) {
-  Rcpp::class_<ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>>( "ThreePointUnivariate" )
-  .property( "num_tips", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::num_tips )
-  .property( "lnDetV", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::get_lnDetV )
-  .property( "Q", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::get_Q )
-  .field( "Q_all", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::Q )
-  .field( "lnDetV_all", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::lnDetV )
-  .field( "p", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::p )
-  .field( "X", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::X )
-  .field( "Y", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::Y )
-  .field( "tTransf", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::tTransf )
-  .field( "hat_mu_Y", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::hat_mu_Y )
-  .field( "tilde_mu_X_prime", &ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>::tilde_mu_X_prime )
+class X {
+  int a_ = 0;
+public:
+  void increment(){
+    a_++;
+  }
+  int a() const {
+    return a_;
+  }
+};
+
+class Y {
+public:
+  X x_;
+  X& x() {
+    return x_;
+  }
+};
+
+
+RCPP_EXPOSED_CLASS(X)
+
+RCPP_MODULE(X) {
+  Rcpp::class_<X>("X")
+  .constructor()
+  .method( "increment", &X::increment )
+  .property( "a", &X::a )
   ;
-  Rcpp::class_<ppa::POUMM_lnDetV_Q_1d<uint>>( "POUMM_lnDetV_Q_1d" )
-    .derives<ppa::ThreePointUnivariate<ppa::POUMM_lnDetV_Q_1d<uint>::TreeType>>("ThreePointUnivariate")
-    .factory<Rcpp::List const&, ppa::vec const&>(&create_POUMM_lnDetV_Q_1d)
-    .method( "set_parameters", &ppa::POUMM_lnDetV_Q_1d<uint>::set_parameters )
-    .method( "DoPruning", &ppa::POUMM_lnDetV_Q_1d<uint>::DoPruning )
-    .property( "lnDetD", &ppa::POUMM_lnDetV_Q_1d<uint>::get_lnDetD )
-    .field( "h", &ppa::POUMM_lnDetV_Q_1d<uint>::h )
-    .field( "u", &ppa::POUMM_lnDetV_Q_1d<uint>::u )
-    .field( "alpha", &ppa::POUMM_lnDetV_Q_1d<uint>::alpha )
-    .field( "sigma", &ppa::POUMM_lnDetV_Q_1d<uint>::sigma )
-    .field( "sigmae", &ppa::POUMM_lnDetV_Q_1d<uint>::sigmae )
-    .field( "g0", &ppa::POUMM_lnDetV_Q_1d<uint>::g0 )
-    .field( "theta", &ppa::POUMM_lnDetV_Q_1d<uint>::theta )
-    .field( "T", &ppa::POUMM_lnDetV_Q_1d<uint>::T )
-    .field( "e2alphaT", &ppa::POUMM_lnDetV_Q_1d<uint>::e2alphaT )
+}
+RCPP_MODULE(Y) {
+  Rcpp::class_<Y>("Y")
+  .constructor()
+  .property( "x", &Y::x )
   ;
 }

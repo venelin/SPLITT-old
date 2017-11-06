@@ -7,11 +7,10 @@ lik_POUMM <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  poummObj$set_parameters(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
-  poummObj$DoPruning(mode)
+  abc = poummObj$DoPruning(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
 
   POUMM:::loglik_abc_g0_g0Prior(
-    abc = poummObj$abc(), g0Prior = NA,
+    abc = abc, g0Prior = NA,
     g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik
 }
 
@@ -19,10 +18,9 @@ lik_POUMM_lnDetV_Q <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  poummObj$set_parameters(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
-  poummObj$DoPruning(mode)
+  res <- poummObj$DoPruning(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
 
-  -1/2*(poummObj$num_tips*log(2*pi) + 2*poummObj$lnDetD + poummObj$lnDetV+poummObj$Q)
+  -1/2*(poummObj$tree$num_tips*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
 
 lik_POUMM_old <- function(
@@ -38,7 +36,7 @@ context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 100
+N <- 1000
 tree <- ape::rtree(N)
 
 g0 <- 16
@@ -54,18 +52,13 @@ z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
 # z<-trees$z[[24]]
 
 
-ppt<-ParallelPruning:::ParallelPruningTree$new(tree)
+#ppt<-ParallelPruning:::ParallelPruningTree$new(tree)
 
 pruneInfo <- POUMM::pruneTree(tree, z, se)
 
-poummabc <- ParallelPruning:::POUMM_abc$new(tree, z = z[1:N], se = se)
+poummabc <- ParallelPruning:::ParallelPruningAbcPOUMM$new(tree, z = z[1:N], se = se)
 
-poummabc$set_parameters( alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
-
-poummabc$DoPruning(0)
-poummabc$abc()
-
-poummlnDetVQ <- ParallelPruning:::POUMM_lnDetV_Q_1d$new(tree, z = z[1:N])
+poummlnDetVQ <- ParallelPruning:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 # test correct value
 test_that("POUMM abc", expect_lt(abs(

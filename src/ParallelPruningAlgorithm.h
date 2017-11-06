@@ -182,25 +182,30 @@ inline bvec NotIsNA(uvec const& x) {
   return res;
 }
 
-// A tree topology is a tree without branch-lengths. Still, for our purposes,
-// it has named nodes. Permuting the nodes results in a different topology.
 template<class Node, class Length>
 class Tree {
+public:
+  typedef Node NodeType;
+  typedef Length LengthType;
+
+private:
+  // private default constructor
+  Tree() {}
+
 protected:
   uint num_tips_;
   uint num_nodes_;
   uvec id_parent_;
 
-  uvec id_branch_original_;
-
-  std::map<Node, uint> map_node_to_id_;
-  std::vector<Node> map_id_to_node_;
-  std::vector<Length> lengths_;
+  std::map<NodeType, uint> map_node_to_id_;
+  std::vector<NodeType> map_id_to_node_;
+  std::vector<LengthType> lengths_;
 
 public:
-  Tree(std::vector<Node> const& branch_start_nodes,
-       std::vector<Node> const& branch_end_nodes,
-       std::vector<Length> const& branch_lengths) {
+  // pass an empty vector for branch_lengths for a tree without branch lengths.
+  Tree(std::vector<NodeType> const& branch_start_nodes,
+       std::vector<NodeType> const& branch_end_nodes,
+       std::vector<LengthType> const& branch_lengths) {
 
     if(branch_start_nodes.size() != branch_end_nodes.size()) {
       std::ostringstream oss;
@@ -217,15 +222,15 @@ public:
     this->num_nodes_ = branch_start_nodes.size() + 1;
 
     // we distinguish three types of nodes:
-    enum NodeType { ROOT, INTERNAL, TIP };
+    enum NodeRole { ROOT, INTERNAL, TIP };
 
     // initially, we traverse the list of branches and order the nodes as they
     // appear during the traversal from 0 to num_nodes_-1. This order is done by
     // incrementing node_id_temp.
     uint node_id_temp = 0;
 
-    std::vector<NodeType> node_types(num_nodes_, ROOT);
-    this->map_id_to_node_ = std::vector<Node>(num_nodes_);
+    std::vector<NodeRole> node_types(num_nodes_, ROOT);
+    this->map_id_to_node_ = std::vector<NodeType>(num_nodes_);
     uvec branch_starts_temp(branch_start_nodes.size(), NA_UINT);
     uvec branch_ends_temp(branch_start_nodes.size(), NA_UINT);
     uvec ending_at(num_nodes_ - 1, NA_UINT);
@@ -238,10 +243,10 @@ public:
         throw std::logic_error(oss.str());
       }
 
-      auto it1 = map_node_to_id_.find(branch_start_nodes[i]);
-      if(it1 == map_node_to_id_.end()) {
-        // node encountered for the first time
-        map_node_to_id_[branch_start_nodes[i]] = node_id_temp; // insert branch_start_nodes[i] in the map
+      auto it1 = map_node_to_id_.insert(
+        std::pair<NodeType, uint>(branch_start_nodes[i], node_id_temp));
+      if(it1.second) {
+        // node encountered for the first time and inserted in the map_node_to_id_
         map_id_to_node_[node_id_temp] = branch_start_nodes[i];
         if(node_types[node_id_temp] == TIP) {
           node_types[node_id_temp] = INTERNAL;
@@ -250,19 +255,19 @@ public:
         node_id_temp++;
       } else {
         // node encountered in a previous branch
-        if(node_types[it1->second] == TIP) {
+        if(node_types[it1.first->second] == TIP) {
           // the previous encounter of the node was as a branch-end
-          node_types[it1->second] = INTERNAL;
+          node_types[it1.first->second] = INTERNAL;
         } else {
           // do nothing
         }
-        branch_starts_temp[i] = it1->second;
+        branch_starts_temp[i] = it1.first->second;
       }
 
-      auto it2 = map_node_to_id_.find(branch_end_nodes[i]);
-      if(it2 == map_node_to_id_.end()) {
-        // node encountered for the first time
-        map_node_to_id_[branch_end_nodes[i]] = node_id_temp;
+      auto it2 = map_node_to_id_.insert(std::pair<NodeType, uint>(branch_end_nodes[i], node_id_temp));
+
+      if(it2.second) {
+        // node encountered for the first time and inserted in the map_node_to_id
         map_id_to_node_[node_id_temp] = branch_end_nodes[i];
 
         if(node_types[node_id_temp] == ROOT) {
@@ -274,20 +279,20 @@ public:
         node_id_temp++;
       } else {
         // node has been previously encountered
-        if(ending_at[it2->second] != NA_UINT) {
+        if(ending_at[it2.first->second] != NA_UINT) {
           std::ostringstream oss;
           oss<<"Found at least two branches ending at the same node ("<<
-            it2->first<<"). Check for cycles or repeated branches. ";
+            it2.first->first<<"). Check for cycles or repeated branches. ";
           throw std::logic_error(oss.str());
         } else {
-          if(node_types[it2->second] == ROOT) {
+          if(node_types[it2.first->second] == ROOT) {
             // the previous enounters of the node were as branch-start -> set
             // the node's type to INTERNAL, because we know for sure that it
             // has descendants.
-            node_types[it2->second] = INTERNAL;
+            node_types[it2.first->second] = INTERNAL;
           }
-          branch_ends_temp[i] = it2->second;
-          ending_at[it2->second] = i;
+          branch_ends_temp[i] = it2.first->second;
+          ending_at[it2.first->second] = i;
         }
       }
     }
@@ -339,16 +344,29 @@ public:
     this->map_id_to_node_ = At(map_id_to_node_, SortIndices(node_ids));
 
     this->id_parent_ = uvec(num_nodes_ - 1);
-    this->lengths_ = std::vector<Length>(num_nodes_ - 1);
 
-    this->id_branch_original_ = uvec(num_nodes_ - 1);
+    if(branch_lengths.size() == num_nodes_ - 1) {
+      this->lengths_ = std::vector<LengthType>(num_nodes_ - 1);
+    } else if(branch_lengths.size() != 0) {
+      std::ostringstream oss;
+      oss<<"branch_lengths should be either empty or of size num_nodes_-1 ("<<
+        num_nodes_-1<<") but is "<<branch_lengths.size()<<"."<<std::endl;
+      throw std::invalid_argument(oss.str());
+    }
 
-    for(uint i = 0; i < num_nodes_ - 1; i++) {
-      uint branch_start_i = node_ids[branch_starts_temp[i]];
-      uint branch_end_i = node_ids[branch_ends_temp[i]];
-      id_parent_[branch_end_i] = branch_start_i;
-      lengths_[branch_end_i] = branch_lengths[i];
-      id_branch_original_[branch_end_i] = i;
+    if(HasBranchLengths()) {
+      for(uint i = 0; i < num_nodes_ - 1; i++) {
+        uint branch_start_i = node_ids[branch_starts_temp[i]];
+        uint branch_end_i = node_ids[branch_ends_temp[i]];
+        id_parent_[branch_end_i] = branch_start_i;
+        lengths_[branch_end_i] = branch_lengths[i];
+      }
+    } else {
+      for(uint i = 0; i < num_nodes_ - 1; i++) {
+        uint branch_start_i = node_ids[branch_starts_temp[i]];
+        uint branch_end_i = node_ids[branch_ends_temp[i]];
+        id_parent_[branch_end_i] = branch_start_i;
+      }
     }
   }
 
@@ -360,12 +378,85 @@ public:
     return num_tips_;
   }
 
-  Length LengthOfBranch(uint i) const {
+  bool HasBranchLengths() const {
+    return lengths_.size() == id_parent_.size();
+  }
+
+  LengthType const& LengthOfBranch(uint i) const {
+    if(i >= lengths_.size()) {
+      std::ostringstream oss;
+      oss<<"i is beyond the size of the lengths_ vector."<<
+        "Check i and that the tree has branches."<<std::endl;
+    }
     return lengths_[i];
   }
 
+  std::vector<LengthType> const& lengths() const {
+    return lengths_;
+  }
+
+  void SetLengthOfBranch(uint i, Length const& value) {
+    if(!HasBranchLengths()) {
+      std::ostringstream oss;
+      oss<<"Trying to set a branch length on a tree without branch lengths. "<<
+        "Use a SetBranchLengths method to add branch lengths first."<<std::endl;
+      throw std::logic_error(oss.str());
+    } else if(i >= lengths_.size()) {
+      std::ostringstream oss;
+      oss<<"i shoulc be smaller than "<<lengths_.size()<<" but was "<<i<<std::endl;
+      throw std::out_of_range(oss.str());
+    } else {
+      lengths_[i] = value;
+    }
+  }
+
+  void SetBranchLengths(std::vector<LengthType> const& lengths) {
+    if(lengths.size() != 0 && lengths.size() != num_nodes_ - 1) {
+      std::ostringstream oss;
+      oss<<"lengths should be either empty or of size num_nodes_-1 ("<<
+        num_nodes_-1<<") but is "<<lengths.size()<<"."<<std::endl;
+    } else {
+      lengths_ = lengths;
+    }
+  }
+
+  void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
+                        std::vector<LengthType> const& lengths) {
+    if(nodes_branch_ends.size() != lengths.size()) {
+      throw std::invalid_argument("The vectors nodes_branch_ends and lengths should be the same size.");
+    }
+    if( !HasBranchLengths() ) {
+      if(nodes_branch_ends.size() != num_nodes_ - 1) {
+        std::ostringstream oss;
+        oss<<"Trying to set branch lengths on a tree without such."<<
+          " In this case, the vectors nodes_branch_ends and lengths should have an"<<
+            "element for each branch but their size is "<<
+              nodes_branch_ends.size()<<" (should be "<<num_nodes_ - 1<<")."<<std::endl;
+        throw std::invalid_argument(oss.str());
+      }
+      lengths_ = vec(num_nodes_ - 1);
+    }
+    std::vector<bool> visited(num_nodes_ - 1, false);
+    for(uint i = 0; i < nodes_branch_ends.size(); ++i) {
+      uint id = FindIdOfNode(nodes_branch_ends[i]);
+      if(i == NA_UINT || i == num_nodes_ - 1) {
+        std::ostringstream oss;
+        oss<<"No branch ends at node identified as "<<id<<
+          ". Check that nodes_branch_ends correspond to tips or internal nodes (excluding the root)"<<std::endl;
+        throw std::logic_error(oss.str());
+      } else if(visited[id]) {
+        std::ostringstream oss;
+        oss<<"Trying to set the length of the same branch twice. Check nodes_branch_ends for duplicates."<<std::endl;
+        throw std::logic_error(oss.str());
+      }
+      visited[id] = true;
+      lengths_[id] = lengths[i];
+    }
+
+  }
+
   // return the node at position id;
-  Node const& FindNodeWithId(uint id) const {
+  NodeType const& FindNodeWithId(uint id) const {
     return map_id_to_node_[id];
   }
 
@@ -387,18 +478,25 @@ public:
 
 template<class Node, class Length>
 class ParallelPruningTree: public Tree<Node, Length> {
+public:
+  typedef Node NodeType;
+  typedef Length LengthType;
+
+private:
+  // default constructor;
+  ParallelPruningTree() {}
+
 protected:
   uvec ranges_id_visit_;
   uvec ranges_id_prune_;
 
-  // private default constructor;
-  ParallelPruningTree() {}
 public:
+
   ParallelPruningTree(
-    std::vector<Node> const& branch_start_nodes,
-    std::vector<Node> const& branch_end_nodes,
-    std::vector<Length> const& branch_lengths):
-      Tree<Node, Length>(branch_start_nodes, branch_end_nodes, branch_lengths) {
+    std::vector<NodeType> const& branch_start_nodes,
+    std::vector<NodeType> const& branch_end_nodes,
+    std::vector<LengthType> const& branch_lengths):
+      Tree<NodeType, LengthType>(branch_start_nodes, branch_end_nodes, branch_lengths) {
 
       // insert a fictive branch leading to the root of the tree.
       uvec branch_ends = Seq(0, this->num_nodes_ - 1);
@@ -470,7 +568,9 @@ public:
         tips_this_level = tips_next_level;
       }
 
-      this->lengths_ = At(this->lengths_, order_branches);
+      if(this->HasBranchLengths()) {
+        this->lengths_ = At(this->lengths_, order_branches);
+      }
 
       uvec id_old = order_branches;
       id_old.push_back(this->num_nodes_ - 1);
@@ -479,7 +579,7 @@ public:
                                id_old);
 
       // update maps
-      std::vector<Node> map_id_to_node(this->num_nodes_);
+      std::vector<NodeType> map_id_to_node(this->num_nodes_);
       for (uint i = 0; i < this->num_nodes_; i++) {
         map_id_to_node[i] = this->map_id_to_node_[id_old[i]];
         this->map_node_to_id_[map_id_to_node[i]] = i;
@@ -514,8 +614,8 @@ public:
   }
 
   // A root-to-node distance vector in the order of pruning processing
-  std::vector<Length> CalculateHeights(Length const& zero) const {
-    std::vector<Length> h(this->num_nodes_, zero);
+  std::vector<LengthType> CalculateHeights(Length const& zero) const {
+    std::vector<LengthType> h(this->num_nodes_, zero);
     for(int i = this->num_nodes_ - 2; i >= 0; i--) {
       h[i] = h[this->id_parent_[i]] + this->lengths_[i];
     }
@@ -524,7 +624,7 @@ public:
 
   // returns a vector of positions in nodes in the order of pruning.
   // See also get_orderNodeIds.
-  uvec OrderNodes(std::vector<Node> const& nodes) const {
+  uvec OrderNodes(std::vector<NodeType> const& nodes) const {
     uvec ids(nodes.size());
     for(uint i = 0; i < nodes.size(); ++i) {
       auto it = this->map_node_to_id_.find(nodes[i]);
@@ -542,13 +642,37 @@ public:
   }
 };
 
+
+enum ParallelMode {
+  SINGLE_THREAD_LOOP_POSTORDER = 0,
+  SINGLE_THREAD_LOOP_PRUNES = 1,
+  MULTI_THREAD_LOOP_PRUNES = 2,
+  MULTI_THREAD_LOOP_VISITS = 3,
+  HYBRID_LOOP_PRUNES = 4,
+  HYBRID_LOOP_VISITS = 5
+};
+
+inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
+  switch(mode) {
+  case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: os<<"SINGLE_THREAD_LOOP_POSTORDER"; break;
+  case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: os<<"SINGLE_THREAD_LOOP_PRUNES"; break;
+  case ParallelMode::MULTI_THREAD_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_PRUNES"; break;
+  case ParallelMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
+  case ParallelMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
+  case ParallelMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
+  };
+  return os<< static_cast<int>(mode);
+}
+
+
 //  a skeleton for a ParallelPruningSpec class
-// Curiously recurring template pattern -  static polymorphism
-template<class ParallelPruningTree, class PruningSpec>
+template<class PruningSpec>
 class ParallelPruningAlgorithm {
 protected:
-  const ParallelPruningTree& pptree_;
-  PruningSpec& spec_;
+  typedef typename PruningSpec::TreeType TreeType;
+
+  TreeType const& ref_tree_;
+  PruningSpec& ref_spec_;
 
   uint num_threads_;
 
@@ -561,17 +685,9 @@ protected:
   const uvec min_sizes_chunk_ = {1, 2, 4, 8, 16, 32, 64};
 
 public:
-  enum PruningMode {
-    SINGLE_THREAD_ONE_LOOP = 1,
-    MULTI_THREAD_ONE_LOOP = 2,
-    MULTI_THREAD_NESTED_LOOPS = 3,
-    HYBRID_ONE_LOOP = 4,
-    HYBRID_NESTED_LOOPS = 5
-  };
 
-  ParallelPruningAlgorithm(
-    const ParallelPruningTree& pptree, PruningSpec& spec):
-  pptree_(pptree), spec_(spec) {
+  ParallelPruningAlgorithm(TreeType const& pptree, PruningSpec& spec):
+  ref_tree_(pptree), ref_spec_(spec) {
 
 #ifdef _OPENMP
 #pragma omp parallel
@@ -595,30 +711,40 @@ this->num_threads_ = 1;
     return current_step_tuning_ < min_sizes_chunk_.size() * 3;
   }
 
-  uint IndexMinSizeChunkVisit() const {
-    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    //return (step / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
-    return step % min_sizes_chunk_.size();
+
+  uint VersionOPENMP() const {
+#ifdef _OPENMP
+    return _OPENMP;
+#else
+    return 0;
+#endif
   }
 
-  uint IndexMinSizeChunkPrune() const {
-    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    return step % min_sizes_chunk_.size();
+  uint ModeAutoAsInt() const {
+    return static_cast<int>(ModeAuto());
   }
 
-  PruningMode ModeAuto() const {
+  std::string ModeAutoAsString() const {
+    std::ostringstream oss;
+    oss<<ModeAuto();
+    return oss.str();
+  }
+
+  ParallelMode ModeAuto() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
 
-    if(step < min_sizes_chunk_.size()/3) {
-      return SINGLE_THREAD_ONE_LOOP;
-    } else if(step < min_sizes_chunk_.size()/3 * 2) {
-      return MULTI_THREAD_ONE_LOOP;
+    if(step < min_sizes_chunk_.size()/4) {
+      return ParallelMode::SINGLE_THREAD_LOOP_POSTORDER;
+    } else if(step < min_sizes_chunk_.size()/4 * 2) {
+      return ParallelMode::SINGLE_THREAD_LOOP_PRUNES;
+    } else if(step < min_sizes_chunk_.size()/4 * 3) {
+      return ParallelMode::MULTI_THREAD_LOOP_PRUNES;
     } else if(step < min_sizes_chunk_.size()) {
-      return MULTI_THREAD_NESTED_LOOPS;
+      return ParallelMode::MULTI_THREAD_LOOP_VISITS;
     } else if(step < min_sizes_chunk_.size() * 2) {
-      return HYBRID_ONE_LOOP;
+      return ParallelMode::HYBRID_LOOP_PRUNES;
     } else {
-      return HYBRID_NESTED_LOOPS;
+      return ParallelMode::HYBRID_LOOP_VISITS;
     }
   }
 
@@ -638,25 +764,37 @@ this->num_threads_ = 1;
     return durations_tuning_;
   }
 
-  void DoPruning(int mode) {
+  void DoPruning(ParallelMode mode) {
     switch(mode) {
-      case SINGLE_THREAD_ONE_LOOP: DoPruningSingleThreadOneLoop(); break;
-      case MULTI_THREAD_ONE_LOOP: DoPruningMultiThreadOneLoop(); break;
-      case MULTI_THREAD_NESTED_LOOPS: DoPruningMultiThreadNestedLoops(); break;
-      case HYBRID_ONE_LOOP: DoPruningHybridOneLoop(); break;
-      case HYBRID_NESTED_LOOPS: DoPruningHybridNestedLoops(); break;
-      default: DoPruningAuto();
+    case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: DoPruningSingleThreadLoopPostorder(); break;
+    case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: DoPruningSingleThreadLoopPrunes(); break;
+    case ParallelMode::MULTI_THREAD_LOOP_PRUNES: DoPruningMultiThreadLoopPrunes(); break;
+    case ParallelMode::MULTI_THREAD_LOOP_VISITS: DoPruningMultiThreadLoopVisits(); break;
+    case ParallelMode::HYBRID_LOOP_PRUNES: DoPruningHybridLoopPrunes(); break;
+    case ParallelMode::HYBRID_LOOP_VISITS: DoPruningHybridLoopVisits(); break;
+    default: DoPruningAuto();
     }
   }
 
 protected:
+
+  uint IndexMinSizeChunkVisit() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    //return (step / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
+    return step % min_sizes_chunk_.size();
+  }
+
+  uint IndexMinSizeChunkPrune() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    return step % min_sizes_chunk_.size();
+  }
 
   void DoPruningAuto() {
 
     std::chrono::steady_clock::time_point start, end;
     double duration;
 
-    PruningMode mode = ModeAuto();
+    ParallelMode mode = ModeAuto();
 
     if( IsTuning() ) {
 
@@ -677,57 +815,67 @@ protected:
 
   }
 
-  void DoPruningSingleThreadOneLoop() {
-
-    // init data for the root node
-    spec_.InitNode(pptree_.num_nodes() - 1);
+  void DoPruningSingleThreadLoopPostorder() {
     _PRAGMA_OMP_SIMD
-      for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-        spec_.InitNode(i);
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
+    }
+
+    for(uint i = 0; i < ref_tree_.num_nodes() - 1; i++) {
+      ref_spec_.VisitNode(i);
+      ref_spec_.PruneNode(i);
+    }
+  }
+
+  void DoPruningSingleThreadLoopPrunes() {
+
+    _PRAGMA_OMP_SIMD
+      for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+        ref_spec_.InitNode(i);
       }
 
-      for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
-        auto range_prune = pptree_.RangeIdPruneNode(i_prune);
+      for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+        auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.VisitNode(i);
-          spec_.PruneNode(i);
+          ref_spec_.VisitNode(i);
+          ref_spec_.PruneNode(i);
         }
       }
   }
 
-  void DoPruningMultiThreadNestedLoops() {
+  void DoPruningMultiThreadLoopVisits() {
     // init data for the root node
-    spec_.InitNode(pptree_.num_nodes() - 1);
+    ref_spec_.InitNode(ref_tree_.num_nodes() - 1);
 
 #pragma omp parallel
 {
   _PRAGMA_OMP_FOR_SIMD
-  for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-    spec_.InitNode(i);
+  for(uint i = 0; i < ref_tree_.num_nodes() - 1; i++) {
+    ref_spec_.InitNode(i);
   }
 
   uint i_prune = 0;
-  for(uint i_level = 0; i_level < pptree_.num_levels(); i_level++) {
+  for(uint i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
 
 #pragma omp barrier
 
-    auto range_visit = pptree_.RangeIdVisitNode(i_level);
+    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        spec_.VisitNode(i);
+        ref_spec_.VisitNode(i);
       }
 
       uint num_branches_done = 0;
 
     while(num_branches_done != range_visit.second - range_visit.first + 1) {
 #pragma omp barrier
-      auto range_prune = pptree_.RangeIdPruneNode(i_prune);
+      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
 
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.PruneNode(i);
+          ref_spec_.PruneNode(i);
         }
 
         num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -737,33 +885,30 @@ protected:
 }
   }
 
-  void DoPruningMultiThreadOneLoop() {
+  void DoPruningMultiThreadLoopPrunes() {
     // init data for the root node
-    spec_.InitNode(pptree_.num_nodes() - 1);
+    ref_spec_.InitNode(ref_tree_.num_nodes() - 1);
 
 #pragma omp parallel
 {
   _PRAGMA_OMP_FOR_SIMD
-  for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-    spec_.InitNode(i);
+  for(uint i = 0; i < ref_tree_.num_nodes() - 1; i++) {
+    ref_spec_.InitNode(i);
   }
 
-  for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
-    auto range_prune = pptree_.RangeIdPruneNode(i_prune);
+  for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+    auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        spec_.VisitNode(i);
-        spec_.PruneNode(i);
+        ref_spec_.VisitNode(i);
+        ref_spec_.PruneNode(i);
       }
   }
 }
   }
 
-  void DoPruningHybridNestedLoops() {
-    // init data for the root
-    spec_.InitNode(pptree_.num_nodes() - 1);
-
+  void DoPruningHybridLoopVisits() {
     uint min_size_chunk_visit = this->min_size_chunk_visit();
     uint min_size_chunk_prune = this->min_size_chunk_prune();
 #pragma omp parallel
@@ -776,25 +921,25 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-      spec_.InitNode(i);
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
     }
 
     uint i_prune = 0;
-  for(int i_level = 0; i_level < pptree_.num_levels(); i_level++) {
-    auto range_visit = pptree_.RangeIdVisitNode(i_level);
+  for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
+    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
 #pragma omp barrier
     if(range_visit.second - range_visit.first + 1 >
         num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_visit.first; i <= range_visit.second; i++) {
-          spec_.VisitNode(i);
+          ref_spec_.VisitNode(i);
         }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        spec_.VisitNode(i);
+        ref_spec_.VisitNode(i);
       }
     }
 
@@ -802,10 +947,10 @@ protected:
       // only one (master) thread executes this
       uint num_branches_done = 0;
       while(num_branches_done != range_visit.second - range_visit.first + 1) {
-        auto range_prune = pptree_.RangeIdPruneNode(i_prune);
+        auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
         _PRAGMA_OMP_SIMD
           for(uint i = range_prune.first; i <= range_prune.second; i++) {
-            spec_.PruneNode(i);
+            ref_spec_.PruneNode(i);
           }
 
           num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -816,10 +961,7 @@ protected:
 }
   }
 
-  void DoPruningHybridOneLoop() {
-    // init data for the root
-    spec_.InitNode(pptree_.num_nodes() - 1);
-
+  void DoPruningHybridLoopPrunes() {
     uint min_size_chunk_prune = this->min_size_chunk_prune();
 #pragma omp parallel
 {
@@ -831,27 +973,27 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < pptree_.num_nodes() - 1; i++) {
-      spec_.InitNode(i);
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
     }
 
 
-  for(int i_prune = 0; i_prune < pptree_.num_parallel_ranges_prune(); i_prune++) {
-      auto range_prune = pptree_.RangeIdPruneNode(i_prune);
+  for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
 #pragma omp barrier
       if (range_prune.second - range_prune.first + 1 >
             num_threads_ * min_size_chunk_prune) {
         _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.VisitNode(i);
-          spec_.PruneNode(i);
+          ref_spec_.VisitNode(i);
+          ref_spec_.PruneNode(i);
         }
       } else if (tid == 0) {
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          spec_.VisitNode(i);
-          spec_.PruneNode(i);
+          ref_spec_.VisitNode(i);
+          ref_spec_.PruneNode(i);
         }
       }
     }
@@ -866,8 +1008,12 @@ template<class Node, class Length>
 class ParallelPruningTreeFindChildren: public ParallelPruningTree<Node, Length> {
   typedef ParallelPruningTree<Node, Length> BaseType;
   typedef ParallelPruningTreeFindChildren<Node, Length> ThisType;
-  typedef ParallelPruningAlgorithm<ThisType, ThisType> PruningAlgoType;
-
+  typedef ParallelPruningAlgorithm<ThisType> PruningAlgoType;
+public:
+  typedef ThisType TreeType;
+  typedef Node NodeType;
+  typedef Length LengthType;
+protected:
   std::vector<uvec> id_child_nodes_;
 
   void InitNode(uint i) const {}
@@ -876,17 +1022,17 @@ class ParallelPruningTreeFindChildren: public ParallelPruningTree<Node, Length> 
     id_child_nodes_[this->FindIdOfParent(i) - this->num_tips()].push_back(i);
   }
 
-  friend class ParallelPruningAlgorithm<ThisType, ThisType>;
+  friend class ParallelPruningAlgorithm<ThisType>;
 public:
-  ParallelPruningTreeFindChildren(std::vector<Node> const& branch_start_nodes,
-                                  std::vector<Node> const& branch_end_nodes,
-                                  std::vector<Length> const& branch_lengths):
+  ParallelPruningTreeFindChildren(std::vector<NodeType> const& branch_start_nodes,
+                                  std::vector<NodeType> const& branch_end_nodes,
+                                  std::vector<LengthType> const& branch_lengths):
   ParallelPruningTree<Node, Length>(branch_start_nodes,
                                     branch_end_nodes,
                                     branch_lengths),
   id_child_nodes_(this->num_nodes() - this->num_tips()) {
     PruningAlgoType algo(*this, *this);
-    algo.DoPruning(PruningAlgoType::PruningMode::SINGLE_THREAD_ONE_LOOP);
+    algo.DoPruning(ParallelMode::SINGLE_THREAD_LOOP_PRUNES);
   }
 
   uvec const& FindChildren(uint i) const {
@@ -900,21 +1046,56 @@ public:
   }
 };
 
-template<class Node, class Length, class Tree, class Data, class PruningSpec>
-class ParallelPruningInstance:
-  public Tree,
-  public PruningSpec,
-  public ParallelPruningAlgorithm<Tree, PruningSpec> {
-
+template<class PruningSpec>
+class ParallelPruningUse {
 public:
-  ParallelPruningInstance(
-    std::vector<Node> const& branch_start_nodes,
-    std::vector<Node> const& branch_end_nodes,
-    std::vector<Length> const& branch_lengths,
-    Data const& data):
-  Tree(branch_start_nodes, branch_end_nodes, branch_lengths),
-  PruningSpec(*this, data),
-  ParallelPruningAlgorithm<Tree, PruningSpec>(*this, *this) {}
+  typedef PruningSpec PruningSpecType;
+  typedef typename PruningSpec::TreeType TreeType;
+  typedef typename TreeType::NodeType NodeType;
+  typedef typename TreeType::LengthType LengthType;
+  typedef typename PruningSpecType::InputDataType InputDataType;
+  typedef typename PruningSpecType::ParameterType ParameterType;
+  typedef typename PruningSpecType::NodeStateType NodeStateType;
+
+
+  typedef ParallelPruningAlgorithm<PruningSpec> ParallelPruningAlgorithmType;
+
+  ParallelPruningUse(
+    std::vector<NodeType> const& branch_start_nodes,
+    std::vector<NodeType> const& branch_end_nodes,
+    std::vector<LengthType> const& branch_lengths,
+    InputDataType const& data):
+  tree_(branch_start_nodes, branch_end_nodes, branch_lengths),
+  spec_(tree_, data),
+  algorithm_(tree_, spec_) {}
+
+  NodeStateType DoPruning(ParameterType const& par, uint mode) {
+    spec_.SetParameter(par);
+    algorithm_.DoPruning(static_cast<ParallelMode>(mode));
+    return spec_.StateAtRoot();
+  }
+
+  TreeType & tree() {
+    return tree_;
+  }
+  PruningSpec & spec() {
+    return spec_;
+  }
+  ParallelPruningAlgorithm<PruningSpecType> & algorithm() {
+    return algorithm_;
+  }
+private:
+  TreeType tree_;
+  PruningSpec spec_;
+  ParallelPruningAlgorithm<PruningSpecType> algorithm_;
+};
+
+
+// implicit interface
+template<class Tree> class PruningSpec {
+protected:
+  Tree const& ref_tree_;
+  PruningSpec(Tree const& tree): ref_tree_(tree) {}
 };
 }
 #endif // ParallelPruning_ParallelPruningAlgorithm_H_

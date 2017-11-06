@@ -1,9 +1,12 @@
 #' @useDynLib ParallelPruning
 NULL
 # loading the ParallelPruning C++ modules
+loadModule( "Tree", TRUE)
 loadModule( "ParallelPruningTree", TRUE)
-loadModule( "ParallelPruningTreeFindChildren", TRUE)
 loadModule( "ParallelPruningTreeStringNodes", TRUE)
-loadModule( "POUMM_abc", TRUE )
-loadModule( "POUMM_lnDetV_Q_1d", TRUE )
+loadModule( "ParallelPruningTreeFindChildren", TRUE)
+loadModule( "ParallelPruningAbcPOUMM", TRUE )
+loadModule( "ParallelPruningThreePointPOUMM", TRUE )
 
+loadModule( "X", TRUE)
+loadModule( "Y" , TRUE)
