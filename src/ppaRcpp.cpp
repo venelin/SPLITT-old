@@ -28,8 +28,8 @@ ppa::Tree<uint, double>* CreateTree(Rcpp::List const& tree) {
   return new ppa::Tree<uint, double>(br_0, br_1, t);
 }
 
-RCPP_MODULE(Tree) {
-  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+RCPP_MODULE(Tree1) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree1" )
   .factory<Rcpp::List const&>( &CreateTree )
   .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
   .property("num_tips", &ppa::Tree<uint, double>::num_tips )
@@ -49,8 +49,8 @@ ppa::ParallelPruningTree<uint, double>* CreateParallelPruningTree(Rcpp::List con
 }
 
 
-RCPP_MODULE(ParallelPruningTree) {
-  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree" )
+RCPP_MODULE(ParallelPruningTree1) {
+  Rcpp::class_<ppa::Tree<uint, double>> ( "Tree1" )
   .factory<Rcpp::List const&>( &CreateTree )
   .property("num_nodes", &ppa::Tree<uint, double>::num_nodes )
   .property("num_tips", &ppa::Tree<uint, double>::num_tips )
@@ -59,8 +59,8 @@ RCPP_MODULE(ParallelPruningTree) {
   .method("FindIdOfNode", &ppa::Tree<uint, double>::FindIdOfNode )
   .method("FindIdOfParent", &ppa::Tree<uint, double>::FindIdOfParent )
   ;
-  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree" )
-    .derives<ppa::Tree<uint, double>> ( "Tree" )
+  Rcpp::class_<ppa::ParallelPruningTree<uint, double>>( "ParallelPruningTree1" )
+    .derives<ppa::Tree<uint, double>> ( "Tree1" )
     .factory<Rcpp::List const&>( &CreateParallelPruningTree )
     .method("OrderNodes", &ppa::ParallelPruningTree<uint, double>::OrderNodes )
     .method("CalculateHeights", &ppa::ParallelPruningTree<uint, double>::CalculateHeights )

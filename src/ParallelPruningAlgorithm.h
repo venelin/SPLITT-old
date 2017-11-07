@@ -235,6 +235,9 @@ public:
     uvec branch_ends_temp(branch_start_nodes.size(), NA_UINT);
     uvec ending_at(num_nodes_ - 1, NA_UINT);
 
+    std::vector<typename std::map<Node, uint>::iterator> it_map_node_to_id_;
+    it_map_node_to_id_.reserve(num_nodes_);
+
     for(uint i = 0; i < branch_start_nodes.size(); ++i) {
       if(branch_start_nodes[i] == branch_end_nodes[i]) {
         std::ostringstream oss;
@@ -252,6 +255,7 @@ public:
           node_types[node_id_temp] = INTERNAL;
         }
         branch_starts_temp[i] = node_id_temp;
+        it_map_node_to_id_.push_back(it1.first);
         node_id_temp++;
       } else {
         // node encountered in a previous branch
@@ -276,6 +280,7 @@ public:
         }
         branch_ends_temp[i] = node_id_temp;
         ending_at[node_id_temp] = i;
+        it_map_node_to_id_.push_back(it2.first);
         node_id_temp++;
       } else {
         // node has been previously encountered
@@ -338,7 +343,8 @@ public:
         // Here node_types[i] == ROOT should be true
         node_ids[i] = num_nodes_ - 1;
       }
-      map_node_to_id_[map_id_to_node_[i]] = node_ids[i];
+      //map_node_to_id_[map_id_to_node_[i]] = node_ids[i];
+      it_map_node_to_id_[i]->second = node_ids[i];
     }
 
     this->map_id_to_node_ = At(map_id_to_node_, SortIndices(node_ids));
