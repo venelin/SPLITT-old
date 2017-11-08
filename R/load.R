@@ -2,9 +2,8 @@
 NULL
 # loading the ParallelPruning C++ modules
 loadModule( "Tree1", TRUE)
-loadModule( "ParallelPruningTree1", TRUE)
-loadModule( "ParallelPruningTreeStringNodes", TRUE)
-loadModule( "ParallelPruningTreeFindChildren", TRUE)
+loadModule( "PruningTree1", TRUE)
+loadModule( "PruningTreeStringNodes", TRUE)
 loadModule( "ParallelPruningAbcPOUMM", TRUE )
 loadModule( "ParallelPruningThreePointPOUMM", TRUE )
 

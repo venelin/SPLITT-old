@@ -36,7 +36,7 @@ context("PruneTree")
 set.seed(1)
 
 EPS <- 1e-8
-N <- 1000
+N <- 100
 tree <- ape::rtree(N)
 
 g0 <- 16
@@ -63,7 +63,7 @@ poummlnDetVQ <- ParallelPruning:::ParallelPruningThreePointPOUMM$new(tree, z = z
 # test correct value
 test_that("POUMM abc", expect_lt(abs(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 0) -
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 5) -
     lik_POUMM_old(pruneInfo,
                   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
     )), EPS))

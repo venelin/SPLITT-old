@@ -96,7 +96,7 @@ public:
 };
 
 typedef ParallelPruningUse<
-  ThreePointPOUMM<ParallelPruningTree<uint, double>> > ParallelPruningThreePointPOUMM;
+  ThreePointPOUMM<PruningTree<uint, double>> > ParallelPruningThreePointPOUMM;
 
 }
 

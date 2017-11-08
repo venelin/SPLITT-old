@@ -20,10 +20,10 @@
 namespace ppa {
 
 template<class Tree>
-class AbcPOUMM: public PruningSpec<Tree> {
+class AbcPOUMM: public PruningSpecification<Tree> {
 
 public:
-  typedef PruningSpec<Tree> BaseType;
+  typedef PruningSpecification<Tree> BaseType;
   typedef Tree TreeType;
   typedef vec ParameterType;
   typedef vec NodeStateType;
@@ -105,16 +105,15 @@ public:
     a[i] /= gutalphasigma2;
   }
 
-  inline void PruneNode(uint i) {
-    uint iParent = this->ref_tree_.FindIdOfParent(i);
-    a[iParent] += a[i];
-    b[iParent] += b[i];
-    c[iParent] += c[i];
+  inline void PruneNode(uint i, uint i_parent) {
+    a[i_parent] += a[i];
+    b[i_parent] += b[i];
+    c[i_parent] += c[i];
   }
 
 };
 
 typedef ParallelPruningUse<
-  AbcPOUMM<ParallelPruningTree<uint, double>> > ParallelPruningAbcPOUMM;
+  AbcPOUMM<PruningTree<uint, double>> > ParallelPruningAbcPOUMM;
 }
 #endif //ABC_POUMM_H_

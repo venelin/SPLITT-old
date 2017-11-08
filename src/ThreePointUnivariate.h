@@ -30,12 +30,12 @@ namespace ppa {
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
-template<class ParallelPruningTree>
-class ThreePointUnivariate: public PruningSpec<ParallelPruningTree> {
+template<class PruningTree>
+class ThreePointUnivariate: public PruningSpecification<PruningTree> {
 
 public:
-  typedef PruningSpec<ParallelPruningTree> BaseType;
-  typedef ParallelPruningTree TreeType;
+  typedef PruningSpecification<PruningTree> BaseType;
+  typedef PruningTree TreeType;
   typedef vec NodeStateType;
   typedef vec ParameterType;
 
@@ -45,7 +45,7 @@ public:
   vec hat_mu_Y, tilde_mu_X_prime;
   vec lnDetV, p, Q;
 
-  ThreePointUnivariate(ParallelPruningTree const& tree): BaseType(tree) {
+  ThreePointUnivariate(PruningTree const& tree): BaseType(tree) {
     this->tTransf = vec(this->ref_tree_.num_nodes() - 1);
     this->lnDetV = vec(this->ref_tree_.num_nodes(), 0);
     this->p = vec(this->ref_tree_.num_nodes(), 0);
@@ -92,13 +92,12 @@ public:
     }
   }
 
-  inline void PruneNode(uint i) {
-    uint iParent = this->ref_tree_.FindIdOfParent(i);
-    hat_mu_Y[iParent] += p[i]*hat_mu_Y[i];
-    tilde_mu_X_prime[iParent] += p[i]*tilde_mu_X_prime[i];
-    lnDetV[iParent] += lnDetV[i];
-    p[iParent] += p[i];
-    Q[iParent] += Q[i];
+  inline void PruneNode(uint i, uint i_parent) {
+    hat_mu_Y[i_parent] += p[i]*hat_mu_Y[i];
+    tilde_mu_X_prime[i_parent] += p[i]*tilde_mu_X_prime[i];
+    lnDetV[i_parent] += lnDetV[i];
+    p[i_parent] += p[i];
+    Q[i_parent] += Q[i];
   }
 };
 };
