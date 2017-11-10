@@ -10,11 +10,13 @@ template<class Tree>
 class ThreePointPOUMM: public ThreePointUnivariate<Tree> {
 
 public:
+  typedef ThreePointPOUMM<Tree> MyType;
   typedef Tree TreeType;
+  typedef ParallelPruning<MyType> PruningAlgorithmType;
   typedef ThreePointUnivariate<TreeType> BaseType;
-  typedef vec NodeStateType;
   typedef vec ParameterType;
   typedef NumericTraitData<typename TreeType::NodeType> InputDataType;
+  typedef vec NodeStateType;
 
   // univariate trait vector
   ppa::vec z;
@@ -95,7 +97,7 @@ public:
   }
 };
 
-typedef ParallelPruningUse<
+typedef PruningTask<
   ThreePointPOUMM<PruningTree<uint, double>> > ParallelPruningThreePointPOUMM;
 
 }

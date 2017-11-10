@@ -63,7 +63,7 @@ poummlnDetVQ <- ParallelPruning:::ParallelPruningThreePointPOUMM$new(tree, z = z
 # test correct value
 test_that("POUMM abc", expect_lt(abs(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 5) -
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 8) -
     lik_POUMM_old(pruneInfo,
                   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
     )), EPS))

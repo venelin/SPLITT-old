@@ -16,7 +16,7 @@
 #define NumericTraitData_H_
 
 
-#include "ParallelPruningAlgorithm.h"
+#include "ParallelPruning.h"
 namespace ppa {
 template<class NameType>
 struct NumericTraitData {

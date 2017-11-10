@@ -14,7 +14,7 @@
 #ifndef ABC_POUMM_H_
 #define ABC_POUMM_H_
 
-#include "./ParallelPruningAlgorithm.h"
+#include "./ParallelPruning.h"
 #include "./NumericTraitData.h"
 
 namespace ppa {
@@ -23,11 +23,13 @@ template<class Tree>
 class AbcPOUMM: public PruningSpecification<Tree> {
 
 public:
+  typedef AbcPOUMM<Tree> MyType;
   typedef PruningSpecification<Tree> BaseType;
   typedef Tree TreeType;
+  typedef ParallelPruning<MyType> PruningAlgorithmType;
   typedef vec ParameterType;
-  typedef vec NodeStateType;
   typedef NumericTraitData<typename TreeType::NodeType> InputDataType;
+  typedef vec NodeStateType;
 
   double alpha, theta, sigmae2, sigma2;
   vec z, se;
@@ -113,7 +115,7 @@ public:
 
 };
 
-typedef ParallelPruningUse<
+typedef PruningTask<
   AbcPOUMM<PruningTree<uint, double>> > ParallelPruningAbcPOUMM;
 }
 #endif //ABC_POUMM_H_

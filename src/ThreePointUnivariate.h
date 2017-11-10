@@ -15,7 +15,7 @@
 #ifndef ParallelPruning_ThreePointUnivariate_H_
 #define ParallelPruning_ThreePointUnivariate_H_
 
-#include "./ParallelPruningAlgorithm.h"
+#include "./ParallelPruning.h"
 #include <iostream>
 
 namespace ppa {

@@ -6,6 +6,3 @@ loadModule( "PruningTree1", TRUE)
 loadModule( "PruningTreeStringNodes", TRUE)
 loadModule( "ParallelPruningAbcPOUMM", TRUE )
 loadModule( "ParallelPruningThreePointPOUMM", TRUE )
-
-loadModule( "X", TRUE)
-loadModule( "Y" , TRUE)

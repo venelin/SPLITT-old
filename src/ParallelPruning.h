@@ -19,8 +19,8 @@
 //
 
 
-#ifndef ParallelPruning_ParallelPruningAlgorithm_H_
-#define ParallelPruning_ParallelPruningAlgorithm_H_
+#ifndef ParallelPruning_ParallelPruning_H_
+#define ParallelPruning_ParallelPruning_H_
 
 #include <algorithm>
 #include <vector>
@@ -657,10 +657,12 @@ enum ParallelMode {
   SINGLE_THREAD_LOOP_POSTORDER = 1,
   SINGLE_THREAD_LOOP_PRUNES = 2,
   MULTI_THREAD_LOOP_PRUNES = 3,
-  MULTI_THREAD_LOOP_VISITS = 4,
+  MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES = 4,
   MULTI_THREAD_VISIT_QUEUE = 5,
-  HYBRID_LOOP_PRUNES = 6,
-  HYBRID_LOOP_VISITS = 7
+  MULTI_THREAD_LOOP_VISITS = 6,
+  HYBRID_LOOP_PRUNES = 7,
+  HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES = 8,
+  HYBRID_LOOP_VISITS = 9
 };
 
 inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
@@ -669,9 +671,11 @@ inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
   case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: os<<"SINGLE_THREAD_LOOP_POSTORDER"; break;
   case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: os<<"SINGLE_THREAD_LOOP_PRUNES"; break;
   case ParallelMode::MULTI_THREAD_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_PRUNES"; break;
+  case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case ParallelMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
   case ParallelMode::MULTI_THREAD_VISIT_QUEUE: os<<"MULTI_THREAD_VISIT_QUEUE"; break;
   case ParallelMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
+  case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case ParallelMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
   };
   return os<< static_cast<int>(mode);
@@ -679,7 +683,10 @@ inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
 
 
 template<class PruningSpec>
-class ParallelPruningAlgorithm {
+class ParallelPruning {
+public:
+  typedef ParallelMode PruningModeType;
+
 protected:
   typedef typename PruningSpec::TreeType TreeType;
 
@@ -694,7 +701,21 @@ protected:
   double min_duration_tuning_ = std::numeric_limits<double>::max();
   std::vector<double> durations_tuning_;
 
-  const uvec min_sizes_chunk_ = {1, 2, 4, 8, 16, 32, 64, 128};
+  const uvec min_sizes_chunk_ = {2}; //, 4, 8, 16, 32};
+
+  const std::vector<ParallelMode> choices_mode_auto_ = {
+    ParallelMode::SINGLE_THREAD_LOOP_POSTORDER,
+    ParallelMode::SINGLE_THREAD_LOOP_PRUNES,
+    ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES,
+    ParallelMode::MULTI_THREAD_LOOP_VISITS,
+    ParallelMode::MULTI_THREAD_VISIT_QUEUE
+  };
+
+  const std::vector<ParallelMode> choices_hybrid_mode_auto_ = {
+    ParallelMode::HYBRID_LOOP_PRUNES,
+    ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES,
+    ParallelMode::HYBRID_LOOP_VISITS
+  };
 
   class VisitQueue {
     std::mutex mutex_;
@@ -825,7 +846,7 @@ protected:
   VisitQueue visit_queue_;
 public:
 
-  ParallelPruningAlgorithm(TreeType const& tree, PruningSpec& spec):
+  ParallelPruning(TreeType const& tree, PruningSpec& spec):
   ref_tree_(tree),
   ref_spec_(spec),
   num_children_(tree.num_nodes() - tree.num_tips()),
@@ -854,7 +875,8 @@ this->num_threads_ = 1;
   }
 
   bool IsTuning() const {
-    return current_step_tuning_ < min_sizes_chunk_.size() * 3;
+    return current_step_tuning_ < choices_mode_auto_.size() +
+      min_sizes_chunk_.size() * choices_hybrid_mode_auto_.size();
   }
 
   uint VersionOPENMP() const {
@@ -865,34 +887,32 @@ this->num_threads_ = 1;
 #endif
   }
 
-  uint ModeAutoAsInt() const {
-    return static_cast<int>(ModeAuto());
-  }
-
-  std::string ModeAutoAsString() const {
+  std::string ModeAutoCurrent() const {
     std::ostringstream oss;
     oss<<ModeAuto();
     return oss.str();
   }
 
-  ParallelMode ModeAuto() const {
-    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+  std::string ModeAutoStep(uint step) const {
+    std::ostringstream oss;
+    oss<<ModeAuto(step);
+    return oss.str();
+  }
 
-    if(step == 0) {
-      return ParallelMode::MULTI_THREAD_VISIT_QUEUE;
-    } else if(step < min_sizes_chunk_.size()/4) {
-      return ParallelMode::SINGLE_THREAD_LOOP_POSTORDER;
-    } else if(step < min_sizes_chunk_.size()/4 * 2) {
-      return ParallelMode::SINGLE_THREAD_LOOP_PRUNES;
-    } else if(step < min_sizes_chunk_.size()/4 * 3) {
-      return ParallelMode::MULTI_THREAD_LOOP_PRUNES;
-    } else if(step < min_sizes_chunk_.size()) {
-      return ParallelMode::MULTI_THREAD_LOOP_VISITS;
-    } else if(step < min_sizes_chunk_.size() * 2) {
-      return ParallelMode::HYBRID_LOOP_PRUNES;
+  PruningModeType ModeAuto() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    return ModeAuto(step);
+  }
+
+  PruningModeType ModeAuto(uint step) const {
+    if( step < choices_mode_auto_.size() ) {
+      return choices_mode_auto_[step];
     } else {
-      return ParallelMode::HYBRID_LOOP_VISITS;
+      uint k = choices_hybrid_mode_auto_.size();
+      uint l = step - choices_mode_auto_.size();
+      return choices_hybrid_mode_auto_[(l/k) % k];
     }
+
   }
 
   uint min_size_chunk_visit() const {
@@ -916,14 +936,15 @@ this->num_threads_ = 1;
     case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: DoPruningSingleThreadLoopPostorder(); break;
     case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: DoPruningSingleThreadLoopPrunes(); break;
     case ParallelMode::MULTI_THREAD_LOOP_PRUNES: DoPruningMultiThreadLoopPrunes(); break;
+    case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: DoPruningMultiThreadLoopVisitsThenLoopPrunes(); break;
     case ParallelMode::MULTI_THREAD_LOOP_VISITS: DoPruningMultiThreadLoopVisits(); break;
     case ParallelMode::MULTI_THREAD_VISIT_QUEUE: DoPruningMultiThreadVisitQueue(); break;
     case ParallelMode::HYBRID_LOOP_PRUNES: DoPruningHybridLoopPrunes(); break;
+    case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: DoPruningHybridLoopVisitsThenLoopPrunes(); break;
     case ParallelMode::HYBRID_LOOP_VISITS: DoPruningHybridLoopVisits(); break;
     default: DoPruningAuto();
     }
   }
-
 protected:
 
   uint IndexMinSizeChunkVisit() const {
@@ -949,6 +970,7 @@ protected:
       start = std::chrono::steady_clock::now();
       DoPruning(mode);
       end = std::chrono::steady_clock::now();
+
       duration = std::chrono::duration<double, std::milli>(end - start).count();
       durations_tuning_.push_back(duration);
       if(duration < min_duration_tuning_) {
@@ -993,7 +1015,7 @@ protected:
       }
   }
 
-  void DoPruningMultiThreadLoopVisits() {
+  void DoPruningMultiThreadLoopVisitsThenLoopPrunes() {
 
 #pragma omp parallel
 {
@@ -1029,6 +1051,44 @@ protected:
     }
   }
 }
+  }
+
+  void DoPruningMultiThreadLoopVisits() {
+#pragma omp parallel
+{
+  uint tid;
+#ifdef _OPENMP
+  tid = omp_get_thread_num();
+#else
+  tid = 0;
+#endif
+
+  _PRAGMA_OMP_FOR_SIMD
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
+    }
+
+    for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
+      auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+    _PRAGMA_OMP_FOR_SIMD
+      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        if(i < ref_tree_.num_tips()) {
+          // i is a tip (only Visit)
+          ref_spec_.VisitNode(i);
+        } else {
+          // i is internal or root
+          for(uint j: ref_tree_.FindChildren(i)) {
+            ref_spec_.PruneNode(j, i);
+          }
+          ref_spec_.VisitNode(i);
+        }
+      }
+    }
+}
+    // VisitNode not called on the root node
+    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
+      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    }
   }
 
   void DoPruningMultiThreadVisitQueue() {
@@ -1068,7 +1128,6 @@ protected:
 }
   }
 
-
   void DoPruningMultiThreadLoopPrunes() {
 
 #pragma omp parallel
@@ -1090,9 +1149,8 @@ protected:
 }
   }
 
-  void DoPruningHybridLoopVisits() {
+  void DoPruningHybridLoopVisitsThenLoopPrunes() {
     uint min_size_chunk_visit = this->min_size_chunk_visit();
-    uint min_size_chunk_prune = this->min_size_chunk_prune();
 #pragma omp parallel
 {
   uint tid;
@@ -1181,24 +1239,82 @@ protected:
     }
 }
   }
+
+  void DoPruningHybridLoopVisits() {
+    uint min_size_chunk_visit = this->min_size_chunk_visit();
+#pragma omp parallel
+{
+  uint tid;
+#ifdef _OPENMP
+  tid = omp_get_thread_num();
+#else
+  tid = 0;
+#endif
+
+  _PRAGMA_OMP_FOR_SIMD
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
+    }
+
+  for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
+    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+#pragma omp barrier
+    if(range_visit.second - range_visit.first + 1 >
+         num_threads_ * min_size_chunk_visit) {
+      _PRAGMA_OMP_FOR_SIMD
+      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        if(i < ref_tree_.num_tips()) {
+          // i is a tip (only Visit)
+          ref_spec_.VisitNode(i);
+        } else if(i < ref_tree_.num_nodes() - 1){
+          // i is internal
+          for(uint j: ref_tree_.FindChildren(i)) {
+            ref_spec_.PruneNode(j, i);
+          }
+          ref_spec_.VisitNode(i);
+        }
+      }
+    } else if(tid == 0) {
+      // only the master thread executes this
+      _PRAGMA_OMP_SIMD
+      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        if(i < ref_tree_.num_tips()) {
+          // i is a tip (only Visit)
+          ref_spec_.VisitNode(i);
+        } else if(i < ref_tree_.num_nodes() - 1){
+          // i is internal
+          for(uint j: ref_tree_.FindChildren(i)) {
+            ref_spec_.PruneNode(j, i);
+          }
+          ref_spec_.VisitNode(i);
+        }
+      }
+    }
+  }
+}
+    // VisitNode not called on the root
+    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
+      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    }
+  }
+
 };
 
 
 template<class PruningSpec>
-class ParallelPruningUse {
+class PruningTask {
 public:
   typedef PruningSpec PruningSpecType;
   typedef typename PruningSpec::TreeType TreeType;
+  typedef typename PruningSpec::PruningAlgorithmType PruningAlgorithmType;
+  typedef typename PruningAlgorithmType::PruningModeType PruningModeType;
   typedef typename TreeType::NodeType NodeType;
   typedef typename TreeType::LengthType LengthType;
   typedef typename PruningSpecType::InputDataType InputDataType;
   typedef typename PruningSpecType::ParameterType ParameterType;
   typedef typename PruningSpecType::NodeStateType NodeStateType;
 
-
-  typedef ParallelPruningAlgorithm<PruningSpec> ParallelPruningAlgorithmType;
-
-  ParallelPruningUse(
+  PruningTask(
     std::vector<NodeType> const& branch_start_nodes,
     std::vector<NodeType> const& branch_end_nodes,
     std::vector<LengthType> const& branch_lengths,
@@ -1209,7 +1325,7 @@ public:
 
   NodeStateType DoPruning(ParameterType const& par, uint mode) {
     spec_.SetParameter(par);
-    algorithm_.DoPruning(static_cast<ParallelMode>(mode));
+    algorithm_.DoPruning(static_cast<PruningModeType>(mode));
     return spec_.StateAtRoot();
   }
 
@@ -1219,13 +1335,13 @@ public:
   PruningSpec & spec() {
     return spec_;
   }
-  ParallelPruningAlgorithm<PruningSpecType> & algorithm() {
+  PruningAlgorithmType & algorithm() {
     return algorithm_;
   }
 private:
   TreeType tree_;
   PruningSpec spec_;
-  ParallelPruningAlgorithm<PruningSpecType> algorithm_;
+  PruningAlgorithmType algorithm_;
 };
 
 
@@ -1236,4 +1352,4 @@ protected:
   PruningSpecification(Tree const& tree): ref_tree_(tree) {}
 };
 }
-#endif // ParallelPruning_ParallelPruningAlgorithm_H_
+#endif // ParallelPruning_ParallelPruning_H_
