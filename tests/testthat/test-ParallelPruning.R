@@ -63,14 +63,14 @@ poummlnDetVQ <- ParallelPruning:::ParallelPruningThreePointPOUMM$new(tree, z = z
 # test correct value
 test_that("POUMM abc", expect_lt(abs(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 8) -
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21) -
     lik_POUMM_old(pruneInfo,
                   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
     )), EPS))
 
 test_that("POUMM lnDetV_Q", expect_lt(abs(
   lik_POUMM_lnDetV_Q(poummlnDetVQ,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 2) -
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21) -
     lik_POUMM_old(pruneInfo,
                   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
     )), EPS))
@@ -78,25 +78,12 @@ test_that("POUMM lnDetV_Q", expect_lt(abs(
 
 test_that("Equal parallel vs serial pruning", expect_equal(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =2),
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =21),
     lik_POUMM(poummabc,
-              g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 1)))
+              g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 10)))
 
 test_that("Equal hybrid vs serial pruning", expect_equal(
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =0),
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =31),
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 1)))
-
-
-
-microbenchmark(
-  pruneInfo <- POUMM::pruneTree(tree, z, se),
-  times = 1)
-
-
-microbenchmark(
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 1),
-  lik_POUMM_old(pruneInfo,
-                g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae))
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12)))

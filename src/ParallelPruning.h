@@ -25,13 +25,11 @@
 #include <algorithm>
 #include <vector>
 #include <math.h>
-#include <iostream>
 #include <sstream>
 #include <limits>
 #include <numeric>
 #include <chrono>
-#include <map>
-#include <stack>
+#include <unordered_map>
 #include <mutex>
 
 #ifdef _OPENMP
@@ -45,9 +43,9 @@
 
 #else // #if _OPENMP >= 201307
 
-#define _PRAGMA_OMP_FOR_SIMD _Pragma("omp for simd")
+#define _PRAGMA_OMP_FOR_SIMD _Pragma("omp for")
 #define _PRAGMA_OMP_FOR _Pragma("omp for")
-#define _PRAGMA_OMP_SIMD _Pragma("omp simd")
+#define _PRAGMA_OMP_SIMD  /*_Pragma("omp simd")*/
 
 #endif // _OPENMP >= 201307
 
@@ -178,7 +176,8 @@ protected:
   uint num_nodes_;
   uvec id_parent_;
 
-  std::map<NodeType, uint> map_node_to_id_;
+  typedef std::unordered_map<NodeType, uint> MapType;
+  MapType map_node_to_id_;
   std::vector<NodeType> map_id_to_node_;
   std::vector<LengthType> lengths_;
   std::vector<uvec> id_child_nodes_;
@@ -221,12 +220,13 @@ public:
     uint node_id_temp = 0;
 
     std::vector<NodeRole> node_types(num_nodes_, ROOT);
-    this->map_id_to_node_ = std::vector<NodeType>(num_nodes_);
+    this->map_id_to_node_.reserve(num_nodes_);
+    this->map_node_to_id_.reserve(num_nodes_);
     uvec branch_starts_temp(branch_start_nodes.size(), NA_UINT);
     uvec branch_ends_temp(branch_start_nodes.size(), NA_UINT);
     uvec ending_at(num_nodes_ - 1, NA_UINT);
 
-    std::vector<typename std::map<Node, uint>::iterator> it_map_node_to_id_;
+    std::vector<typename MapType::iterator> it_map_node_to_id_;
     it_map_node_to_id_.reserve(num_nodes_);
 
     for(uint i = 0; i < branch_start_nodes.size(); ++i) {
@@ -239,6 +239,7 @@ public:
 
       auto it1 = map_node_to_id_.insert(
         std::pair<NodeType, uint>(branch_start_nodes[i], node_id_temp));
+
       if(it1.second) {
         // node encountered for the first time and inserted in the map_node_to_id_
         map_id_to_node_[node_id_temp] = branch_start_nodes[i];
@@ -651,18 +652,18 @@ public:
   }
 };
 
-
 enum ParallelMode {
   AUTO = 0,
-  SINGLE_THREAD_LOOP_POSTORDER = 1,
-  SINGLE_THREAD_LOOP_PRUNES = 2,
-  MULTI_THREAD_LOOP_PRUNES = 3,
-  MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES = 4,
-  MULTI_THREAD_VISIT_QUEUE = 5,
-  MULTI_THREAD_LOOP_VISITS = 6,
-  HYBRID_LOOP_PRUNES = 7,
-  HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES = 8,
-  HYBRID_LOOP_VISITS = 9
+  SINGLE_THREAD_LOOP_POSTORDER = 10,
+  SINGLE_THREAD_LOOP_PRUNES = 11,
+  SINGLE_THREAD_LOOP_VISITS = 12,
+  MULTI_THREAD_LOOP_PRUNES = 21,
+  MULTI_THREAD_LOOP_VISITS = 22,
+  MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES = 23,
+  MULTI_THREAD_VISIT_QUEUE = 24,
+  HYBRID_LOOP_PRUNES = 31,
+  HYBRID_LOOP_VISITS = 32,
+  HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES = 33
 };
 
 inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
@@ -670,17 +671,17 @@ inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
   case ParallelMode::AUTO: os<<"AUTO"; break;
   case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: os<<"SINGLE_THREAD_LOOP_POSTORDER"; break;
   case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: os<<"SINGLE_THREAD_LOOP_PRUNES"; break;
+  case ParallelMode::SINGLE_THREAD_LOOP_VISITS: os<<"SINGLE_THREAD_LOOP_VISITS"; break;
   case ParallelMode::MULTI_THREAD_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_PRUNES"; break;
-  case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case ParallelMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
+  case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case ParallelMode::MULTI_THREAD_VISIT_QUEUE: os<<"MULTI_THREAD_VISIT_QUEUE"; break;
   case ParallelMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
-  case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case ParallelMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
+  case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   };
   return os<< static_cast<int>(mode);
 }
-
 
 template<class PruningSpec>
 class ParallelPruning {
@@ -701,11 +702,12 @@ protected:
   double min_duration_tuning_ = std::numeric_limits<double>::max();
   std::vector<double> durations_tuning_;
 
-  const uvec min_sizes_chunk_ = {2}; //, 4, 8, 16, 32};
+  const uvec min_sizes_chunk_ = {8}; //, 4, 8, 16, 32};
 
   const std::vector<ParallelMode> choices_mode_auto_ = {
     ParallelMode::SINGLE_THREAD_LOOP_POSTORDER,
     ParallelMode::SINGLE_THREAD_LOOP_PRUNES,
+    ParallelMode::SINGLE_THREAD_LOOP_VISITS,
     ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES,
     ParallelMode::MULTI_THREAD_LOOP_VISITS,
     ParallelMode::MULTI_THREAD_VISIT_QUEUE
@@ -713,8 +715,8 @@ protected:
 
   const std::vector<ParallelMode> choices_hybrid_mode_auto_ = {
     ParallelMode::HYBRID_LOOP_PRUNES,
-    ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES,
-    ParallelMode::HYBRID_LOOP_VISITS
+    ParallelMode::HYBRID_LOOP_VISITS,
+    ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES
   };
 
   class VisitQueue {
@@ -746,23 +748,19 @@ protected:
       std::unique_lock<std::mutex> lock(mutex_);
 
       while( IsTemporarilyEmpty() ) {
-        //std::cout<<"Thread on hold. Queue temporarily empty."<<std::endl;
         has_a_new_node_.wait(lock);
       }
 
       if(it_queue_begin < it_queue_end) {
         uint res = *it_queue_begin;
-        //std::cout<<"Next in queue:"<<res<<std::endl;
         ++it_queue_begin;
         return res;
       } else if(it_queue_begin == queue_.end()) {
-        //std::cout<<"Next in queue is the root (stop)"<<std::endl;
         // algorithm thread should stop here. all waiting threads should be notified,
         // since no other elements will be inserted in the queue.
         has_a_new_node_.notify_all();
         return ref_tree_.num_nodes();
       } else {
-        //td::cout<<"Queue temporarily empty"<<std::endl;
         // algorithm thread continues to check for new node to visit
         // should never execute this
         //std::cout<<"Error returning NA_UINT from VisitQueue."<<std::endl;
@@ -782,7 +780,6 @@ protected:
         *it_queue_end = i_parent;
         *it_queue_end++;
         has_a_new_node_.notify_one();
-        //std::cout<<"A new node for visiting inserted: "<<i_parent<<std::endl;
       }
     }
 
@@ -794,52 +791,14 @@ protected:
     it_queue_end(queue_.begin()),
     num_non_visited_children_(tree.num_nodes() - tree.num_tips()) {}
 
-
-    // Move initialization (may have compiler errors, uncomment if needed)
-    // VisitQueue(VisitQueue&& other) {
-    //   std::lock_guard<std::mutex> lock(other.mutex_);
-    //   auto other_begin = other.queue_.begin();
-    //   queue_ = std::move(other.queue_);
-    //   it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
-    //   it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
-    //   num_non_visited_children_ = std::move(other.num_non_visited_children_);
-    // }
-
     // Copy initialization (non-thread-safe)
     VisitQueue(const VisitQueue& other): ref_tree_(other.ref_tree_) {
-      //std::lock_guard<std::mutex> lock(other.mutex_);
       auto other_begin = other.queue_.begin();
       queue_ = other.queue_;
       it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
       it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
       num_non_visited_children_ = other.num_non_visited_children_;
     }
-
-    // // Move assignment (may have compiler errors, uncomment if needed)
-    // VisitQueue& operator = (VisitQueue&& other) {
-    //   std::lock(mutex_, other.mutex_);
-    //   std::lock_guard<std::mutex> self_lock(mutex_, std::adopt_lock);
-    //   std::lock_guard<std::mutex> other_lock(other.mutex_, std::adopt_lock);
-    //   auto other_begin = other.queue_.begin();
-    //   queue_ = std::move(other.queue_);
-    //   it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
-    //   it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
-    //   num_non_visited_children_ = std::move(other.num_non_visited_children_);
-    //   return *this;
-    // }
-
-    // Copy assignment (may have compiler errors, uncomment if needed)
-    // VisitQueue& operator = (const VisitQueue& other) {
-    //   std::lock(mutex_, other.mutex_);
-    //   std::lock_guard<std::mutex> self_lock(mutex_, std::adopt_lock);
-    //   std::lock_guard<std::mutex> other_lock(other.mutex_, std::adopt_lock);
-    //   auto other_begin = other.queue_.begin();
-    //   queue_ = other.queue_;
-    //   it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
-    //   it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
-    //   num_non_visited_children_ = other.num_non_visited_children_;
-    //   return *this;
-    // }
   };
 
   uvec num_children_;
@@ -935,6 +894,7 @@ this->num_threads_ = 1;
     switch(mode) {
     case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: DoPruningSingleThreadLoopPostorder(); break;
     case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: DoPruningSingleThreadLoopPrunes(); break;
+    case ParallelMode::SINGLE_THREAD_LOOP_VISITS: DoPruningSingleThreadLoopVisits(); break;
     case ParallelMode::MULTI_THREAD_LOOP_PRUNES: DoPruningMultiThreadLoopPrunes(); break;
     case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: DoPruningMultiThreadLoopVisitsThenLoopPrunes(); break;
     case ParallelMode::MULTI_THREAD_LOOP_VISITS: DoPruningMultiThreadLoopVisits(); break;
@@ -998,21 +958,49 @@ protected:
   }
 
   void DoPruningSingleThreadLoopPrunes() {
+    _PRAGMA_OMP_SIMD
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
+    }
+
+    for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_SIMD
-      for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-        ref_spec_.InitNode(i);
+      for(uint i = range_prune.first; i <= range_prune.second; i++) {
+        ref_spec_.VisitNode(i);
+        ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
       }
+    }
+  }
 
-      for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
-        auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
-
+  void DoPruningSingleThreadLoopVisits() {
     _PRAGMA_OMP_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
+      ref_spec_.InitNode(i);
+    }
+
+    for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
+      auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+      _PRAGMA_OMP_SIMD
+      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        if(i < ref_tree_.num_tips()) {
+          // i is a tip (only Visit)
           ref_spec_.VisitNode(i);
-          ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+        } else {
+          // i is internal or root
+          for(uint j: ref_tree_.FindChildren(i)) {
+            ref_spec_.PruneNode(j, i);
+          }
+          ref_spec_.VisitNode(i);
         }
       }
+    }
+
+    // VisitNode not called on the root node
+    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
+      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    }
   }
 
   void DoPruningMultiThreadLoopVisitsThenLoopPrunes() {

@@ -67,6 +67,7 @@ RCPP_MODULE(PruningTree1) {
     .factory<Rcpp::List const&>( &CreatePruningTree )
     .method("CalculateHeights", &ppa::PruningTree<uint, double>::CalculateHeights )
     .property("num_levels", &ppa::PruningTree<uint, double>::num_levels )
+    .property("num_parallel_ranges_prune", &ppa::PruningTree<uint, double>::num_parallel_ranges_prune )
     .property("ranges_id_visit", &ppa::PruningTree<uint, double>::ranges_id_visit )
     .property("ranges_id_prune", &ppa::PruningTree<uint, double>::ranges_id_prune )
   ;
