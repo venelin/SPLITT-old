@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 #include <R_ext/Rdynload.h>
-
+#include<iostream>
 #include "AbcPOUMM.h"
 #include "ThreePointPOUMM.h"
 

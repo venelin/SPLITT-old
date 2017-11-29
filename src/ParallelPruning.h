@@ -31,7 +31,6 @@
 #include <chrono>
 #include <unordered_map>
 #include <mutex>
-#include <iostream>
 
 #ifdef _OPENMP
 
@@ -198,8 +197,6 @@ public:
        std::vector<NodeType> const& branch_end_nodes,
        std::vector<LengthType> const& branch_lengths) {
 
-    std::cout<<"Tree1"<<std::endl;
-
     if(branch_start_nodes.size() != branch_end_nodes.size()) {
       std::ostringstream oss;
       oss<<"branch_start_nodes and branch_end_nodes should be the same size, but were "
@@ -208,14 +205,12 @@ public:
       throw std::length_error(oss.str());
     }
 
-    std::cout<<"Tree2"<<std::endl;
     // There should be exactly num_nodes_ = number-of-branches + 1
     // distinct nodes
     // This is because each branch can be mapped to its ending node. The +1
     // corresponds to the root node, to which no branch points.
     this->num_nodes_ = branch_start_nodes.size() + 1;
 
-    std::cout<<"Tree3"<<std::endl;
 
     // we distinguish three types of nodes:
     enum NodeRole { ROOT, INTERNAL, TIP };
@@ -238,7 +233,6 @@ public:
     std::vector<typename MapType::iterator> it_map_node_to_id_;
     it_map_node_to_id_.reserve(num_nodes_);
 
-    std::cout<<"Tree4"<<std::endl;
 
     for(uint i = 0; i < branch_start_nodes.size(); ++i) {
       if(branch_start_nodes[i] == branch_end_nodes[i]) {
@@ -248,7 +242,6 @@ public:
         throw std::logic_error(oss.str());
       }
 
-      std::cout<<"Tree5"<<std::endl;
 
       auto it1 = map_node_to_id_.insert(
         std::pair<NodeType, uint>(branch_start_nodes[i], node_id_temp));
@@ -273,54 +266,40 @@ public:
         branch_starts_temp[i] = it1.first->second;
       }
 
-      std::cout<<"Tree6"<<std::endl;
 
       auto it2 = map_node_to_id_.insert(std::pair<NodeType, uint>(branch_end_nodes[i], node_id_temp));
 
-      std::cout<<"Tree6.1"<<std::endl;
       if(it2.second) {
-        std::cout<<map_id_to_node_.size()<<" "<<node_id_temp<<" "
-        <<branch_end_nodes.size()<<" "<<i<<std::endl;
         // node encountered for the first time and inserted in the map_node_to_id
         map_id_to_node_[node_id_temp] = branch_end_nodes[i];
 
-        std::cout<<"Tree6.2"<<std::endl;
         if(node_types[node_id_temp] == ROOT) {
           // not known if the node has descendants, so we set its type to TIP.
           node_types[node_id_temp] = TIP;
         }
-        std::cout<<"Tree6.3"<<std::endl;
         branch_ends_temp[i] = node_id_temp;
         ending_at[node_id_temp] = i;
         it_map_node_to_id_.push_back(it2.first);
         node_id_temp++;
-        std::cout<<"Tree6.4"<<std::endl;
+
       } else {
-        std::cout<<"Tree6.5"<<std::endl;
         // node has been previously encountered
         if(ending_at[it2.first->second] != NA_UINT) {
-          std::cout<<"Tree6.6"<<std::endl;
           std::ostringstream oss;
           oss<<"Found at least two branches ending at the same node ("<<
             it2.first->first<<"). Check for cycles or repeated branches. ";
           throw std::logic_error(oss.str());
         } else {
-          std::cout<<"Tree6.7"<<std::endl;
           if(node_types[it2.first->second] == ROOT) {
             // the previous enounters of the node were as branch-start -> set
             // the node's type to INTERNAL, because we know for sure that it
             // has descendants.
-            std::cout<<"Tree6.8"<<std::endl;
             node_types[it2.first->second] = INTERNAL;
           }
-          std::cout<<"Tree6.9"<<std::endl;
           branch_ends_temp[i] = it2.first->second;
-          std::cout<<"Tree6.10"<<std::endl;
           ending_at[it2.first->second] = i;
-          std::cout<<"Tree6.11"<<std::endl;
         }
       }
-      std::cout<<"Tree7"<<std::endl;
     }
 
     if(map_node_to_id_.size() != num_nodes_) {
@@ -338,7 +317,6 @@ public:
       throw std::logic_error(oss.str());
     }
 
-    std::cout<<"Tree8"<<std::endl;
     this->num_tips_ = count(node_types.begin(), node_types.end(), TIP);
     if(num_tips_ == 0) {
       std::ostringstream oss;
@@ -352,7 +330,6 @@ public:
     // internal nodes are numbered from num_tips_ to num_nodes_ - 2;
     // root is numbered num_nodes_ - 1;
     std::vector<uint> node_ids(num_nodes_, NA_UINT);
-    std::cout<<"Tree9"<<std::endl;
     uint tip_no = 0, internal_no = num_tips_;
     for(uint i = 0; i < num_nodes_; i++) {
       if(node_types[i] == TIP) {
@@ -369,7 +346,6 @@ public:
       it_map_node_to_id_[i]->second = node_ids[i];
     }
 
-    std::cout<<"Tree10"<<std::endl;
 
     this->map_id_to_node_ = At(map_id_to_node_, SortIndices(node_ids));
 
@@ -384,7 +360,6 @@ public:
       throw std::invalid_argument(oss.str());
     }
 
-    std::cout<<"Tree11"<<std::endl;
 
     if(HasBranchLengths()) {
       for(uint i = 0; i < num_nodes_ - 1; i++) {
@@ -393,20 +368,15 @@ public:
         id_parent_[branch_end_i] = branch_start_i;
         lengths_[branch_end_i] = branch_lengths[i];
       }
-      std::cout<<"Tree12"<<std::endl;
     } else {
       for(uint i = 0; i < num_nodes_ - 1; i++) {
         uint branch_start_i = node_ids[branch_starts_temp[i]];
         uint branch_end_i = node_ids[branch_ends_temp[i]];
         id_parent_[branch_end_i] = branch_start_i;
       }
-
-      std::cout<<"Tree13"<<std::endl;
     }
 
-    std::cout<<"Tree14"<<std::endl;
     init_id_child_nodes();
-    std::cout<<"Tree15"<<std::endl;
   }
 
   uint num_nodes() const {
@@ -567,8 +537,6 @@ public:
   ranges_id_visit_(1, 0),
   ranges_id_prune_(1, 0) {
 
-    std::cout<<"PruningTree1"<<std::endl;
-
     // insert a fictive branch leading to the root of the tree.
     uvec branch_ends = Seq(0, this->num_nodes_ - 1);
 
@@ -586,14 +554,10 @@ public:
     uvec order_branches;
     order_branches.reserve(this->num_nodes_);
 
-    std::cout<<"PruningTree2"<<std::endl;
-
     while(tips_this_level[0] != this->num_nodes_ - 1) {
       // while the root has not become a tip itself
       ranges_id_visit_.push_back(
         ranges_id_visit_[ranges_id_visit_.size() - 1] + tips_this_level.size());
-
-      std::cout<<"PruningTree3"<<std::endl;
 
       // unique parents at this level
       uvec parents_this_level;
@@ -610,7 +574,6 @@ public:
         pos_of_parent[i_parent - this->num_tips_].push_back(i);
       }
 
-      std::cout<<"PruningTree4"<<std::endl;
       uint num_parents_remaining = parents_this_level.size();
       while( num_parents_remaining ) {
 
@@ -633,12 +596,10 @@ public:
           }
         }
 
-        std::cout<<"PruningTree5"<<std::endl;
         ranges_id_prune_.push_back(
           ranges_id_prune_[ranges_id_prune_.size() - 1] + num_parent_updates);
       }
 
-      std::cout<<"PruningTree6"<<std::endl;
       tips_this_level = tips_next_level;
     }
 
@@ -646,15 +607,11 @@ public:
       this->lengths_ = At(this->lengths_, order_branches);
     }
 
-    std::cout<<"PruningTree7"<<std::endl;
-
     uvec id_old = order_branches;
     id_old.push_back(this->num_nodes_ - 1);
 
     this->id_parent_ = Match(At(this->id_parent_, order_branches),
                              id_old);
-
-    std::cout<<"PruningTree8"<<std::endl;
 
     // update maps
     std::vector<NodeType> map_id_to_node(this->num_nodes_);
@@ -663,14 +620,9 @@ public:
       this->map_node_to_id_[map_id_to_node[i]] = i;
     }
 
-    std::cout<<"PruningTree9"<<std::endl;
-
     std::swap(this->map_id_to_node_, map_id_to_node);
 
-    std::cout<<"PruningTree10"<<std::endl;
-
     this->init_id_child_nodes();
-    std::cout<<"PruningTree11"<<std::endl;
   }
 
   uint num_levels() const {
@@ -1383,18 +1335,84 @@ public:
   PruningAlgorithmType & algorithm() {
     return algorithm_;
   }
-private:
+protected:
   TreeType tree_;
   PruningSpec spec_;
   PruningAlgorithmType algorithm_;
 };
 
 
-// implicit interface
+// The following class defines the main interface of the ParallelPruning framework.
+// The user must provide a PruningImplementationSpecification class implementing
+// this class' methods as described in the comments below. It is
+// highly recommended to inherit from this class. However, this is not at all
+// obligatory (it is not checked during compilation).
 template<class Tree> class PruningSpecification {
 protected:
+  // A reference to a Tree available for inheriting classes
   Tree const& ref_tree_;
+  // A protected constructor that initializes the tree-reference. This constructor
+  // must be called explicitly in the initalization list of inheriting class constructors.
   PruningSpecification(Tree const& tree): ref_tree_(tree) {}
+public:
+  // public typedefs. These typedefs must be provided by an implementation class.
+  // 1. typedef Tree TreeType;
+  // 2. typedef ParallelPruning<ImlementationClass> PruningAlgorithmType;
+  // 3. typedef ImplementationSpecificParameterType ParameterType;
+  // 4. typedef ImplementationSpecificInputDataType InputDataType;
+  // 5. typedef ImplementationSpecificNodeStateType NodeStateType;
+
+
+  // The following methods must be present any implementation
+  // 6. constructor: will be called by a PruningTask object; Here, it is
+  // commented out, because the InputDataType is not known.
+  // ImplementationClassName(TreeType & tree, InputDataType & input_data) :
+  //   PruningSpecification(tree) {
+  //     implementation specific initialization using the tree and the input_data.
+  // }
+
+
+  // The following methods get called by the PruningAlgorithm implementation:
+
+  // 7. Setting the model parameters prior to starting the pruning procedure on the tree.
+  // This method is called by the PruningTask.DoPruning(ParamterType const&, uint mode)
+  // method. The method declaration is commented out because ParameterType is not known
+  // and must be specified by the implementing class.
+  // void SetParameter(ParameterType const& par);
+
+  // 8. InitNode(i) is called on each node in the tree right after SetParameter and
+  // before any of the VisitNode and PruneNode has been called. There is no predefined
+  // order of the calls to InitNode and they may be executed in parallel. Therefore, only
+  // node-specific data initialization, including the length of the branch
+  // leading to node i, can take place in this method.
+  void InitNode(uint i) {}
+
+
+  // 9. VisitNode(i) is called on each tip or internal node (EXCLUDING THE ROOT),
+  // in the tree after PruneNode has been called on each descendant of i.
+  // The method is the perfect place to calculate the state of node i using the
+  // pre-calculated states of its descendants. Although, it is guaranteed
+  // that VisitNode(i) is called before VisitNode(i_parent), this method SHOULD NOT BE USED
+  // FOR ALTERING THE STATE of i_parent, because this would conflict with
+  // a concurrent execution of VisitNode on a sibling of i (see also PruneNode).
+  void VisitNode(uint i) {}
+
+  // 10. PruneNode(i, i_parent) is called on each tip or internal node (EXCLUDING THE ROOT)
+  // after VisitNode(i) and in sync with PruneNode(k, i_parent), for any sibling k of i.
+  // Thus, it is safe to use PruneNode to update the state of i_parent.
+  void PruneNode(uint i, uint i_parent) {}
+
+  // 11. NodeStateType StateAtRoot() is called after PruneNode has been called on each
+  // direct descendant of the root node. If necessary, VisitNode(i_root) can be called
+  // here, in order to calculate the final state of the root. The value returned by this
+  // function is also returned by the PruningTask.DoPruning(ParameterType const& par, uint mode)
+  // method.
 };
+
+// 12. After the class PruningSpecificationImplementation has been defined it is
+// time to specify the PruningTask template. This is not obligatory but can be very
+// convinient for creating PruningTask objects with the user specific implementation
+// and to call their DoPruning method.
+// typedef PruningTask<PruningSpecificationImplementation> > MyPruningTask;
 }
 #endif // ParallelPruning_ParallelPruning_H_

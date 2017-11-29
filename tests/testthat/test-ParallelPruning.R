@@ -87,3 +87,59 @@ test_that("Equal hybrid vs serial pruning", expect_equal(
             g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =31),
   lik_POUMM(poummabc,
             g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12)))
+
+
+library(ape)
+library(ParallelPruning)
+N <- 10000
+tree<-rtree(N)
+idx <- sample(which(tree$edge[, 2] > N), size=N/2)
+tree$edge.length[idx] <- 0
+tree2 <- di2multi(tree)
+z <- rnorm(N)
+se <- rep(0, N)
+context("PruneTree")
+set.seed(1)
+
+EPS <- 1e-8
+N <- 100
+tree <- ape::rtree(N)
+
+g0 <- 16
+alpha <- 2
+theta <- 4
+sigma <- .2
+sigmae <- .7
+
+lik_POUMM <- function(
+  poummObj,
+  g0, alpha, theta, sigma, sigmae, mode) {
+
+  abc = poummObj$DoPruning(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
+
+  POUMM:::loglik_abc_g0_g0Prior(
+    abc = abc, g0Prior = NA,
+    g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik
+}
+
+lik_POUMM_lnDetV_Q <- function(
+  poummObj,
+  g0, alpha, theta, sigma, sigmae, mode) {
+
+  res <- poummObj$DoPruning(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
+
+  -1/2*(poummObj$tree$num_tips*log(2*pi) + 2*res[3] + res[1]+res[2])
+}
+
+poummabc <- ParallelPruning:::ParallelPruningAbcPOUMM$new(tree2, z, se)
+library(microbenchmark)
+
+microbenchmark(
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 11),
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12),
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21),
+  lik_POUMM(poummabc,
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 22))
