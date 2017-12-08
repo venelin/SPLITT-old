@@ -1,21 +1,32 @@
-//   Copyright 2017 Venelin Mitov
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-//   limitations under the License.
-
+/*
+ *  ThreePointMultivariate.h
+ *  SPLiTTree
+ *
+ * Copyright 2017 Venelin Mitov
+ *
+ * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * Lineage Traversal of Trees.
+ *
+ * SPLiTTree is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * SPLiTTree is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with SPLiTTree.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * @author Venelin Mitov
+ */
 #ifndef ParallelPruning_ThreePointMultivariate_H_
 #define ParallelPruning_ThreePointMultivariate_H_
 
-#include "ParallelPruning.h"
+#include "splittree.h"
 #include <armadillo>
 
 // Calculate the |V| and quadratic quantities of the form Q=X'V^(-1)Y, for
@@ -29,11 +40,11 @@
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
-namespace ppa {
+namespace splittree {
 template<class PruningTree>
-class ThreePointMultivariate: public PruningSpecification<PruningTree> {
+class ThreePointMultivariate: public TraversalSpecification<PruningTree> {
 public:
-  typedef PruningSpecification<PruningTree> BaseType;
+  typedef TraversalSpecification<PruningTree> BaseType;
   typedef PruningTree TreeType;
   typedef vec NodeStateType;
   typedef vec ParameterType;

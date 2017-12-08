@@ -1,8 +1,8 @@
-#' @useDynLib ParallelPruning
+#' @useDynLib SPLiTTree
 NULL
-# loading the ParallelPruning C++ modules
+# loading the SPLiTTree C++ modules
 loadModule( "Tree1", TRUE)
-loadModule( "PruningTree1", TRUE)
-loadModule( "PruningTreeStringNodes", TRUE)
+loadModule( "OrderedTree1", TRUE)
+loadModule( "OrderedTreeStringNodes", TRUE)
 loadModule( "ParallelPruningAbcPOUMM", TRUE )
 loadModule( "ParallelPruningThreePointPOUMM", TRUE )

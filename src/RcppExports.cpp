@@ -6,3 +6,23 @@
 
 using namespace Rcpp;
 
+
+RcppExport SEXP _rcpp_module_boot_Tree1();
+RcppExport SEXP _rcpp_module_boot_OrderedTree1();
+RcppExport SEXP _rcpp_module_boot_OrderedTreeStringNodes();
+RcppExport SEXP _rcpp_module_boot_ParallelPruningThreePointPOUMM();
+RcppExport SEXP _rcpp_module_boot_ParallelPruningAbcPOUMM();
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_rcpp_module_boot_Tree1", (DL_FUNC) &_rcpp_module_boot_Tree1, 0},
+    {"_rcpp_module_boot_OrderedTree1", (DL_FUNC) &_rcpp_module_boot_OrderedTree1, 0},
+    {"_rcpp_module_boot_OrderedTreeStringNodes", (DL_FUNC) &_rcpp_module_boot_OrderedTreeStringNodes, 0},
+    {"_rcpp_module_boot_ParallelPruningThreePointPOUMM", (DL_FUNC) &_rcpp_module_boot_ParallelPruningThreePointPOUMM, 0},
+    {"_rcpp_module_boot_ParallelPruningAbcPOUMM", (DL_FUNC) &_rcpp_module_boot_ParallelPruningAbcPOUMM, 0},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_SPLiTTree(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

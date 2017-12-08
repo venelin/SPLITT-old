@@ -1,26 +1,31 @@
-// Copyright 2017 Venelin Mitov
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-//   limitations under the License.
+/*
+ *  splittree.h
+ *  SPLiTTree
+ *
+ * Copyright 2017 Venelin Mitov
+ *
+ * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * Lineage Traversal of Trees.
+ *
+ * SPLiTTree is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * SPLiTTree is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with SPLiTTree.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * @author Venelin Mitov
+ */
 
-// An Open-MP based implementation of a parallel pruning algorithm (postorder
-// tree traversal). To use the library, follow the steps below:
-// 0. The best way to familiarize youself with the five steps below is to learn
-// the example class POUMM_abc.
-//
-
-
-#ifndef ParallelPruning_ParallelPruning_H_
-#define ParallelPruning_ParallelPruning_H_
+#ifndef SPLiTTree_splittree_H_
+#define SPLiTTree_splittree_H_
 
 #include <algorithm>
 #include <vector>
@@ -63,7 +68,7 @@
 
 // all functions and classes defined in the namespace ppa
 // (stays for parallel pruning algorithm)
-namespace ppa{
+namespace splittree{
 
 typedef unsigned int uint;
 typedef std::vector<uint> uvec;
@@ -514,14 +519,14 @@ public:
 
 
 template<class Node, class Length>
-class PruningTree: public Tree<Node, Length> {
+class OrderedTree: public Tree<Node, Length> {
 public:
   typedef Node NodeType;
   typedef Length LengthType;
 
 private:
   // default constructor;
-  PruningTree() {}
+  OrderedTree() {}
 
 protected:
   uvec ranges_id_visit_;
@@ -529,7 +534,7 @@ protected:
 
 public:
 
-  PruningTree(
+  OrderedTree(
     std::vector<NodeType> const& branch_start_nodes,
     std::vector<NodeType> const& branch_end_nodes,
     std::vector<LengthType> const& branch_lengths):
@@ -661,7 +666,7 @@ public:
   }
 };
 
-enum ParallelMode {
+enum PostOrderMode {
   AUTO = 0,
   SINGLE_THREAD_LOOP_POSTORDER = 10,
   SINGLE_THREAD_LOOP_PRUNES = 11,
@@ -675,58 +680,32 @@ enum ParallelMode {
   HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES = 33
 };
 
-inline std::ostream& operator<< (std::ostream& os, ParallelMode mode) {
+inline std::ostream& operator<< (std::ostream& os, PostOrderMode mode) {
   switch(mode) {
-  case ParallelMode::AUTO: os<<"AUTO"; break;
-  case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: os<<"SINGLE_THREAD_LOOP_POSTORDER"; break;
-  case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: os<<"SINGLE_THREAD_LOOP_PRUNES"; break;
-  case ParallelMode::SINGLE_THREAD_LOOP_VISITS: os<<"SINGLE_THREAD_LOOP_VISITS"; break;
-  case ParallelMode::MULTI_THREAD_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_PRUNES"; break;
-  case ParallelMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
-  case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
-  case ParallelMode::MULTI_THREAD_VISIT_QUEUE: os<<"MULTI_THREAD_VISIT_QUEUE"; break;
-  case ParallelMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
-  case ParallelMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
-  case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
+  case PostOrderMode::AUTO: os<<"AUTO"; break;
+  case PostOrderMode::SINGLE_THREAD_LOOP_POSTORDER: os<<"SINGLE_THREAD_LOOP_POSTORDER"; break;
+  case PostOrderMode::SINGLE_THREAD_LOOP_PRUNES: os<<"SINGLE_THREAD_LOOP_PRUNES"; break;
+  case PostOrderMode::SINGLE_THREAD_LOOP_VISITS: os<<"SINGLE_THREAD_LOOP_VISITS"; break;
+  case PostOrderMode::MULTI_THREAD_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_PRUNES"; break;
+  case PostOrderMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
+  case PostOrderMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
+  case PostOrderMode::MULTI_THREAD_VISIT_QUEUE: os<<"MULTI_THREAD_VISIT_QUEUE"; break;
+  case PostOrderMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
+  case PostOrderMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
+  case PostOrderMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   };
   return os<< static_cast<int>(mode);
 }
 
-template<class PruningSpec>
-class ParallelPruning {
-public:
-  typedef ParallelMode PruningModeType;
-
+template<class TraversalSpecification>
+class TraversalAlgorithm {
 protected:
-  typedef typename PruningSpec::TreeType TreeType;
+  typedef typename TraversalSpecification::TreeType TreeType;
 
   TreeType const& ref_tree_;
-  PruningSpec& ref_spec_;
+  TraversalSpecification& ref_spec_;
 
   uint num_threads_;
-
-  uint current_step_tuning_ = 0;
-  uint fastest_step_tuning_ = 0;
-
-  double min_duration_tuning_ = std::numeric_limits<double>::max();
-  std::vector<double> durations_tuning_;
-
-  const uvec min_sizes_chunk_ = {8}; //, 4, 8, 16, 32};
-
-  const std::vector<ParallelMode> choices_mode_auto_ = {
-    ParallelMode::SINGLE_THREAD_LOOP_POSTORDER,
-    ParallelMode::SINGLE_THREAD_LOOP_PRUNES,
-    ParallelMode::SINGLE_THREAD_LOOP_VISITS,
-    ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES,
-    ParallelMode::MULTI_THREAD_LOOP_VISITS,
-    ParallelMode::MULTI_THREAD_VISIT_QUEUE
-  };
-
-  const std::vector<ParallelMode> choices_hybrid_mode_auto_ = {
-    ParallelMode::HYBRID_LOOP_PRUNES,
-    ParallelMode::HYBRID_LOOP_VISITS,
-    ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES
-  };
 
   class VisitQueue {
     std::mutex mutex_;
@@ -812,9 +791,9 @@ protected:
 
   uvec num_children_;
   VisitQueue visit_queue_;
-public:
 
-  ParallelPruning(TreeType const& tree, PruningSpec& spec):
+public:
+  TraversalAlgorithm(TreeType const& tree, TraversalSpecification& spec):
   ref_tree_(tree),
   ref_spec_(spec),
   num_children_(tree.num_nodes() - tree.num_tips()),
@@ -842,11 +821,6 @@ this->num_threads_ = 1;
     return num_threads_;
   }
 
-  bool IsTuning() const {
-    return current_step_tuning_ < choices_mode_auto_.size() +
-      min_sizes_chunk_.size() * choices_hybrid_mode_auto_.size();
-  }
-
   uint VersionOPENMP() const {
 #ifdef _OPENMP
     return _OPENMP;
@@ -854,6 +828,64 @@ this->num_threads_ = 1;
     return 0;
 #endif
   }
+};
+
+template<class TraversalSpecification>
+class PostOrderTraversal: public TraversalAlgorithm<TraversalSpecification> {
+
+  typedef TraversalAlgorithm<TraversalSpecification> ParentType;
+
+public:
+  typedef PostOrderMode ModeType;
+
+  PostOrderTraversal(typename TraversalSpecification::TreeType const& tree,
+                     TraversalSpecification& spec): ParentType(tree, spec) { }
+
+  void TraverseTree(ModeType mode) {
+    switch(mode) {
+    case ModeType::SINGLE_THREAD_LOOP_POSTORDER: TraverseTreeSingleThreadLoopPostorder(); break;
+    case ModeType::SINGLE_THREAD_LOOP_PRUNES: TraverseTreeSingleThreadLoopPrunes(); break;
+    case ModeType::SINGLE_THREAD_LOOP_VISITS: TraverseTreeSingleThreadLoopVisits(); break;
+    case ModeType::MULTI_THREAD_LOOP_PRUNES: TraverseTreeMultiThreadLoopPrunes(); break;
+    case ModeType::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: TraverseTreeMultiThreadLoopVisitsThenLoopPrunes(); break;
+    case ModeType::MULTI_THREAD_LOOP_VISITS: TraverseTreeMultiThreadLoopVisits(); break;
+    case ModeType::MULTI_THREAD_VISIT_QUEUE: TraverseTreeMultiThreadVisitQueue(); break;
+    case ModeType::HYBRID_LOOP_PRUNES: TraverseTreeHybridLoopPrunes(); break;
+    case ModeType::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: TraverseTreeHybridLoopVisitsThenLoopPrunes(); break;
+    case ModeType::HYBRID_LOOP_VISITS: TraverseTreeHybridLoopVisits(); break;
+    default: TraverseTreeAuto();
+    }
+  }
+protected:
+  uint current_step_tuning_ = 0;
+  uint fastest_step_tuning_ = 0;
+
+  double min_duration_tuning_ = std::numeric_limits<double>::max();
+  std::vector<double> durations_tuning_;
+
+  const uvec min_sizes_chunk_ = {8}; //, 4, 8, 16, 32};
+
+  const std::vector<ModeType> choices_mode_auto_ = {
+    ModeType::SINGLE_THREAD_LOOP_POSTORDER,
+    ModeType::SINGLE_THREAD_LOOP_PRUNES,
+    ModeType::SINGLE_THREAD_LOOP_VISITS,
+    ModeType::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES,
+    ModeType::MULTI_THREAD_LOOP_VISITS,
+    ModeType::MULTI_THREAD_VISIT_QUEUE
+  };
+
+  const std::vector<ModeType> choices_hybrid_mode_auto_ = {
+    ModeType::HYBRID_LOOP_PRUNES,
+    ModeType::HYBRID_LOOP_VISITS,
+    ModeType::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES
+  };
+
+public:
+  bool IsTuning() const {
+    return current_step_tuning_ < choices_mode_auto_.size() +
+      min_sizes_chunk_.size() * choices_hybrid_mode_auto_.size();
+  }
+
 
   std::string ModeAutoCurrent() const {
     std::ostringstream oss;
@@ -867,12 +899,12 @@ this->num_threads_ = 1;
     return oss.str();
   }
 
-  PruningModeType ModeAuto() const {
+  ModeType ModeAuto() const {
     auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
     return ModeAuto(step);
   }
 
-  PruningModeType ModeAuto(uint step) const {
+  ModeType ModeAuto(uint step) const {
     if( step < choices_mode_auto_.size() ) {
       return choices_mode_auto_[step];
     } else {
@@ -881,6 +913,17 @@ this->num_threads_ = 1;
       return choices_hybrid_mode_auto_[(l/k) % k];
     }
 
+  }
+
+  uint IndexMinSizeChunkVisit() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    //return (step / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
+    return step % min_sizes_chunk_.size();
+  }
+
+  uint IndexMinSizeChunkPrune() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    return step % min_sizes_chunk_.size();
   }
 
   uint min_size_chunk_visit() const {
@@ -899,45 +942,18 @@ this->num_threads_ = 1;
     return durations_tuning_;
   }
 
-  void DoPruning(ParallelMode mode) {
-    switch(mode) {
-    case ParallelMode::SINGLE_THREAD_LOOP_POSTORDER: DoPruningSingleThreadLoopPostorder(); break;
-    case ParallelMode::SINGLE_THREAD_LOOP_PRUNES: DoPruningSingleThreadLoopPrunes(); break;
-    case ParallelMode::SINGLE_THREAD_LOOP_VISITS: DoPruningSingleThreadLoopVisits(); break;
-    case ParallelMode::MULTI_THREAD_LOOP_PRUNES: DoPruningMultiThreadLoopPrunes(); break;
-    case ParallelMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: DoPruningMultiThreadLoopVisitsThenLoopPrunes(); break;
-    case ParallelMode::MULTI_THREAD_LOOP_VISITS: DoPruningMultiThreadLoopVisits(); break;
-    case ParallelMode::MULTI_THREAD_VISIT_QUEUE: DoPruningMultiThreadVisitQueue(); break;
-    case ParallelMode::HYBRID_LOOP_PRUNES: DoPruningHybridLoopPrunes(); break;
-    case ParallelMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: DoPruningHybridLoopVisitsThenLoopPrunes(); break;
-    case ParallelMode::HYBRID_LOOP_VISITS: DoPruningHybridLoopVisits(); break;
-    default: DoPruningAuto();
-    }
-  }
 protected:
-
-  uint IndexMinSizeChunkVisit() const {
-    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    //return (step / min_sizes_chunk_.size()) % min_sizes_chunk_.size();
-    return step % min_sizes_chunk_.size();
-  }
-
-  uint IndexMinSizeChunkPrune() const {
-    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
-    return step % min_sizes_chunk_.size();
-  }
-
-  void DoPruningAuto() {
+  void TraverseTreeAuto() {
 
     std::chrono::steady_clock::time_point start, end;
     double duration;
 
-    ParallelMode mode = ModeAuto();
+    ModeType mode = ModeAuto();
 
     if( IsTuning() ) {
 
       start = std::chrono::steady_clock::now();
-      DoPruning(mode);
+      TraverseTree(mode);
       end = std::chrono::steady_clock::now();
 
       duration = std::chrono::duration<double, std::milli>(end - start).count();
@@ -949,98 +965,98 @@ protected:
       current_step_tuning_++;
 
     } else {
-      DoPruning(mode);
-    }
-
-  }
-
-  void DoPruningSingleThreadLoopPostorder() {
-    _PRAGMA_OMP_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
-    }
-
-    for(uint i = 0; i < ref_tree_.num_nodes() - 1; i++) {
-      ref_spec_.VisitNode(i);
-      ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+      TraverseTree(mode);
     }
   }
-
-  void DoPruningSingleThreadLoopPrunes() {
+  void TraverseTreeSingleThreadLoopPostorder() {
     _PRAGMA_OMP_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
-      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes() - 1; i++) {
+      ParentType::ref_spec_.VisitNode(i);
+      ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+    }
+  }
+
+  void TraverseTreeSingleThreadLoopPrunes() {
+    _PRAGMA_OMP_SIMD
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
+    }
+
+    for(int i_prune = 0;
+        i_prune < ParentType::ref_tree_.num_parallel_ranges_prune();
+        i_prune++) {
+      auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_SIMD
       for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        ref_spec_.VisitNode(i);
-        ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+        ParentType::ref_spec_.VisitNode(i);
+        ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
       }
     }
   }
 
-  void DoPruningSingleThreadLoopVisits() {
+  void TraverseTreeSingleThreadLoopVisits() {
     _PRAGMA_OMP_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
-      auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+    for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        if(i < ref_tree_.num_tips()) {
+        if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         } else {
-          // i is internal or root
-          for(uint j: ref_tree_.FindChildren(i)) {
-            ref_spec_.PruneNode(j, i);
+          // i is internal
+          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+            ParentType::ref_spec_.PruneNode(j, i);
           }
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         }
       }
     }
 
     // VisitNode not called on the root node
-    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
-      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    for(uint j: ParentType::ref_tree_.FindChildren(ParentType::ref_tree_.num_nodes() - 1)) {
+      ParentType::ref_spec_.PruneNode(j, ParentType::ref_tree_.num_nodes() - 1);
     }
   }
 
-  void DoPruningMultiThreadLoopVisitsThenLoopPrunes() {
+  void TraverseTreeMultiThreadLoopVisitsThenLoopPrunes() {
 
 #pragma omp parallel
 {
   _PRAGMA_OMP_FOR_SIMD
-  for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-    ref_spec_.InitNode(i);
+  for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+    ParentType::ref_spec_.InitNode(i);
   }
 
   uint i_prune = 0;
-  for(uint i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
+  for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
 
 #pragma omp barrier
 
-    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+    auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        ref_spec_.VisitNode(i);
+        ParentType::ref_spec_.VisitNode(i);
       }
 
       uint num_branches_done = 0;
 
     while(num_branches_done != range_visit.second - range_visit.first + 1) {
 #pragma omp barrier
-      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
+      auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
 
         num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -1050,7 +1066,7 @@ protected:
 }
   }
 
-  void DoPruningMultiThreadLoopVisits() {
+  void TraverseTreeMultiThreadLoopVisits() {
 #pragma omp parallel
 {
   uint tid;
@@ -1061,63 +1077,63 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
-      auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+    for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        if(i < ref_tree_.num_tips()) {
+        if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         } else {
-          // i is internal or root
-          for(uint j: ref_tree_.FindChildren(i)) {
-            ref_spec_.PruneNode(j, i);
+          // i is internal
+          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+            ParentType::ref_spec_.PruneNode(j, i);
           }
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         }
       }
     }
 }
     // VisitNode not called on the root node
-    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
-      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    for(uint j: ParentType::ref_tree_.FindChildren(ParentType::ref_tree_.num_nodes() - 1)) {
+      ParentType::ref_spec_.PruneNode(j, ParentType::ref_tree_.num_nodes() - 1);
     }
   }
 
-  void DoPruningMultiThreadVisitQueue() {
-    visit_queue_.Init(num_children_);
+  void TraverseTreeMultiThreadVisitQueue() {
+    ParentType::visit_queue_.Init(ParentType::num_children_);
 #pragma omp parallel
 {
   while(true) {
-    uint i = visit_queue_.NextInQueue();
+    uint i = ParentType::visit_queue_.NextInQueue();
     if(i == NA_UINT) {
       continue;
-    } else if(i == ref_tree_.num_nodes()) {
+    } else if(i == ParentType::ref_tree_.num_nodes()) {
       break;
-    } else if(i < ref_tree_.num_tips()) {
+    } else if(i < ParentType::ref_tree_.num_tips()) {
       // i is a tip (only Visit)
-      ref_spec_.InitNode(i);
-      ref_spec_.VisitNode(i);
-      visit_queue_.RemoveVisitedNode(i);
-    } else if(i < ref_tree_.num_nodes() - 1){
+      ParentType::ref_spec_.InitNode(i);
+      ParentType::ref_spec_.VisitNode(i);
+      ParentType::visit_queue_.RemoveVisitedNode(i);
+    } else if(i < ParentType::ref_tree_.num_nodes() - 1){
       // i is internal
-      ref_spec_.InitNode(i);
-      uvec const& children = ref_tree_.FindChildren(i);
+      ParentType::ref_spec_.InitNode(i);
+      uvec const& children = ParentType::ref_tree_.FindChildren(i);
       for(uint j: children) {
-        ref_spec_.PruneNode(j, i);
+        ParentType::ref_spec_.PruneNode(j, i);
       }
-      ref_spec_.VisitNode(i);
-      visit_queue_.RemoveVisitedNode(i);
+      ParentType::ref_spec_.VisitNode(i);
+      ParentType::visit_queue_.RemoveVisitedNode(i);
     } else {
       // i is the root
-      ref_spec_.InitNode(i);
-      uvec const& children = ref_tree_.FindChildren(i);
+      ParentType::ref_spec_.InitNode(i);
+      uvec const& children = ParentType::ref_tree_.FindChildren(i);
       for(uint j: children) {
-        ref_spec_.PruneNode(j, i);
+        ParentType::ref_spec_.PruneNode(j, i);
       }
       // don't visit the root
     }
@@ -1125,28 +1141,28 @@ protected:
 }
   }
 
-  void DoPruningMultiThreadLoopPrunes() {
+  void TraverseTreeMultiThreadLoopPrunes() {
 
 #pragma omp parallel
 {
   _PRAGMA_OMP_FOR_SIMD
-  for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-    ref_spec_.InitNode(i);
+  for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+    ParentType::ref_spec_.InitNode(i);
   }
 
-  for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
-    auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
+  for(int i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+    auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_prune.first; i <= range_prune.second; i++) {
-        ref_spec_.VisitNode(i);
-        ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+        ParentType::ref_spec_.VisitNode(i);
+        ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
       }
   }
 }
   }
 
-  void DoPruningHybridLoopVisitsThenLoopPrunes() {
+  void TraverseTreeHybridLoopVisitsThenLoopPrunes() {
     uint min_size_chunk_visit = this->min_size_chunk_visit();
 #pragma omp parallel
 {
@@ -1158,25 +1174,25 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
     uint i_prune = 0;
-  for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
-    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+  for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+    auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
 #pragma omp barrier
     if(range_visit.second - range_visit.first + 1 >
-        num_threads_ * min_size_chunk_visit) {
+         ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_visit.first; i <= range_visit.second; i++) {
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        ref_spec_.VisitNode(i);
+        ParentType::ref_spec_.VisitNode(i);
       }
     }
 
@@ -1184,10 +1200,10 @@ protected:
       // only one (master) thread executes this
       uint num_branches_done = 0;
       while(num_branches_done != range_visit.second - range_visit.first + 1) {
-        auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
+        auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
         _PRAGMA_OMP_SIMD
           for(uint i = range_prune.first; i <= range_prune.second; i++) {
-            ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+            ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
           }
 
           num_branches_done +=  range_prune.second - range_prune.first + 1;
@@ -1198,7 +1214,7 @@ protected:
 }
   }
 
-  void DoPruningHybridLoopPrunes() {
+  void TraverseTreeHybridLoopPrunes() {
     uint min_size_chunk_prune = this->min_size_chunk_prune();
 #pragma omp parallel
 {
@@ -1210,34 +1226,34 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
 
-  for(int i_prune = 0; i_prune < ref_tree_.num_parallel_ranges_prune(); i_prune++) {
-      auto range_prune = ref_tree_.RangeIdPruneNode(i_prune);
+  for(int i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+      auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 #pragma omp barrier
       if (range_prune.second - range_prune.first + 1 >
-            num_threads_ * min_size_chunk_prune) {
+            ParentType::num_threads_ * min_size_chunk_prune) {
         _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          ref_spec_.VisitNode(i);
-          ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+          ParentType::ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
       } else if (tid == 0) {
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
         for(uint i = range_prune.first; i <= range_prune.second; i++) {
-          ref_spec_.VisitNode(i);
-          ref_spec_.PruneNode(i, ref_tree_.FindIdOfParent(i));
+          ParentType::ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
       }
     }
 }
   }
 
-  void DoPruningHybridLoopVisits() {
+  void TraverseTreeHybridLoopVisits() {
     uint min_size_chunk_visit = this->min_size_chunk_visit();
 #pragma omp parallel
 {
@@ -1249,69 +1265,242 @@ protected:
 #endif
 
   _PRAGMA_OMP_FOR_SIMD
-    for(uint i = 0; i < ref_tree_.num_nodes(); i++) {
-      ref_spec_.InitNode(i);
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
     }
 
-  for(int i_level = 0; i_level < ref_tree_.num_levels(); i_level++) {
-    auto range_visit = ref_tree_.RangeIdVisitNode(i_level);
+  for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+    auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
 #pragma omp barrier
     if(range_visit.second - range_visit.first + 1 >
-         num_threads_ * min_size_chunk_visit) {
+         ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        if(i < ref_tree_.num_tips()) {
+        if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
-          ref_spec_.VisitNode(i);
-        } else if(i < ref_tree_.num_nodes() - 1){
+          ParentType::ref_spec_.VisitNode(i);
+        } else if(i < ParentType::ref_tree_.num_nodes() - 1){
           // i is internal
-          for(uint j: ref_tree_.FindChildren(i)) {
-            ref_spec_.PruneNode(j, i);
+          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+            ParentType::ref_spec_.PruneNode(j, i);
           }
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         }
       }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit.first; i <= range_visit.second; i++) {
-        if(i < ref_tree_.num_tips()) {
+        if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
-          ref_spec_.VisitNode(i);
-        } else if(i < ref_tree_.num_nodes() - 1){
+          ParentType::ref_spec_.VisitNode(i);
+        } else if(i < ParentType::ref_tree_.num_nodes() - 1){
           // i is internal
-          for(uint j: ref_tree_.FindChildren(i)) {
-            ref_spec_.PruneNode(j, i);
+          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+            ParentType::ref_spec_.PruneNode(j, i);
           }
-          ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.VisitNode(i);
         }
       }
     }
   }
 }
     // VisitNode not called on the root
-    for(uint j: ref_tree_.FindChildren(ref_tree_.num_nodes() - 1)) {
-      ref_spec_.PruneNode(j, ref_tree_.num_nodes() - 1);
+    for(uint j: ParentType::ref_tree_.FindChildren(ParentType::ref_tree_.num_nodes() - 1)) {
+      ParentType::ref_spec_.PruneNode(j, ParentType::ref_tree_.num_nodes() - 1);
     }
   }
 
 };
 
 
-template<class PruningSpec>
-class PruningTask {
+enum PreOrderMode {
+  PREORDER_AUTO = 0,
+  PREORDER_SINGLE_THREAD_LOOP_PREORDER = 10,
+  PREORDER_SINGLE_THREAD_LOOP_VISITS = 12,
+  PREORDER_MULTI_THREAD_LOOP_VISITS = 22
+};
+
+inline std::ostream& operator<< (std::ostream& os, PreOrderMode mode) {
+  switch(mode) {
+  case PreOrderMode::PREORDER_AUTO: os<<"PREORDER_AUTO"; break;
+  case PreOrderMode::PREORDER_SINGLE_THREAD_LOOP_PREORDER: os<<"PREORDER_SINGLE_THREAD_LOOP_PREORDER"; break;
+  case PreOrderMode::PREORDER_SINGLE_THREAD_LOOP_VISITS: os<<"PREORDER_SINGLE_THREAD_LOOP_VISITS"; break;
+  case PreOrderMode::PREORDER_MULTI_THREAD_LOOP_VISITS: os<<"PREORDER_MULTI_THREAD_LOOP_VISITS"; break;
+  };
+  return os<< static_cast<int>(mode);
+}
+
+template<class TraversalSpecification>
+class PreOrderTraversal: public TraversalAlgorithm<TraversalSpecification> {
+
+  typedef TraversalAlgorithm<TraversalSpecification> ParentType;
+
 public:
-  typedef PruningSpec PruningSpecType;
-  typedef typename PruningSpec::TreeType TreeType;
-  typedef typename PruningSpec::PruningAlgorithmType PruningAlgorithmType;
-  typedef typename PruningAlgorithmType::PruningModeType PruningModeType;
+  typedef PreOrderMode ModeType;
+
+  PreOrderTraversal(typename TraversalSpecification::TreeType const& tree,
+                     TraversalSpecification& spec): ParentType(tree, spec) { }
+
+  void TraverseTree(ModeType mode) {
+    switch(mode) {
+    case ModeType::PREORDER_SINGLE_THREAD_LOOP_PREORDER: TraverseTreeSingleThreadLoopPreorder(); break;
+    case ModeType::PREORDER_SINGLE_THREAD_LOOP_VISITS: TraverseTreeSingleThreadLoopVisits(); break;
+    case ModeType::PREORDER_MULTI_THREAD_LOOP_VISITS: TraverseTreeMultiThreadLoopVisits(); break;
+    default: TraverseTreeAuto();
+    }
+  }
+protected:
+  uint current_step_tuning_ = 0;
+  uint fastest_step_tuning_ = 0;
+
+  double min_duration_tuning_ = std::numeric_limits<double>::max();
+  std::vector<double> durations_tuning_;
+
+  const uvec min_sizes_chunk_ = {8}; //, 4, 8, 16, 32};
+
+  const std::vector<ModeType> choices_mode_auto_ = {
+    ModeType::PREORDER_SINGLE_THREAD_LOOP_PREORDER,
+    ModeType::PREORDER_SINGLE_THREAD_LOOP_VISITS,
+    ModeType::PREORDER_MULTI_THREAD_LOOP_VISITS
+  };
+
+public:
+  bool IsTuning() const {
+    return current_step_tuning_ < choices_mode_auto_.size();
+  }
+
+
+  std::string ModeAutoCurrent() const {
+    std::ostringstream oss;
+    oss<<ModeAuto();
+    return oss.str();
+  }
+
+  std::string ModeAutoStep(uint step) const {
+    std::ostringstream oss;
+    oss<<ModeAuto(step);
+    return oss.str();
+  }
+
+  ModeType ModeAuto() const {
+    auto step = IsTuning()? current_step_tuning_ : fastest_step_tuning_;
+    return ModeAuto(step);
+  }
+
+  ModeType ModeAuto(uint step) const {
+    return choices_mode_auto_[step%choices_mode_auto_.size()];
+  }
+
+  uint fastest_step_tuning() const {
+    return fastest_step_tuning_;
+  }
+
+  std::vector<double>  durations_tuning() const {
+    return durations_tuning_;
+  }
+
+protected:
+  void TraverseTreeAuto() {
+
+    std::chrono::steady_clock::time_point start, end;
+    double duration;
+
+    ModeType mode = ModeAuto();
+
+    if( IsTuning() ) {
+
+      start = std::chrono::steady_clock::now();
+      TraverseTree(mode);
+      end = std::chrono::steady_clock::now();
+
+      duration = std::chrono::duration<double, std::milli>(end - start).count();
+      durations_tuning_.push_back(duration);
+      if(duration < min_duration_tuning_) {
+        min_duration_tuning_ = duration;
+        fastest_step_tuning_ = current_step_tuning_;
+      }
+      current_step_tuning_++;
+
+    } else {
+      TraverseTree(mode);
+    }
+  }
+
+  void TraverseTreeSingleThreadLoopPreorder() {
+    _PRAGMA_OMP_SIMD
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
+    }
+
+    for(uint i = ParentType::ref_tree_.num_nodes() - 1; ; i--) {
+      ParentType::ref_spec_.VisitNode(i);
+      if(i == 0) {
+        break;
+      }
+    }
+  }
+
+  void TraverseTreeSingleThreadLoopVisits() {
+    _PRAGMA_OMP_SIMD
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
+    }
+
+    ParentType::ref_spec_.VisitNode(ParentType::ref_tree_.num_nodes() - 1);
+
+    for(int i_level = ParentType::ref_tree_.num_levels() - 1; i_level >= 0; i_level--) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
+      _PRAGMA_OMP_SIMD
+        for(uint i = range_visit.first; i <= range_visit.second; i++) {
+          ParentType::ref_spec_.VisitNode(i);
+        }
+    }
+  }
+
+  void TraverseTreeMultiThreadLoopVisits() {
+#pragma omp parallel
+{
+  uint tid;
+#ifdef _OPENMP
+  tid = omp_get_thread_num();
+#else
+  tid = 0;
+#endif
+
+  _PRAGMA_OMP_FOR_SIMD
+    for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+      ParentType::ref_spec_.InitNode(i);
+    }
+
+    ParentType::ref_spec_.VisitNode(ParentType::ref_tree_.num_nodes() - 1);
+
+    for(int i_level = ParentType::ref_tree_.num_levels() - 1; i_level >= 0; i_level--) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
+      _PRAGMA_OMP_FOR_SIMD
+        for(uint i = range_visit.first; i <= range_visit.second; i++) {
+          ParentType::ref_spec_.VisitNode(i);
+        }
+    }
+}
+  }
+
+};
+
+template<class TraversalSpecification>
+class TraversalTask {
+public:
+  typedef TraversalSpecification TraversalSpecificationType;
+  typedef typename TraversalSpecification::TreeType TreeType;
+  typedef typename TraversalSpecification::AlgorithmType AlgorithmType;
+  typedef typename AlgorithmType::ModeType ModeType;
   typedef typename TreeType::NodeType NodeType;
   typedef typename TreeType::LengthType LengthType;
-  typedef typename PruningSpecType::InputDataType InputDataType;
-  typedef typename PruningSpecType::ParameterType ParameterType;
-  typedef typename PruningSpecType::NodeStateType NodeStateType;
+  typedef typename TraversalSpecificationType::InputDataType InputDataType;
+  typedef typename TraversalSpecificationType::ParameterType ParameterType;
+  typedef typename TraversalSpecificationType::NodeStateType NodeStateType;
 
-  PruningTask(
+  TraversalTask(
     std::vector<NodeType> const& branch_start_nodes,
     std::vector<NodeType> const& branch_end_nodes,
     std::vector<LengthType> const& branch_lengths,
@@ -1320,62 +1509,62 @@ public:
   spec_(tree_, data),
   algorithm_(tree_, spec_) {}
 
-  NodeStateType DoPruning(ParameterType const& par, uint mode) {
+  NodeStateType TraverseTree(ParameterType const& par, uint mode) {
     spec_.SetParameter(par);
-    algorithm_.DoPruning(static_cast<PruningModeType>(mode));
+    algorithm_.TraverseTree(static_cast<ModeType>(mode));
     return spec_.StateAtRoot();
   }
 
   TreeType & tree() {
     return tree_;
   }
-  PruningSpec & spec() {
+  TraversalSpecification & spec() {
     return spec_;
   }
-  PruningAlgorithmType & algorithm() {
+  AlgorithmType & algorithm() {
     return algorithm_;
   }
 protected:
   TreeType tree_;
-  PruningSpec spec_;
-  PruningAlgorithmType algorithm_;
+  TraversalSpecification spec_;
+  AlgorithmType algorithm_;
 };
 
 
-// The following class defines the main interface of the ParallelPruning framework.
-// The user must provide a PruningImplementationSpecification class implementing
+// The following class defines the main interface of the SPLiTTree library.
+// The user must provide a TraversalSpecificationImplementation class implementing
 // this class' methods as described in the comments below. It is
 // highly recommended to inherit from this class. However, this is not at all
 // obligatory (it is not checked during compilation).
-template<class Tree> class PruningSpecification {
+template<class Tree> class TraversalSpecification {
 protected:
   // A reference to a Tree available for inheriting classes
   Tree const& ref_tree_;
   // A protected constructor that initializes the tree-reference. This constructor
   // must be called explicitly in the initalization list of inheriting class constructors.
-  PruningSpecification(Tree const& tree): ref_tree_(tree) {}
+  TraversalSpecification(Tree const& tree): ref_tree_(tree) {}
 public:
   // public typedefs. These typedefs must be provided by an implementation class.
   // 1. typedef Tree TreeType;
-  // 2. typedef ParallelPruning<ImlementationClass> PruningAlgorithmType;
+  // 2. typedef PostOrderTraversal<ImlementationClass> AlgorithmType;
   // 3. typedef ImplementationSpecificParameterType ParameterType;
   // 4. typedef ImplementationSpecificInputDataType InputDataType;
   // 5. typedef ImplementationSpecificNodeStateType NodeStateType;
 
 
   // The following methods must be present any implementation
-  // 6. constructor: will be called by a PruningTask object; Here, it is
+  // 6. constructor: will be called by a TraversalTask object; Here, it is
   // commented out, because the InputDataType is not known.
   // ImplementationClassName(TreeType & tree, InputDataType & input_data) :
-  //   PruningSpecification(tree) {
+  //   TraversalSpecification(tree) {
   //     implementation specific initialization using the tree and the input_data.
   // }
 
 
-  // The following methods get called by the PruningAlgorithm implementation:
+  // The following methods get called by the TraversalAlgorithm implementation:
 
   // 7. Setting the model parameters prior to starting the pruning procedure on the tree.
-  // This method is called by the PruningTask.DoPruning(ParamterType const&, uint mode)
+  // This method is called by the TraversalTask.TraverseTree(ParamterType const&, uint mode)
   // method. The method declaration is commented out because ParameterType is not known
   // and must be specified by the implementing class.
   // void SetParameter(ParameterType const& par);
@@ -1405,14 +1594,14 @@ public:
   // 11. NodeStateType StateAtRoot() is called after PruneNode has been called on each
   // direct descendant of the root node. If necessary, VisitNode(i_root) can be called
   // here, in order to calculate the final state of the root. The value returned by this
-  // function is also returned by the PruningTask.DoPruning(ParameterType const& par, uint mode)
+  // function is also returned by the TraversalTask.TraverseTree(ParameterType const& par, uint mode)
   // method.
 };
 
-// 12. After the class PruningSpecificationImplementation has been defined it is
-// time to specify the PruningTask template. This is not obligatory but can be very
-// convinient for creating PruningTask objects with the user specific implementation
-// and to call their DoPruning method.
-// typedef PruningTask<PruningSpecificationImplementation> > MyPruningTask;
+// 12. After the class TraversalSpecificationImplementation has been defined it is
+// time to specify the TraversalTask template. This is not obligatory but can be very
+// convinient for creating TraversalTask objects with the user specific implementation
+// and to call their TraverseTree method.
+// typedef TraversalTask<TraversalSpecificationImplementation> > MyTraversalTask;
 }
-#endif // ParallelPruning_ParallelPruning_H_
+#endif // SPLiTTree_splittree_H_

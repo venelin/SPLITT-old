@@ -1,10 +1,36 @@
+/*
+ *  ThreePointPOUMM.h
+ *  SPLiTTree
+ *
+ * Copyright 2017 Venelin Mitov
+ *
+ * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * Lineage Traversal of Trees.
+ *
+ * SPLiTTree is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * SPLiTTree is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with SPLiTTree.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * @author Venelin Mitov
+ */
+
 #ifndef ThreePointPOUMM_H_
 #define ThreePointPOUMM_H_
 
 #include "ThreePointUnivariate.h"
 #include "NumericTraitData.h"
 
-namespace ppa {
+namespace splittree {
 
 template<class Tree>
 class ThreePointPOUMM: public ThreePointUnivariate<Tree> {
@@ -12,15 +38,15 @@ class ThreePointPOUMM: public ThreePointUnivariate<Tree> {
 public:
   typedef ThreePointPOUMM<Tree> MyType;
   typedef Tree TreeType;
-  typedef ParallelPruning<MyType> PruningAlgorithmType;
+  typedef PostOrderTraversal<MyType> AlgorithmType;
   typedef ThreePointUnivariate<TreeType> BaseType;
   typedef vec ParameterType;
   typedef NumericTraitData<typename TreeType::NodeType> InputDataType;
   typedef vec NodeStateType;
 
   // univariate trait vector
-  ppa::vec z;
-  ppa::vec h, u;
+  splittree::vec z;
+  splittree::vec h, u;
   double g0, alpha, theta, sigma, sigmae, e2alphaT, sum_u;
   double T; // tree height
 
@@ -42,7 +68,7 @@ public:
       this->h = this->ref_tree_.CalculateHeights(0);
 
       this->T = *std::max_element(h.begin(), h.begin()+this->ref_tree_.num_tips());
-      this->u = ppa::vec(this->ref_tree_.num_tips());
+      this->u = splittree::vec(this->ref_tree_.num_tips());
       for(int i = 0; i < this->ref_tree_.num_tips(); i++) u[i] = T - h[i];
       sum_u = 0;
       for(auto uu : u) sum_u += uu;
@@ -75,7 +101,7 @@ public:
   inline void InitNode(uint i) {
     ThreePointUnivariate<TreeType>::InitNode(i);
     if(i < this->ref_tree_.num_nodes() - 1) {
-      // if an internal node or a tip transform the branch length leading to this tip
+      // if an internal node or a tip, transform the branch length leading to this tip
       uint iParent = this->ref_tree_.FindIdOfParent(i);
       // tTransf[i] =
       //   sigma*sigma/(2*alpha) * ( (1-exp(-2*alpha*h[i]))*exp(-2*alpha*(T-h[i])) -
@@ -97,8 +123,8 @@ public:
   }
 };
 
-typedef PruningTask<
-  ThreePointPOUMM<PruningTree<uint, double>> > ParallelPruningThreePointPOUMM;
+typedef TraversalTask<
+  ThreePointPOUMM<OrderedTree<uint, double>> > ParallelPruningThreePointPOUMM;
 
 }
 

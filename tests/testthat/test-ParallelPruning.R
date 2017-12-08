@@ -7,7 +7,7 @@ lik_POUMM <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  abc = poummObj$DoPruning(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
+  abc = poummObj$TraverseTree(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
 
   POUMM:::loglik_abc_g0_g0Prior(
     abc = abc, g0Prior = NA,
@@ -18,7 +18,7 @@ lik_POUMM_lnDetV_Q <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  res <- poummObj$DoPruning(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
+  res <- poummObj$TraverseTree(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
 
   -1/2*(poummObj$tree$num_tips*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
@@ -115,7 +115,7 @@ lik_POUMM <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  abc = poummObj$DoPruning(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
+  abc = poummObj$TraverseTree(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
 
   POUMM:::loglik_abc_g0_g0Prior(
     abc = abc, g0Prior = NA,
@@ -126,7 +126,7 @@ lik_POUMM_lnDetV_Q <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
 
-  res <- poummObj$DoPruning(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
+  res <- poummObj$TraverseTree(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
 
   -1/2*(poummObj$tree$num_tips*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
