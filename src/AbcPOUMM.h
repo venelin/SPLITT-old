@@ -41,14 +41,14 @@ public:
   typedef Tree TreeType;
   typedef PostOrderTraversal<MyType> AlgorithmType;
   typedef vec ParameterType;
-  typedef NumericTraitData<typename TreeType::NodeType> InputDataType;
-  typedef vec NodeStateType;
+  typedef NumericTraitData<typename TreeType::NodeType> DataType;
+  typedef vec StateType;
 
   double alpha, theta, sigmae2, sigma2;
   vec z, se;
   vec a, b, c;
 
-  AbcPOUMM(TreeType const& tree, InputDataType const& input_data):
+  AbcPOUMM(TreeType const& tree, DataType const& input_data):
     BaseType(tree) {
 
     if(input_data.z_.size() != this->ref_tree_.num_tips() ||
@@ -65,7 +65,7 @@ public:
     }
   };
 
-  NodeStateType StateAtRoot() const {
+  StateType StateAtRoot() const {
     vec res(3);
     res[0] = a[this->ref_tree_.num_nodes() - 1];
     res[1] = b[this->ref_tree_.num_nodes() - 1];

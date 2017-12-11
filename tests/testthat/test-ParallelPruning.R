@@ -1,5 +1,5 @@
 library(testthat)
-library(ParallelPruning)
+library(SPLiTTree)
 library(microbenchmark)
 library(ape)
 
@@ -52,13 +52,15 @@ z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
 # z<-trees$z[[24]]
 
 
-#ppt<-ParallelPruning:::ParallelPruningTree$new(tree)
-
+#ppt<-SPLiTTree:::ParallelPruningTree$new(tree)
+context("POUMM::pruneTree")
 pruneInfo <- POUMM::pruneTree(tree, z, se)
 
-poummabc <- ParallelPruning:::ParallelPruningAbcPOUMM$new(tree, z = z[1:N], se = se)
 
-poummlnDetVQ <- ParallelPruning:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
+context("SPLiTTree:::ParallelPruningAbcPOUMM")
+poummabc <- SPLiTTree:::ParallelPruningAbcPOUMM$new(tree, z = z[1:N], se = se)
+context("SPLiTTree:::ParallelPruningThreePointPOUMM")
+poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 # test correct value
 test_that("POUMM abc", expect_lt(abs(
@@ -90,20 +92,18 @@ test_that("Equal hybrid vs serial pruning", expect_equal(
 
 
 library(ape)
-library(ParallelPruning)
+library(SPLiTTree)
+library(microbenchmark)
+library(testthat)
 N <- 10000
 tree<-rtree(N)
 idx <- sample(which(tree$edge[, 2] > N), size=N/2)
 tree$edge.length[idx] <- 0
-tree2 <- di2multi(tree)
+#tree2 <- di2multi(tree)
 z <- rnorm(N)
 se <- rep(0, N)
 context("PruneTree")
 set.seed(1)
-
-EPS <- 1e-8
-N <- 100
-tree <- ape::rtree(N)
 
 g0 <- 16
 alpha <- 2
@@ -128,11 +128,13 @@ lik_POUMM_lnDetV_Q <- function(
 
   res <- poummObj$TraverseTree(c(g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae),mode)
 
-  -1/2*(poummObj$tree$num_tips*log(2*pi) + 2*res[3] + res[1]+res[2])
+  -1/2*(N*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
 
-poummabc <- ParallelPruning:::ParallelPruningAbcPOUMM$new(tree2, z, se)
-library(microbenchmark)
+poummabc <- SPLiTTree:::ParallelPruningAbcPOUMM$new(tree, z, se)
+poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
+
+
 
 microbenchmark(
   lik_POUMM(poummabc,
@@ -142,4 +144,13 @@ microbenchmark(
   lik_POUMM(poummabc,
             g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21),
   lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 22))
+            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 22),
+
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 11),
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12),
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21),
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 22))

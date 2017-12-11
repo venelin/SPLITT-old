@@ -137,7 +137,7 @@ splittree::ParallelPruningThreePointPOUMM* CreateParallelPruningThreePointPOUMM(
   splittree::vec t = Rcpp::as<splittree::vec>(tree["edge.length"]);
   uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
   splittree::uvec node_names = splittree::Seq(1, num_tips);
-  typename splittree::ParallelPruningThreePointPOUMM::InputDataType data(node_names, z, se);
+  typename splittree::ParallelPruningThreePointPOUMM::DataType data(node_names, z, se);
   return new splittree::ParallelPruningThreePointPOUMM(br_0, br_1, t, data);
 }
 
@@ -202,7 +202,7 @@ splittree::ParallelPruningAbcPOUMM* CreateParallelPruningAbcPOUMM(
   splittree::vec t = Rcpp::as<splittree::vec>(tree["edge.length"]);
   uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
   splittree::uvec node_names = splittree::Seq(1, num_tips);
-  typename splittree::ParallelPruningAbcPOUMM::InputDataType data(node_names, z, se);
+  typename splittree::ParallelPruningAbcPOUMM::DataType data(node_names, z, se);
   return new splittree::ParallelPruningAbcPOUMM(br_0, br_1, t, data);
 }
 

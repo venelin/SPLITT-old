@@ -46,7 +46,7 @@ class ThreePointUnivariate: public TraversalSpecification<PruningTree> {
 public:
   typedef TraversalSpecification<PruningTree> BaseType;
   typedef PruningTree TreeType;
-  typedef vec NodeStateType;
+  typedef vec StateType;
   typedef vec ParameterType;
 
   // public (unsafe) access to fields.
@@ -73,7 +73,7 @@ public:
     }
   }
 
-  NodeStateType StateAtRoot() const {
+  StateType StateAtRoot() const {
     vec res(2);
     res[0] = this->lnDetV[this->ref_tree_.num_nodes() - 1];
     res[1] = this->Q[this->ref_tree_.num_nodes() - 1];

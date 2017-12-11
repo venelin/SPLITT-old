@@ -41,18 +41,18 @@ public:
   typedef PostOrderTraversal<MyType> AlgorithmType;
   typedef ThreePointUnivariate<TreeType> BaseType;
   typedef vec ParameterType;
-  typedef NumericTraitData<typename TreeType::NodeType> InputDataType;
-  typedef vec NodeStateType;
+  typedef NumericTraitData<typename TreeType::NodeType> DataType;
+  typedef vec StateType;
 
   // univariate trait vector
   splittree::vec z;
   splittree::vec h, u;
-  double g0, alpha, theta, sigma, sigmae, e2alphaT, sum_u;
+  double g0, alpha, alpha_x_2, theta, g0_theta, sigma, sigma2, sigma2_div_alpha_x_2, sigmae, sigmae2, e2alphaT, sum_u;
   double T; // tree height
 
 
   ThreePointPOUMM(
-    TreeType const& tree, InputDataType const& input_data):
+    TreeType const& tree, DataType const& input_data):
     BaseType(tree) {
 
     if(input_data.z_.size() != this->ref_tree_.num_tips() ||
@@ -86,13 +86,18 @@ public:
     }
     this->g0 = par[0];
     this->alpha = par[1];
+    this->alpha_x_2 = 2*alpha;
     this->theta = par[2];
     this->sigma = par[3];
+    this->sigma2 = sigma*sigma;
     this->sigmae = par[4];
+    this->sigmae2 = sigmae*sigmae;
+    this->sigma2_div_alpha_x_2 = sigma2/alpha_x_2;
+    this->g0_theta = g0 - theta;
     this->e2alphaT = exp(-2*alpha*T);
   }
 
-  NodeStateType StateAtRoot() const {
+  StateType StateAtRoot() const {
     vec res = BaseType::StateAtRoot();
     res.push_back(alpha*sum_u);
     return res;
@@ -109,15 +114,16 @@ public:
 
       double ealphahi = exp(alpha*h[i]);
 
-      this->tTransf[i] = sigma*sigma/(2*alpha) *
-        (e2alphaT*(ealphahi*ealphahi - exp(2*alpha*h[iParent])));
+      this->tTransf[i] = sigma2_div_alpha_x_2 *
+        (e2alphaT*(ealphahi*ealphahi - exp(alpha_x_2*h[iParent])));
 
       if(i < this->ref_tree_.num_tips()) {
         //double mu = exp(-alpha*h[i])*g0 + (1-exp(-alpha*h[i]))*theta;
-        double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
-        double ealphaui = exp(alpha*u[i]);
-        this->X[i] = this->Y[i] = (z[i] - mu)/ealphaui;
-        this->tTransf[i] += sigmae*sigmae / (ealphaui*ealphaui);
+        // double mu = g0 / ealphahi + (1 - 1/ealphahi)*theta;
+        double mu = theta + g0_theta/ealphahi;
+        double ealphaui = exp(-alpha*u[i]);
+        this->X[i] = this->Y[i] = (z[i] - mu)*ealphaui;
+        this->tTransf[i] += sigmae2 * ealphaui*ealphaui;
       }
     }
   }

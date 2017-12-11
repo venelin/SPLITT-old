@@ -1496,20 +1496,20 @@ public:
   typedef typename AlgorithmType::ModeType ModeType;
   typedef typename TreeType::NodeType NodeType;
   typedef typename TreeType::LengthType LengthType;
-  typedef typename TraversalSpecificationType::InputDataType InputDataType;
+  typedef typename TraversalSpecificationType::DataType DataType;
   typedef typename TraversalSpecificationType::ParameterType ParameterType;
-  typedef typename TraversalSpecificationType::NodeStateType NodeStateType;
+  typedef typename TraversalSpecificationType::StateType StateType;
 
   TraversalTask(
     std::vector<NodeType> const& branch_start_nodes,
     std::vector<NodeType> const& branch_end_nodes,
     std::vector<LengthType> const& branch_lengths,
-    InputDataType const& data):
+    DataType const& data):
   tree_(branch_start_nodes, branch_end_nodes, branch_lengths),
   spec_(tree_, data),
   algorithm_(tree_, spec_) {}
 
-  NodeStateType TraverseTree(ParameterType const& par, uint mode) {
+  StateType TraverseTree(ParameterType const& par, uint mode) {
     spec_.SetParameter(par);
     algorithm_.TraverseTree(static_cast<ModeType>(mode));
     return spec_.StateAtRoot();
@@ -1548,14 +1548,14 @@ public:
   // 1. typedef Tree TreeType;
   // 2. typedef PostOrderTraversal<ImlementationClass> AlgorithmType;
   // 3. typedef ImplementationSpecificParameterType ParameterType;
-  // 4. typedef ImplementationSpecificInputDataType InputDataType;
-  // 5. typedef ImplementationSpecificNodeStateType NodeStateType;
+  // 4. typedef ImplementationSpecificDataType DataType;
+  // 5. typedef ImplementationSpecificStateType StateType;
 
 
   // The following methods must be present any implementation
   // 6. constructor: will be called by a TraversalTask object; Here, it is
-  // commented out, because the InputDataType is not known.
-  // ImplementationClassName(TreeType & tree, InputDataType & input_data) :
+  // commented out, because the DataType is not known.
+  // ImplementationClassName(TreeType & tree, DataType & input_data) :
   //   TraversalSpecification(tree) {
   //     implementation specific initialization using the tree and the input_data.
   // }
@@ -1591,7 +1591,7 @@ public:
   // Thus, it is safe to use PruneNode to update the state of i_parent.
   void PruneNode(uint i, uint i_parent) {}
 
-  // 11. NodeStateType StateAtRoot() is called after PruneNode has been called on each
+  // 11. StateType StateAtRoot() is called after PruneNode has been called on each
   // direct descendant of the root node. If necessary, VisitNode(i_root) can be called
   // here, in order to calculate the final state of the root. The value returned by this
   // function is also returned by the TraversalTask.TraverseTree(ParameterType const& par, uint mode)
