@@ -2,6 +2,7 @@ library(testthat)
 library(SPLiTTree)
 library(microbenchmark)
 library(ape)
+library(POUMM)
 
 lik_POUMM <- function(
   poummObj,
@@ -27,7 +28,7 @@ lik_POUMM_old <- function(
   pruneInfo,
   g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae) {
 
-  POUMM::likPOUMMGivenTreeVTipsC4(
+  POUMM::likPOUMMGivenTreeVTipsC(
     integrator = pruneInfo$integrator,
     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae)
 }
@@ -45,7 +46,7 @@ theta <- 4
 sigma <- .2
 sigmae <- .7
 se = rep(0, N); #rexp(N, 1/.01)
-z <- POUMM::rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
+z <- rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
 
 # load("../../../poummBayesianValidation/DATA/Microbenchmark/Trees.RData")
 # tree<-trees$tree[[24]]
@@ -57,19 +58,10 @@ context("POUMM::pruneTree")
 pruneInfo <- POUMM::pruneTree(tree, z, se)
 
 
-context("SPLiTTree:::ParallelPruningAbcPOUMM")
-poummabc <- SPLiTTree:::ParallelPruningAbcPOUMM$new(tree, z = z[1:N], se = se)
 context("SPLiTTree:::ParallelPruningThreePointPOUMM")
 poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 # test correct value
-test_that("POUMM abc", expect_lt(abs(
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21) -
-    lik_POUMM_old(pruneInfo,
-                  g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae
-    )), EPS))
-
 test_that("POUMM lnDetV_Q", expect_lt(abs(
   lik_POUMM_lnDetV_Q(poummlnDetVQ,
             g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21) -
@@ -79,16 +71,10 @@ test_that("POUMM lnDetV_Q", expect_lt(abs(
 
 
 test_that("Equal parallel vs serial pruning", expect_equal(
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =21),
-    lik_POUMM(poummabc,
-              g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 10)))
-
-test_that("Equal hybrid vs serial pruning", expect_equal(
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode =31),
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12)))
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21),
+  lik_POUMM_lnDetV_Q(poummlnDetVQ,
+                     g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 1)))
 
 
 library(ape)
@@ -111,17 +97,6 @@ theta <- 4
 sigma <- .2
 sigmae <- .7
 
-lik_POUMM <- function(
-  poummObj,
-  g0, alpha, theta, sigma, sigmae, mode) {
-
-  abc = poummObj$TraverseTree(c(alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae), mode)
-
-  POUMM:::loglik_abc_g0_g0Prior(
-    abc = abc, g0Prior = NA,
-    g0 = g0, alpha = alpha, theta = theta, sigma = sigma)$loglik
-}
-
 lik_POUMM_lnDetV_Q <- function(
   poummObj,
   g0, alpha, theta, sigma, sigmae, mode) {
@@ -131,21 +106,11 @@ lik_POUMM_lnDetV_Q <- function(
   -1/2*(N*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
 
-poummabc <- SPLiTTree:::ParallelPruningAbcPOUMM$new(tree, z, se)
 poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 
 
 microbenchmark(
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 11),
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 12),
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 21),
-  lik_POUMM(poummabc,
-            g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 22),
-
   lik_POUMM_lnDetV_Q(poummlnDetVQ,
                      g0 = g0, alpha = alpha, theta = theta, sigma = sigma, sigmae = sigmae, mode = 11),
   lik_POUMM_lnDetV_Q(poummlnDetVQ,

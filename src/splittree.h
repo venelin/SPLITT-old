@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <array>
 #include <math.h>
 #include <sstream>
 #include <limits>
@@ -36,6 +37,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <mutex>
+#include <condition_variable>
 
 #ifdef _OPENMP
 
@@ -66,13 +68,36 @@
 #endif // #ifdef _OPENMP
 
 
-// all functions and classes defined in the namespace ppa
-// (stays for parallel pruning algorithm)
+//' @name splittree
+//' @title namespace splittree;
+//' 
+//' @description All functions and classes defined in the namespace splittree.
+//' 
+//' [[Rcpp::export]]
 namespace splittree{
 
+//' @name uint
+//' @title typedef unsigned int uint;
+//' @description a synonyme for the native type.
+//' @family basic-types
 typedef unsigned int uint;
+
+//' @name uvec
+//' @title typedef \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{uint}> uvec;
+//' @description a vectof of \link{uint}'s.
+//' @family basic-types
 typedef std::vector<uint> uvec;
+
+//' @name vec
+//' @title typedef \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<double> vec;
+//' @description a vectof of double's.
+//' @family basic-types
 typedef std::vector<double> vec;
+
+//' @name bvec
+//' @title typedef \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<bool> bvec;
+//' @description a vectof of bool's.
+//' @family basic-types
 typedef std::vector<bool> bvec;
 
 const uvec EMPTY_UVEC;
@@ -125,51 +150,109 @@ inline VectorValues At(VectorValues const& v, bvec const& mask) {
 }
 
 // for each element of x return the index of its first occurence in table or
-// NA_UINT if the element is not found in table or is equal to NA_UINT.
-// It is assumed that x does not have duplicated elements or NA_UINT elements.
-inline uvec Match(uvec const& x, uvec const& table) {
+// NA if the element is not found in table or is equal to NA.
+// It is assumed that x does not have duplicated elements or NA elements.
+template<class VectorValues, class PosType>
+inline std::vector<PosType> Match(
+    VectorValues const& x, VectorValues const& table, PosType const& NA) {
   auto minmax_x = std::minmax_element(x.begin(), x.end());
-  uvec index(*minmax_x.second - *minmax_x.first + 1, NA_UINT);
-  for(uint i = 0; i < table.size(); ++i) {
+  std::vector<PosType> index(*minmax_x.second - *minmax_x.first + 1, NA);
+  for(PosType i = 0; i < table.size(); ++i) {
     if(table[i] >= *minmax_x.first && table[i] <= *minmax_x.second &&
-       index[table[i] - *minmax_x.first] == NA_UINT) {
+       index[table[i] - *minmax_x.first] == NA) {
       index[table[i] - *minmax_x.first] = i;
     }
   }
 
-  uvec positions(x.size());
-  for(uint i = 0; i < x.size(); ++i) {
+  std::vector<PosType> positions(x.size());
+  for(size_t i = 0; i < x.size(); ++i) {
     positions[i] = index[x[i] - *minmax_x.first];
   }
   return positions;
 }
 
-inline uvec Seq(uint first, uint last) {
-  uvec res(last-first+1);
+template<class T>
+inline std::vector<T> Seq(T const& first, T const& last) {
+  std::vector<T> res(last-first+1);
   std::iota(res.begin(), res.end(), first);
   return res;
 }
 
-inline bvec IsNA(uvec const& x) {
-  bvec res(x.size(), false);
+template<class T>
+inline bvec IsNA(std::vector<T> const& x, T const& NA) {
+  bvec res(x.size(), true);
   for(uint i = 0; i < x.size(); ++i) {
-    if(x[i]==NA_UINT) res[i] = true;
+    if(x[i]==NA) res[i] = TRUE;
+  }
+  return res;
+}
+
+inline bvec IsNA(uvec const& x) {
+  return IsNA(x, NA_UINT);
+}
+
+template<class T>
+inline bvec NotIsNA(std::vector<T> const& x, T const& NA) {
+  bvec res(x.size(), true);
+  for(uint i = 0; i < x.size(); ++i) {
+    if(x[i]==NA) res[i] = false;
   }
   return res;
 }
 
 inline bvec NotIsNA(uvec const& x) {
-  bvec res(x.size(), true);
-  for(uint i = 0; i < x.size(); ++i) {
-    if(x[i]==NA_UINT) res[i] = false;
-  }
-  return res;
+  return NotIsNA(x, NA_UINT);
 }
 
+//' @name Tree
+//' 
+//' @title template<class Node, class Length>class Tree
+//' 
+//' @description A generic C++ class defining the data structure and basic 
+//'   operations with a tree. 
+//' 
+//' @section Template Arguments:
+//' \describe{
+//' \item{class Node}{see \code{\link{NodeType}}.}
+//' \item{class Length}{see \code{\link{LengthType}}.}
+//' }
+//' @section Public Methods:
+//' \describe{
+//' }
+//' 
+//' @seealso \code{\link{OrderedTree}}
 template<class Node, class Length>
 class Tree {
 public:
+//' @name Tree::NodeType 
+//' @title typedef Node NodeType;
+//' @description A public typedef in class \code{\link{Tree}}. A synonym for the 
+//'   template argument \code{Node}. Defines a 
+//'   hash-able type such as \code{int} or 
+//'   \code{\href{http://en.cppreference.com/w/cpp/string/basic_string}{std::string}}. 
+//'   Specifically, this should be a type for which 
+//'   \code{\href{http://en.cppreference.com/w/cpp/utility/hash}{std::hash}}
+//'   specialization does exist. This is the application-specific node-type. The branches in the tree are defined as couples of nodes 
+//'   (branch_start_node, branch_end_node).
+//' @details
+//'   During the construction of \code{Tree} object, the nodes are assigned 
+//'   \code{unsigned int} ids from 0 to M-1 (M being the number of nodes in the
+//'   tree). 
+//'   
+//' @aliases NodeType
+//' @seealso \code{\link{Tree}} \code{\link{FindIdOfNode}}
   typedef Node NodeType;
+  
+//' @name Tree::LengthType
+//'
+//' @title typedef Length LengthType;
+//'
+//' @description A public typedef in class \code{\link{Tree}}. A synonym for the template
+//'   argument Length. Defines a type that can be associated with a branch. Can
+//'   be \code{double}, but also a composite of several attributes on a
+//'   branch, such as a \code{double} length and an \code{int} color.
+//' @aliases LengthType Tree.LengthType
+//' @seealso \code{\link{Tree}}
   typedef Length LengthType;
 
 private:
@@ -197,7 +280,20 @@ protected:
   }
 
 public:
-  // pass an empty vector for branch_lengths for a tree without branch lengths.
+//' @name Tree::Tree
+//' 
+//' @title Constructor for class Tree
+//' 
+//' @param branch_start_nodes \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
+//'   starting node for every branch in the tree.
+//' @param branch_end_nodes \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; ending 
+//'   node for every branch in the tree; must be the same length as 
+//'   branch_start_nodes.
+//' @param branch_lengths \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const&}; lengths 
+//'   associated with the branches. Pass an empty vector for branch_lengths for 
+//'   a tree without branch lengths (i.e. only a topology).
+//' 
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   Tree(std::vector<NodeType> const& branch_start_nodes,
        std::vector<NodeType> const& branch_end_nodes,
        std::vector<LengthType> const& branch_lengths) {
@@ -233,7 +329,7 @@ public:
 
     uvec branch_starts_temp(branch_start_nodes.size(), NA_UINT);
     uvec branch_ends_temp(branch_start_nodes.size(), NA_UINT);
-    uvec ending_at(num_nodes_ - 1, NA_UINT);
+    uvec ending_at(num_nodes_, NA_UINT);
 
     std::vector<typename MapType::iterator> it_map_node_to_id_;
     it_map_node_to_id_.reserve(num_nodes_);
@@ -384,18 +480,52 @@ public:
     init_id_child_nodes();
   }
 
+//' @name Tree::num_nodes
+//' @title Number of nodes in a tree
+//'  
+//' @section Signature:
+//' \code{\link{uint} Tree::num_nodes() const;}
+//'  
+//' @return the numbef of nodes in the tree, including tips, internal nodes and the root.
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   uint num_nodes() const {
     return num_nodes_;
   }
 
+//' @name Tree::num_tips
+//' 
+//' @title Number of tips (a.k.a. leaves) in the tree
+//' @section Signature:
+//' \code{\link{uint} \link{Tree}::num_nodes() const;}
+//' @return \code{\link{uint}}, the number of tips in the tree.
+//' @seealso \code{\link{Tree}}
   uint num_tips() const {
     return num_tips_;
   }
-
+  
+//' @name Tree::HasBranchLengths
+//' 
+//' @title Does a tree has lengths associated with its branches?
+//' @section Signature:
+//' \code{bool \link{Tree}::HasBranchLengths() const;}
+//' @return \code{bool}, \code{true} if the tree has branch lengths.
+//' @aliases HasBranchLengths
+//' @family branch-length-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   bool HasBranchLengths() const {
     return lengths_.size() == id_parent_.size();
   }
 
+//' @name Tree::LengthOfBranch
+//' 
+//' @title Get the length of a branch ending at node with id \code{i}
+//' @section Signature:
+//' \code{\link{LengthType} const& \link{Tree}::LengthOfBranch(uint i) const;}
+//' @param i \code{\link{uint}}; the id of the end-node for the branch
+//' @return \code{\link{LengthType}}; the length associated with the branch ending at node \code{i}.
+//' @aliases LengthOfBranch
+//' @family branch-length-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   LengthType const& LengthOfBranch(uint i) const {
     if(i >= lengths_.size()) {
       std::ostringstream oss;
@@ -404,12 +534,33 @@ public:
     }
     return lengths_[i];
   }
-
-  std::vector<LengthType> const& lengths() const {
+  
+//' @name Tree::BranchLengths
+//' 
+//' @title Get a reference to the internal vector of branch lengths.
+//' @section Signature:
+//' \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const& \link{Tree}::BranchLengths() const;}
+//' @return \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const&}; 
+//'   a const reference to the internally stored vector of branch lengths, in the order of the end-node ids.
+//' @aliases BranchLengths
+//' @family branch-length-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
+  std::vector<LengthType> const& BranchLengths() const {
     return lengths_;
   }
 
-  void SetLengthOfBranch(uint i, Length const& value) {
+//' @name Tree::SetLengthOfBranch
+//' 
+//' @title Set the length of a branch ending at node with id \code{i} to a given \code{value}
+//' @section Signature:
+//' \code{void \link{Tree}::SetLengthOfBranch(uint i, \link{LengthType} const& value);}
+//' @param i \code{\link{uint}}; the id of the end-node of the branch;
+//' @param value \code{\link{LengthType} const&}; the new value of to set.
+//' @return \code{void}
+//' @family branch-length-methods
+//' @aliases SetLengthOfBranch
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
+  void SetLengthOfBranch(uint i, LengthType const& value) {
     if(!HasBranchLengths()) {
       std::ostringstream oss;
       oss<<"Trying to set a branch length on a tree without branch lengths. "<<
@@ -417,13 +568,28 @@ public:
       throw std::logic_error(oss.str());
     } else if(i >= lengths_.size()) {
       std::ostringstream oss;
-      oss<<"i shoulc be smaller than "<<lengths_.size()<<" but was "<<i<<std::endl;
+      oss<<"i should be smaller than "<<lengths_.size()<<" but was "<<i<<std::endl;
       throw std::out_of_range(oss.str());
     } else {
       lengths_[i] = value;
     }
   }
 
+//' @name Tree::SetBranchLengths
+//' 
+//' @title Set a new internally stored vector of branch lenthts
+//' 
+//' @description 
+//' @section Signature:
+//' \code{void \link{Tree}::SetBranchLengths(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const& lengths);}
+//' @param lengths \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const&}; 
+//'   a const reference to a new vector of branch lengths, in the order of the end-node ids. 
+//'   The vector should be of length M-1, where M is the 
+//'   number of nodes in the tree.
+//' @return \code{void}
+//' @aliases SetBranchLengths
+//' @family branch-length-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   void SetBranchLengths(std::vector<LengthType> const& lengths) {
     if(lengths.size() != 0 && lengths.size() != num_nodes_ - 1) {
       std::ostringstream oss;
@@ -434,6 +600,25 @@ public:
     }
   }
 
+//' @name Tree::SetBranchLengths2
+//' 
+//' @title Set new branch lenthts to the branches in the order given by their 
+//'   application-specific end-nodes.
+//' @description If the tree has no branch lengths, the supplied arguments should
+//'   be of length M-1, where M is the total number of nodes in the tree (-1, 
+//'   because there is no branch leading to the root).
+//' @section Signature:
+//' \code{void \link{Tree}::SetBranchLengths(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes_branch_ends, \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const& lengths);}
+//' 
+//' @param nodes_branch_ends \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
+//'   a const reference to a new vector of branch lengths, in the order of the nodes in \code{nodes_branch_ends}.
+//' @param lengths \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const&}; 
+//'   a const reference to a new vector of branch lengths, in the order of the nodes in \code{nodes_branch_ends}.
+//'   
+//' @return \code{void}
+//' @aliases SetBranchLengths
+//' @family branch-length-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
                         std::vector<LengthType> const& lengths) {
     if(nodes_branch_ends.size() != lengths.size()) {
@@ -469,13 +654,42 @@ public:
 
   }
 
-  // return the node at position id;
+//' @name Tree::FindNodeWithId
+//' @title Get the node with the specified id.
+//' @section Signature:
+//' \code{\link{NodeType} const& \link{Tree}::FindNodeWithId(uint id) const;}
+//' 
+//' @description A public method of class \code{\link{Tree}}.
+//' 
+//' @param id \code{\link{uint}} the id of the node (should be between 0 and M-1, where
+//'   M is the number of nodes in hte tree).
+//' @family node-methods  
+//' 
+//' @aliases FindNodeWithId
+//' 
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   NodeType const& FindNodeWithId(uint id) const {
     return map_id_to_node_[id];
   }
 
-  // get the internally stored id of node
-  uint FindIdOfNode(Node const& node) const {
+//' @name Tree::FindIdOfNode
+//' @title Get the internally stored id of a node
+//' 
+//' @section Signature:
+//' \code{uint \link{Tree}::FindIdOfNode(\link{NodeType} const& node) const;}
+//' 
+//' @description A public method of class \code{\link{Tree}}.
+//' 
+//' @param node \code{\link{NodeType} const&}; the node;
+//' 
+//' @return an \code{\link{uint}} from 0 to M-1, where M is the number of nodes 
+//'   in the tree.
+//' @family node-methods 
+//' 
+//' @aliases FindIdOfNode
+//' 
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
+  uint FindIdOfNode(NodeType const& node) const {
     auto it = map_node_to_id_.find(node);
     if(it == map_node_to_id_.end()) {
       return NA_UINT;
@@ -484,10 +698,41 @@ public:
     }
   }
 
+//' @name Tree::FindIdOfParent
+//' @title Get the parent id of a node with id id_child.
+//' @section Signature:
+//' \code{uint \link{Tree}::FindIdOfParent(uint id_child) const;}
+//' 
+//' @param id_child \code{\link{uint}}, the id of the child node. 
+//' 
+//' @return an \code{\link{uint}} from 0 to M-1, where M is the number of nodes 
+//'   in the tree.
+//'   
+//' @family node-methods
+//' 
+//' @aliases FindIdOfParent
+//'  
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   uint FindIdOfParent(uint id_child) const {
     return this->id_parent_[id_child];
   }
 
+//' @name Tree::FindChildren
+//' @title Get a vector with the ids of the children of a node.
+//' @section Signature:
+//' \code{uvec const& \link{Tree}::FindChildren(uint i) const;}
+//' 
+//' @param i \code{\link{uint}}; the id of a node. 
+//' 
+//' @return a \code{uvec const&}; a const reference to an internally stored vector of the
+//'   ids of the children of \code{i}. If \code{i} is a tip, an empty uvec is returned. The
+//'   returned vector reference is valid as long as the tree object is not destroyed.
+//'   
+//' @family node-methods 
+//' 
+//' @aliases FindChildren
+//' 
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   uvec const& FindChildren(uint i) const {
     if(i < this->num_tips()) {
       return EMPTY_UVEC;
@@ -498,8 +743,40 @@ public:
     }
   }
 
-  // returns a vector of positions in nodes in the order of their internally stored ids.
+//' @name Tree::OrderNodes
+//' @title Reorder a vector of nodes
+//' @section Signature:
+//' \code{\link{uvec} \link{Tree}::OrderNodes(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes) const;}
+//' @param nodes \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
+//'   a vector of application-specific nodes.
+//' @return \code{\link{uvec}}; a vector of positions in \code{nodes} in the order of 
+//'   their internally stored ids.
+//' @family node-methods
+//' @aliases OrderNodes
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
   uvec OrderNodes(std::vector<NodeType> const& nodes) const {
+    return OrderNodesPosType(nodes, NA_UINT);
+  }
+  
+
+//' @name Tree::OrderNodesPosType
+//' @title Reorder a vector of nodes (generic w.r.t. the position type).
+//' @section Template Arguments:
+//' \describe{
+//' \item{PosType}{an integer type for the positions in the returned vector.}}
+//' @section Signature:
+//' \code{template<class PosType> \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> \link{Tree}::OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes, PosType const& NA) const;
+//' @param nodes \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> \link{Tree}::OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
+//'   a vector of application-specific nodes.
+//' @param NA \code{PosType const&}; NA value used mainly for the purpose of template-specification.
+//' @return \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType>}; a vector of positions in nodes in the order of their internally stored ids.
+//' the element-type of the returned vector can be specified as a template argument or 
+//' dedcued from the type of NA.
+//' @aliases OrderNodesPosType
+//' @family node-methods
+//' @seealso \code{\link{Tree}} \code{\link{OrderedTree}}
+  template<class PosType>
+  std::vector<PosType> OrderNodesPosType(std::vector<NodeType> const& nodes, PosType const& NA) const {
     uvec ids(nodes.size());
     for(uint i = 0; i < nodes.size(); ++i) {
       auto it = this->map_node_to_id_.find(nodes[i]);
@@ -512,12 +789,28 @@ public:
         ids[i] = it->second;
       }
     }
-    uvec m = Match(Seq(0, this->num_nodes_ - 1), ids);
-    return At(m, NotIsNA(m));
+    std::vector<PosType> m = Match(Seq(uint(0), this->num_nodes_ - 1), ids, NA);
+    return At(m, NotIsNA(m, NA));
   }
 };
 
-
+//' @name OrderedTree
+//' 
+//' @title template<class Node, class Length>class OrderedTree: public Tree<Node, Length>
+//' 
+//' @description A generic C++ class defining the data structure and basic 
+//'   operations with a tree. 
+//' 
+//' @section Template Arguments:
+//' \describe{
+//' \item{class Node}{see \code{\link{NodeType}}.}
+//' \item{class Length}{see \code{\link{LengthType}}.}
+//' }
+//' @section Public Methods:
+//' \describe{
+//' }
+//' 
+//' @seealso \code{\link{OrderedTree}}
 template<class Node, class Length>
 class OrderedTree: public Tree<Node, Length> {
 public:
@@ -543,13 +836,13 @@ public:
   ranges_id_prune_(1, 0) {
 
     // insert a fictive branch leading to the root of the tree.
-    uvec branch_ends = Seq(0, this->num_nodes_ - 1);
+    uvec branch_ends = Seq(uint(0), this->num_nodes_ - 1);
 
     uvec num_children_remaining(this->num_nodes_, 0);
     for(uint i : this->id_parent_) num_children_remaining[i]++;
 
     // start by pruning the tips of the tree
-    uvec tips_this_level = Seq(0, this->num_tips_ - 1);
+    uvec tips_this_level = Seq(uint(0), this->num_tips_ - 1);
 
     uvec default_pos_vector;
     default_pos_vector.reserve(2);
@@ -616,7 +909,7 @@ public:
     id_old.push_back(this->num_nodes_ - 1);
 
     this->id_parent_ = Match(At(this->id_parent_, order_branches),
-                             id_old);
+                             id_old, NA_UINT);
 
     // update maps
     std::vector<NodeType> map_id_to_node(this->num_nodes_);
@@ -642,27 +935,21 @@ public:
     return ranges_id_visit_;
   }
 
-  std::pair<uint, uint> RangeIdVisitNode(uint i_level) const {
-    return std::pair<uint, uint>(ranges_id_visit_[i_level],
-                                 ranges_id_visit_[i_level+1] - 1);
+  
+  std::array<uint, 2> RangeIdVisitNode(uint i_level) const {
+    // double braces required by C++11 standard,
+    // http://en.cppreference.com/w/cpp/container/array
+    return std::array<uint, 2> {{ranges_id_visit_[i_level],
+                                 ranges_id_visit_[i_level+1] - 1}};
   }
 
   uvec const& ranges_id_prune() const {
     return ranges_id_prune_;
   }
 
-  std::pair<uint, uint> RangeIdPruneNode(uint i_step) const {
-    return std::pair<uint, uint>(ranges_id_prune_[i_step],
-                                 ranges_id_prune_[i_step+1] - 1);
-  }
-
-  // A root-to-node distance vector in the order of pruning processing
-  std::vector<LengthType> CalculateHeights(Length const& zero) const {
-    std::vector<LengthType> h(this->num_nodes_, zero);
-    for(int i = this->num_nodes_ - 2; i >= 0; i--) {
-      h[i] = h[this->id_parent_[i]] + this->lengths_[i];
-    }
-    return h;
+  std::array<uint, 2> RangeIdPruneNode(uint i_step) const {
+    return std::array<uint, 2> {{ranges_id_prune_[i_step],
+                                 ranges_id_prune_[i_step+1] - 1}};
   }
 };
 
@@ -697,6 +984,88 @@ inline std::ostream& operator<< (std::ostream& os, PostOrderMode mode) {
   return os<< static_cast<int>(mode);
 }
 
+template<class TreeType> class VisitQueue {
+  std::mutex mutex_;
+  std::condition_variable has_a_new_node_;
+  
+  TreeType const& ref_tree_;
+  uvec queue_;
+  uvec::iterator it_queue_begin;
+  uvec::iterator it_queue_end;
+  uvec num_non_visited_children_;
+public:
+  
+  // non-thread safe (called in single-thread mode)
+  void Init(uvec const& num_children) {
+    std::copy(num_children.begin(), num_children.end(),
+              num_non_visited_children_.begin());
+    it_queue_begin = queue_.begin();
+    it_queue_end = queue_.begin() + ref_tree_.num_tips();
+    std::iota(it_queue_begin, it_queue_end, 0);
+  }
+  
+  bool IsTemporarilyEmpty() const {
+    return it_queue_begin == it_queue_end & it_queue_end < queue_.end();
+  }
+  
+  // thread-safe
+  uint NextInQueue() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    
+    while( IsTemporarilyEmpty() ) {
+      has_a_new_node_.wait(lock);
+    }
+    
+    if(it_queue_begin < it_queue_end) {
+      uint res = *it_queue_begin;
+      ++it_queue_begin;
+      return res;
+    } else if(it_queue_begin == queue_.end()) {
+      // algorithm thread should stop here. all waiting threads should be notified,
+      // since no other elements will be inserted in the queue.
+      has_a_new_node_.notify_all();
+      return ref_tree_.num_nodes();
+    } else {
+      // algorithm thread continues to check for new node to visit
+      // should never execute this
+      //std::cout<<"Error returning NA_UINT from VisitQueue."<<std::endl;
+      return NA_UINT;
+    }
+  }
+  
+  // thread-safe
+  // if the parent of i becomes visit-able, it gets inserted in the
+  // queue.
+  void RemoveVisitedNode(uint i) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    
+    uint i_parent = ref_tree_.FindIdOfParent(i);
+    num_non_visited_children_[i_parent - ref_tree_.num_tips()]--;
+    if(num_non_visited_children_[i_parent - ref_tree_.num_tips()] == 0) {
+      *it_queue_end = i_parent;
+      *it_queue_end++;
+      has_a_new_node_.notify_one();
+    }
+  }
+  
+  // non-thread-safe. should call Init() before using.
+  VisitQueue(TreeType const& tree):
+  ref_tree_(tree),
+  queue_(tree.num_nodes()),
+  it_queue_begin(queue_.begin()),
+  it_queue_end(queue_.begin()),
+  num_non_visited_children_(tree.num_nodes() - tree.num_tips()) {}
+  
+  // Copy initialization (non-thread-safe)
+  VisitQueue(const VisitQueue& other): ref_tree_(other.ref_tree_) {
+    auto other_begin = other.queue_.begin();
+    queue_ = other.queue_;
+    it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
+    it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
+    num_non_visited_children_ = other.num_non_visited_children_;
+  }
+};
+
 template<class TraversalSpecification>
 class TraversalAlgorithm {
 protected:
@@ -707,90 +1076,8 @@ protected:
 
   uint num_threads_;
 
-  class VisitQueue {
-    std::mutex mutex_;
-    std::condition_variable has_a_new_node_;
-
-    TreeType const& ref_tree_;
-    uvec queue_;
-    uvec::iterator it_queue_begin;
-    uvec::iterator it_queue_end;
-    uvec num_non_visited_children_;
-  public:
-
-    // non-thread safe (called in single-thread mode)
-    void Init(uvec const& num_children) {
-      std::copy(num_children.begin(), num_children.end(),
-                num_non_visited_children_.begin());
-      it_queue_begin = queue_.begin();
-      it_queue_end = queue_.begin() + ref_tree_.num_tips();
-      std::iota(it_queue_begin, it_queue_end, 0);
-    }
-
-    bool IsTemporarilyEmpty() const {
-      return it_queue_begin == it_queue_end & it_queue_end < queue_.end();
-    }
-
-    // thread-safe
-    uint NextInQueue() {
-      std::unique_lock<std::mutex> lock(mutex_);
-
-      while( IsTemporarilyEmpty() ) {
-        has_a_new_node_.wait(lock);
-      }
-
-      if(it_queue_begin < it_queue_end) {
-        uint res = *it_queue_begin;
-        ++it_queue_begin;
-        return res;
-      } else if(it_queue_begin == queue_.end()) {
-        // algorithm thread should stop here. all waiting threads should be notified,
-        // since no other elements will be inserted in the queue.
-        has_a_new_node_.notify_all();
-        return ref_tree_.num_nodes();
-      } else {
-        // algorithm thread continues to check for new node to visit
-        // should never execute this
-        //std::cout<<"Error returning NA_UINT from VisitQueue."<<std::endl;
-        return NA_UINT;
-      }
-    }
-
-    // thread-safe
-    // if the parent of i becomes visit-able, it gets inserted in the
-    // queue.
-    void RemoveVisitedNode(uint i) {
-      std::unique_lock<std::mutex> lock(mutex_);
-
-      uint i_parent = ref_tree_.FindIdOfParent(i);
-      num_non_visited_children_[i_parent - ref_tree_.num_tips()]--;
-      if(num_non_visited_children_[i_parent - ref_tree_.num_tips()] == 0) {
-        *it_queue_end = i_parent;
-        *it_queue_end++;
-        has_a_new_node_.notify_one();
-      }
-    }
-
-    // non-thread-safe. should call Init() before using.
-    VisitQueue(TreeType const& tree):
-    ref_tree_(tree),
-    queue_(tree.num_nodes()),
-    it_queue_begin(queue_.begin()),
-    it_queue_end(queue_.begin()),
-    num_non_visited_children_(tree.num_nodes() - tree.num_tips()) {}
-
-    // Copy initialization (non-thread-safe)
-    VisitQueue(const VisitQueue& other): ref_tree_(other.ref_tree_) {
-      auto other_begin = other.queue_.begin();
-      queue_ = other.queue_;
-      it_queue_begin = queue_.begin() + (other.it_queue_begin  - other_begin);
-      it_queue_end = queue_.begin() + (other.it_queue_end  - other_begin);
-      num_non_visited_children_ = other.num_non_visited_children_;
-    }
-  };
-
   uvec num_children_;
-  VisitQueue visit_queue_;
+  VisitQueue<TreeType> visit_queue_;
 
 public:
   TraversalAlgorithm(TreeType const& tree, TraversalSpecification& spec):
@@ -832,10 +1119,10 @@ this->num_threads_ = 1;
 
 template<class TraversalSpecification>
 class PostOrderTraversal: public TraversalAlgorithm<TraversalSpecification> {
-
+  
+public:
   typedef TraversalAlgorithm<TraversalSpecification> ParentType;
 
-public:
   typedef PostOrderMode ModeType;
 
   PostOrderTraversal(typename TraversalSpecification::TreeType const& tree,
@@ -986,13 +1273,13 @@ protected:
       ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_prune = 0;
+    for(uint i_prune = 0;
         i_prune < ParentType::ref_tree_.num_parallel_ranges_prune();
         i_prune++) {
       auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_SIMD
-      for(uint i = range_prune.first; i <= range_prune.second; i++) {
+      for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
         ParentType::ref_spec_.VisitNode(i);
         ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
       }
@@ -1005,10 +1292,10 @@ protected:
       ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+    for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
       auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
       _PRAGMA_OMP_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
           ParentType::ref_spec_.VisitNode(i);
@@ -1044,22 +1331,22 @@ protected:
 
     auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         ParentType::ref_spec_.VisitNode(i);
       }
 
       uint num_branches_done = 0;
 
-    while(num_branches_done != range_visit.second - range_visit.first + 1) {
+    while(num_branches_done != range_visit[1] - range_visit[0] + 1) {
 #pragma omp barrier
       auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
       _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+        for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
           ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
 
-        num_branches_done +=  range_prune.second - range_prune.first + 1;
+        num_branches_done +=  range_prune[1] - range_prune[0] + 1;
       ++i_prune;
     }
   }
@@ -1081,10 +1368,10 @@ protected:
       ParentType::ref_spec_.InitNode(i);
     }
 
-    for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+    for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
       auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
           ParentType::ref_spec_.VisitNode(i);
@@ -1150,11 +1437,11 @@ protected:
     ParentType::ref_spec_.InitNode(i);
   }
 
-  for(int i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+  for(uint i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
     auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 
     _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_prune.first; i <= range_prune.second; i++) {
+      for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
         ParentType::ref_spec_.VisitNode(i);
         ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
       }
@@ -1179,19 +1466,19 @@ protected:
     }
 
     uint i_prune = 0;
-  for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+  for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
     auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
 #pragma omp barrier
-    if(range_visit.second - range_visit.first + 1 >
+    if(range_visit[1] - range_visit[0] + 1 >
          ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
           ParentType::ref_spec_.VisitNode(i);
         }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         ParentType::ref_spec_.VisitNode(i);
       }
     }
@@ -1199,14 +1486,14 @@ protected:
     if (tid == 0) {
       // only one (master) thread executes this
       uint num_branches_done = 0;
-      while(num_branches_done != range_visit.second - range_visit.first + 1) {
+      while(num_branches_done != range_visit[1] - range_visit[0] + 1) {
         auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
         _PRAGMA_OMP_SIMD
-          for(uint i = range_prune.first; i <= range_prune.second; i++) {
+          for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
             ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
           }
 
-          num_branches_done +=  range_prune.second - range_prune.first + 1;
+          num_branches_done +=  range_prune[1] - range_prune[0] + 1;
         ++i_prune;
       }
     }
@@ -1231,20 +1518,20 @@ protected:
     }
 
 
-  for(int i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+  for(uint i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
       auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
 #pragma omp barrier
-      if (range_prune.second - range_prune.first + 1 >
+      if (range_prune[1] - range_prune[0] + 1 >
             ParentType::num_threads_ * min_size_chunk_prune) {
         _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+        for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
           ParentType::ref_spec_.VisitNode(i);
           ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
       } else if (tid == 0) {
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
-        for(uint i = range_prune.first; i <= range_prune.second; i++) {
+        for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
           ParentType::ref_spec_.VisitNode(i);
           ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
         }
@@ -1269,13 +1556,13 @@ protected:
       ParentType::ref_spec_.InitNode(i);
     }
 
-  for(int i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
+  for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
     auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
 #pragma omp barrier
-    if(range_visit.second - range_visit.first + 1 >
+    if(range_visit[1] - range_visit[0] + 1 >
          ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
           ParentType::ref_spec_.VisitNode(i);
@@ -1290,7 +1577,7 @@ protected:
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
-      for(uint i = range_visit.first; i <= range_visit.second; i++) {
+      for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
         if(i < ParentType::ref_tree_.num_tips()) {
           // i is a tip (only Visit)
           ParentType::ref_spec_.VisitNode(i);
@@ -1449,10 +1736,10 @@ protected:
 
     ParentType::ref_spec_.VisitNode(ParentType::ref_tree_.num_nodes() - 1);
 
-    for(int i_level = ParentType::ref_tree_.num_levels() - 1; i_level >= 0; i_level--) {
-      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
+    for(uint i_level = ParentType::ref_tree_.num_levels(); i_level > 0; i_level--) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level - 1);
       _PRAGMA_OMP_SIMD
-        for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
           ParentType::ref_spec_.VisitNode(i);
         }
     }
@@ -1475,10 +1762,10 @@ protected:
 
     ParentType::ref_spec_.VisitNode(ParentType::ref_tree_.num_nodes() - 1);
 
-    for(int i_level = ParentType::ref_tree_.num_levels() - 1; i_level >= 0; i_level--) {
-      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
+    for(uint i_level = ParentType::ref_tree_.num_levels(); i_level > 0; i_level--) {
+      auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level - 1);
       _PRAGMA_OMP_FOR_SIMD
-        for(uint i = range_visit.first; i <= range_visit.second; i++) {
+        for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
           ParentType::ref_spec_.VisitNode(i);
         }
     }
@@ -1524,12 +1811,53 @@ public:
   AlgorithmType & algorithm() {
     return algorithm_;
   }
+  
 protected:
   TreeType tree_;
   TraversalSpecification spec_;
   AlgorithmType algorithm_;
 };
 
+// A lighter TraversalTask class which gets a reference to an already 
+// constructed tree.
+template<class TraversalSpecification>
+class TraversalTaskLightweight {
+public:
+  typedef TraversalSpecification TraversalSpecificationType;
+  typedef typename TraversalSpecification::TreeType TreeType;
+  typedef typename TraversalSpecification::AlgorithmType AlgorithmType;
+  typedef typename AlgorithmType::ModeType ModeType;
+  typedef typename TreeType::NodeType NodeType;
+  typedef typename TreeType::LengthType LengthType;
+  typedef typename TraversalSpecificationType::DataType DataType;
+  typedef typename TraversalSpecificationType::ParameterType ParameterType;
+  typedef typename TraversalSpecificationType::StateType StateType;
+  
+  TraversalTaskLightweight(
+    TreeType const& tree,
+    DataType const& data):
+    tree_(tree),
+    spec_(tree_, data),
+    algorithm_(tree_, spec_) {}
+  
+  StateType TraverseTree(ParameterType const& par, uint mode) {
+    spec_.SetParameter(par);
+    algorithm_.TraverseTree(static_cast<ModeType>(mode));
+    return spec_.StateAtRoot();
+  }
+  
+  TraversalSpecification & spec() {
+    return spec_;
+  }
+  AlgorithmType & algorithm() {
+    return algorithm_;
+  }
+  
+protected:
+  TreeType const& tree_;
+  TraversalSpecification spec_;
+  AlgorithmType algorithm_;
+};
 
 // The following class defines the main interface of the SPLiTTree library.
 // The user must provide a TraversalSpecificationImplementation class implementing

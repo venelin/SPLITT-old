@@ -40,12 +40,12 @@ namespace splittree {
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
-template<class PruningTree>
-class ThreePointUnivariate: public TraversalSpecification<PruningTree> {
+template<class Tree>
+class ThreePointUnivariate: public TraversalSpecification<Tree> {
 
 public:
-  typedef TraversalSpecification<PruningTree> BaseType;
-  typedef PruningTree TreeType;
+  typedef TraversalSpecification<Tree> BaseType;
+  typedef Tree TreeType;
   typedef vec StateType;
   typedef vec ParameterType;
 
@@ -55,7 +55,7 @@ public:
   vec hat_mu_Y, tilde_mu_X_prime;
   vec lnDetV, p, Q;
 
-  ThreePointUnivariate(PruningTree const& tree): BaseType(tree) {
+  ThreePointUnivariate(Tree const& tree): BaseType(tree) {
     this->tTransf = vec(this->ref_tree_.num_nodes() - 1);
     this->lnDetV = vec(this->ref_tree_.num_nodes(), 0);
     this->p = vec(this->ref_tree_.num_nodes(), 0);

@@ -65,7 +65,11 @@ public:
       vec X(this->ref_tree_.num_tips());
       this->set_X_and_Y(X, X);
 
-      this->h = this->ref_tree_.CalculateHeights(0);
+      // A root-to-node distance vector in the order of pruning processing
+      h.resize(this->ref_tree_.num_nodes() - 1);
+      for(int i = this->ref_tree_.num_nodes() - 2; i >= 0; i--) {
+        h[i] = h[this->ref_tree_.FindIdOfParent(i)] + this->ref_tree_.LengthOfBranch(i);
+      }
 
       this->T = *std::max_element(h.begin(), h.begin()+this->ref_tree_.num_tips());
       this->u = splittree::vec(this->ref_tree_.num_tips());
