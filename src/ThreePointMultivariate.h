@@ -64,7 +64,7 @@ public:
 
   void set_X_and_Y(arma::mat const& X, arma::mat const& Y) {
     if(X.n_rows != this->ref_tree_.num_tips() || Y.n_rows != this->ref_tree_.num_tips()) {
-      Rcpp::stop("The matrices X and Y must have the same number of rows as V.");
+      throw std::invalid_argument("ERR:01301:SPLiTTree:ThreePointMultivariate.h:Set_X_and_Y:: The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 

@@ -64,7 +64,7 @@ public:
 
   void set_X_and_Y(vec const& X, vec const& Y) {
     if(X.size() != this->ref_tree_.num_tips() || Y.size() != this->ref_tree_.num_tips()) {
-      throw std::invalid_argument("The matrices X and Y must have the same number of rows as V.");
+      throw std::invalid_argument("ERR:01101:SPLiTTree:ThreePointUnivariate.h:Set_X_and_Y:: The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 

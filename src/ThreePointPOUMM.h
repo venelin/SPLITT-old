@@ -57,7 +57,7 @@ public:
 
     if(input_data.z_.size() != this->ref_tree_.num_tips() ||
        input_data.se_.size() != this->ref_tree_.num_tips()) {
-      throw std::invalid_argument("The vectors z and se must be the same length as the number of tips.");
+      throw std::invalid_argument("ERR:01201:SPLiTTree:ThreePointPOUMM.h:ThreePointPOUMM:: The vectors z and se must be the same length as the number of tips.");
     } else {
 
       uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
@@ -82,11 +82,11 @@ public:
   void SetParameter(ParameterType const& par) {
     if(par.size() != 5) {
       throw std::invalid_argument(
-          "The par vector should be of length 5 with \
+          "ERR:01211:SPLiTTree:ThreePointPOUMM.h:SetParameter:: The par vector should be of length 5 with \
       elements corresponding to g0, alpha, theta, sigma and sigmae.");
     }
     if(par[1] < 0 || par[3] < 0 || par[4] < 0) {
-      throw std::logic_error("The parameters alpha, sigma and sigmae should be non-negative.");
+      throw std::logic_error("ERR:01212:SPLiTTree:ThreePointPOUMM.h:SetParameter:: The parameters alpha, sigma and sigmae should be non-negative.");
     }
     this->g0 = par[0];
     this->alpha = par[1];

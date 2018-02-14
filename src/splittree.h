@@ -134,7 +134,7 @@ inline VectorValues At(VectorValues const& v, VectorPositions const& positions) 
 template<class VectorValues>
 inline VectorValues At(VectorValues const& v, bvec const& mask) {
   if(mask.size() != v.size()) {
-    throw std::length_error("bool vector mask should have the same length as v.");
+    throw std::length_error("ERR:01001:SPLiTTree:splittree.h:At:: bool vector mask should have the same length as v.");
   }
 
   size_t res_size = 0;
@@ -300,7 +300,8 @@ public:
 
     if(branch_start_nodes.size() != branch_end_nodes.size()) {
       std::ostringstream oss;
-      oss<<"branch_start_nodes and branch_end_nodes should be the same size, but were "
+      oss<<"ERR:01011:SPLiTTree:splittree.h:Tree::"<<
+        " branch_start_nodes and branch_end_nodes should be the same size, but were "
          <<branch_start_nodes.size()<<" and "<<
       branch_end_nodes.size()<<" respectively.";
       throw std::length_error(oss.str());
@@ -338,7 +339,7 @@ public:
     for(uint i = 0; i < branch_start_nodes.size(); ++i) {
       if(branch_start_nodes[i] == branch_end_nodes[i]) {
         std::ostringstream oss;
-        oss<<"Found a branch with the same start and end node ("<<
+        oss<<"ERR:01012:SPLiTTree:splittree.h:Tree:: Found a branch with the same start and end node ("<<
           branch_start_nodes[i]<<"). Not allowed. ";
         throw std::logic_error(oss.str());
       }
@@ -387,7 +388,7 @@ public:
         // node has been previously encountered
         if(ending_at[it2.first->second] != NA_UINT) {
           std::ostringstream oss;
-          oss<<"Found at least two branches ending at the same node ("<<
+          oss<<"ERR:01013:SPLiTTree:splittree.h:Tree:: Found at least two branches ending at the same node ("<<
             it2.first->first<<"). Check for cycles or repeated branches. ";
           throw std::logic_error(oss.str());
         } else {
@@ -405,7 +406,7 @@ public:
 
     if(map_node_to_id_.size() != num_nodes_) {
       std::ostringstream oss;
-      oss<<"The number of distinct nodes ("<<map_node_to_id_.size()<<
+      oss<<"ERR:01014:SPLiTTree:splittree.h:Tree:: The number of distinct nodes ("<<map_node_to_id_.size()<<
         ") should equal the number-of-branches+1 ("<<num_nodes_<<").";
       throw std::logic_error(oss.str());
     }
@@ -413,7 +414,7 @@ public:
     auto num_roots = count(node_types.begin(), node_types.end(), ROOT);
     if(num_roots != 1) {
       std::ostringstream oss;
-      oss<<"There should be exactly one ROOT node, but "<<num_roots<<
+      oss<<"ERR:01015:SPLiTTree:splittree.h:Tree:: There should be exactly one ROOT node, but "<<num_roots<<
         " were found. Check for cycles or for multiple trees.";
       throw std::logic_error(oss.str());
     }
@@ -421,7 +422,7 @@ public:
     this->num_tips_ = count(node_types.begin(), node_types.end(), TIP);
     if(num_tips_ == 0) {
       std::ostringstream oss;
-      oss<<"There should be at least one TIP node, but none"<<
+      oss<<"ERR:01016:SPLiTTree:splittree.h:Tree:: There should be at least one TIP node, but none"<<
         " was found. Check for cycles.";
       throw std::logic_error(oss.str());
     }
@@ -456,7 +457,7 @@ public:
       this->lengths_ = std::vector<LengthType>(num_nodes_ - 1);
     } else if(branch_lengths.size() != 0) {
       std::ostringstream oss;
-      oss<<"branch_lengths should be either empty or of size num_nodes_-1 ("<<
+      oss<<"ERR:01017:SPLiTTree:splittree.h:Tree:: branch_lengths should be either empty or of size num_nodes_-1 ("<<
         num_nodes_-1<<") but is "<<branch_lengths.size()<<"."<<std::endl;
       throw std::invalid_argument(oss.str());
     }
@@ -529,7 +530,7 @@ public:
   LengthType const& LengthOfBranch(uint i) const {
     if(i >= lengths_.size()) {
       std::ostringstream oss;
-      oss<<"i is beyond the size of the lengths_ vector."<<
+      oss<<"ERR:01021:SPLiTTree:splittree.h:LengthOfBranch:: i is beyond the size of the lengths_ vector."<<
         "Check i and that the tree has branches."<<std::endl;
     }
     return lengths_[i];
@@ -563,7 +564,7 @@ public:
   void SetLengthOfBranch(uint i, LengthType const& value) {
     if(!HasBranchLengths()) {
       std::ostringstream oss;
-      oss<<"Trying to set a branch length on a tree without branch lengths. "<<
+      oss<<"ERR:01031:SPLiTTree:splittree.h:SetLengthOfBranch:: Trying to set a branch length on a tree without branch lengths. "<<
         "Use a SetBranchLengths method to add branch lengths first."<<std::endl;
       throw std::logic_error(oss.str());
     } else if(i >= lengths_.size()) {
@@ -593,7 +594,7 @@ public:
   void SetBranchLengths(std::vector<LengthType> const& lengths) {
     if(lengths.size() != 0 && lengths.size() != num_nodes_ - 1) {
       std::ostringstream oss;
-      oss<<"lengths should be either empty or of size num_nodes_-1 ("<<
+      oss<<"ERR:01041:SPLiTTree:splittree.h:SetBranchLengths:: lengths should be either empty or of size num_nodes_-1 ("<<
         num_nodes_-1<<") but is "<<lengths.size()<<"."<<std::endl;
     } else {
       lengths_ = lengths;
@@ -622,12 +623,12 @@ public:
   void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
                         std::vector<LengthType> const& lengths) {
     if(nodes_branch_ends.size() != lengths.size()) {
-      throw std::invalid_argument("The vectors nodes_branch_ends and lengths should be the same size.");
+      throw std::invalid_argument("ERR:01051:SPLiTTree:splittree.h:SetBranchLengths:: The vectors nodes_branch_ends and lengths should be the same size.");
     }
     if( !HasBranchLengths() ) {
       if(nodes_branch_ends.size() != num_nodes_ - 1) {
         std::ostringstream oss;
-        oss<<"Trying to set branch lengths on a tree without such."<<
+        oss<<"ERR:01052:SPLiTTree:splittree.h:SetBranchLengths:: Trying to set branch lengths on a tree without such."<<
           " In this case, the vectors nodes_branch_ends and lengths should have an"<<
             "element for each branch but their size is "<<
               nodes_branch_ends.size()<<" (should be "<<num_nodes_ - 1<<")."<<std::endl;
@@ -640,12 +641,12 @@ public:
       uint id = FindIdOfNode(nodes_branch_ends[i]);
       if(i == NA_UINT || i == num_nodes_ - 1) {
         std::ostringstream oss;
-        oss<<"No branch ends at node identified as "<<id<<
+        oss<<"ERR:01053:SPLiTTree:splittree.h:SetBranchLengths:: No branch ends at node identified as "<<id<<
           ". Check that nodes_branch_ends correspond to tips or internal nodes (excluding the root)"<<std::endl;
         throw std::logic_error(oss.str());
       } else if(visited[id]) {
         std::ostringstream oss;
-        oss<<"Trying to set the length of the same branch twice. Check nodes_branch_ends for duplicates."<<std::endl;
+        oss<<"ERR:01054:SPLiTTree:splittree.h:SetBranchLengths:: Trying to set the length of the same branch twice. Check nodes_branch_ends for duplicates."<<std::endl;
         throw std::logic_error(oss.str());
       }
       visited[id] = true;
@@ -739,7 +740,7 @@ public:
     } else if(i - this->num_tips() < id_child_nodes_.size()) {
       return id_child_nodes_[i - this->num_tips()];
     } else {
-      throw std::invalid_argument("i must be smaller than the number of nodes.");
+      throw std::invalid_argument("ERR:01061:SPLiTTree:splittree.h:FindChildren:: i must be smaller than the number of nodes.");
     }
   }
 
@@ -782,7 +783,7 @@ public:
       auto it = this->map_node_to_id_.find(nodes[i]);
       if(it == this->map_node_to_id_.end()) {
         std::ostringstream oss;
-        oss<<"At least one of the nodes is not present in the tree ("<<
+        oss<<"ERR:01071:SPLiTTree:splittree.h:OrderNodesPosType:: At least one of the nodes is not present in the tree ("<<
           nodes[i]<<").";
         throw std::invalid_argument(oss.str());
       } else {
