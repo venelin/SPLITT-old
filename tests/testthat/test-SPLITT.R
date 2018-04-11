@@ -1,5 +1,5 @@
 library(testthat)
-library(SPLiTTree)
+library(SPLITT)
 library(microbenchmark)
 library(ape)
 library(POUMM)
@@ -53,13 +53,13 @@ z <- rVNodesGivenTreePOUMM(tree, g0, alpha, theta, sigma, sigmae)
 # z<-trees$z[[24]]
 
 
-#ppt<-SPLiTTree:::ParallelPruningTree$new(tree)
+#ppt<-SPLITT:::ParallelPruningTree$new(tree)
 context("POUMM::pruneTree")
 pruneInfo <- POUMM::pruneTree(tree, z, se)
 
 
-context("SPLiTTree:::ParallelPruningThreePointPOUMM")
-poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
+context("SPLITT:::ParallelPruningThreePointPOUMM")
+poummlnDetVQ <- SPLITT:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 # test correct value
 test_that("POUMM lnDetV_Q", expect_lt(abs(
@@ -78,7 +78,7 @@ test_that("Equal parallel vs serial pruning", expect_equal(
 
 
 library(ape)
-library(SPLiTTree)
+library(SPLITT)
 library(microbenchmark)
 library(testthat)
 N <- 10000
@@ -106,7 +106,7 @@ lik_POUMM_lnDetV_Q <- function(
   -1/2*(N*log(2*pi) + 2*res[3] + res[1]+res[2])
 }
 
-poummlnDetVQ <- SPLiTTree:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
+poummlnDetVQ <- SPLITT:::ParallelPruningThreePointPOUMM$new(tree, z = z[1:N], se = se)
 
 
 

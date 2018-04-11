@@ -1,11 +1,11 @@
-Package: SPLiTTree
+Package: SPLITT
 Type: Package
 Title: A generic library for Serial and Parallel Lineage Traversal of Trees
 Version: 1.0
 Date: 2018-01-04
 Authors@R: person("Venelin", "Mitov", email = "vmitov@gmail.com",
                  role = c("aut", "cre", "cph"))
-Description: SPLiTTree is a one-header-only generic C++ library for serial and
+Description: SPLITT is a one-header-only generic C++ library for serial and
  parallel pre-order and post-order traversal of trees. The library implements
  several algorithms for parallel lineage traversal and is capable to choose 
  automatically the fastest implementation for a particular visit-node operation

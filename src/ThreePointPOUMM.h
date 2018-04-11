@@ -1,24 +1,24 @@
 /*
  *  ThreePointPOUMM.h
- *  SPLiTTree
+ *  SPLITT
  *
  * Copyright 2017 Venelin Mitov
  *
- * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * This file is part of SPLITT: a generic C++ library for Serial and Parallel
  * Lineage Traversal of Trees.
  *
- * SPLiTTree is free software: you can redistribute it and/or modify
+ * SPLITT is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * SPLiTTree is distributed in the hope that it will be useful,
+ * SPLITT is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with SPLiTTree.  If not, see
+ * License along with SPLITT.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Venelin Mitov
@@ -30,7 +30,7 @@
 #include "ThreePointUnivariate.h"
 #include "NumericTraitData.h"
 
-namespace splittree {
+namespace SPLITT {
 
 template<class Tree>
 class ThreePointPOUMM: public ThreePointUnivariate<Tree> {
@@ -45,8 +45,8 @@ public:
   typedef vec StateType;
 
   // univariate trait vector
-  splittree::vec z;
-  splittree::vec h, u;
+  SPLITT::vec z;
+  SPLITT::vec h, u;
   double g0, alpha, alpha_x_2, theta, g0_theta, sigma, sigma2, sigma2_div_alpha_x_2, sigmae, sigmae2, e2alphaT, sum_u;
   double T; // tree height
 
@@ -57,7 +57,7 @@ public:
 
     if(input_data.z_.size() != this->ref_tree_.num_tips() ||
        input_data.se_.size() != this->ref_tree_.num_tips()) {
-      throw std::invalid_argument("ERR:01201:SPLiTTree:ThreePointPOUMM.h:ThreePointPOUMM:: The vectors z and se must be the same length as the number of tips.");
+      throw std::invalid_argument("ERR:01201:SPLITT:ThreePointPOUMM.h:ThreePointPOUMM:: The vectors z and se must be the same length as the number of tips.");
     } else {
 
       uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
@@ -72,7 +72,7 @@ public:
       }
 
       this->T = *std::max_element(h.begin(), h.begin()+this->ref_tree_.num_tips());
-      this->u = splittree::vec(this->ref_tree_.num_tips());
+      this->u = SPLITT::vec(this->ref_tree_.num_tips());
       for(int i = 0; i < this->ref_tree_.num_tips(); i++) u[i] = T - h[i];
       sum_u = 0;
       for(auto uu : u) sum_u += uu;
@@ -82,11 +82,11 @@ public:
   void SetParameter(ParameterType const& par) {
     if(par.size() != 5) {
       throw std::invalid_argument(
-          "ERR:01211:SPLiTTree:ThreePointPOUMM.h:SetParameter:: The par vector should be of length 5 with \
+          "ERR:01211:SPLITT:ThreePointPOUMM.h:SetParameter:: The par vector should be of length 5 with \
       elements corresponding to g0, alpha, theta, sigma and sigmae.");
     }
     if(par[1] < 0 || par[3] < 0 || par[4] < 0) {
-      throw std::logic_error("ERR:01212:SPLiTTree:ThreePointPOUMM.h:SetParameter:: The parameters alpha, sigma and sigmae should be non-negative.");
+      throw std::logic_error("ERR:01212:SPLITT:ThreePointPOUMM.h:SetParameter:: The parameters alpha, sigma and sigmae should be non-negative.");
     }
     this->g0 = par[0];
     this->alpha = par[1];

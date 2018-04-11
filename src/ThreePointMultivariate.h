@@ -1,24 +1,24 @@
 /*
  *  ThreePointMultivariate.h
- *  SPLiTTree
+ *  SPLITT
  *
  * Copyright 2017 Venelin Mitov
  *
- * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * This file is part of SPLITT: a generic C++ library for Serial and Parallel
  * Lineage Traversal of Trees.
  *
- * SPLiTTree is free software: you can redistribute it and/or modify
+ * SPLITT is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * SPLiTTree is distributed in the hope that it will be useful,
+ * SPLITT is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with SPLiTTree.  If not, see
+ * License along with SPLITT.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Venelin Mitov
@@ -26,7 +26,7 @@
 #ifndef ParallelPruning_ThreePointMultivariate_H_
 #define ParallelPruning_ThreePointMultivariate_H_
 
-#include "splittree.h"
+#include "SPLITT.h"
 #include <armadillo>
 
 // Calculate the |V| and quadratic quantities of the form Q=X'V^(-1)Y, for
@@ -40,7 +40,7 @@
 //
 // Reference: Lam Si Tung Ho and Cécile Ané. A Linear-Time Algorithm for
 // Gaussian and Non-Gaussian Trait Evolution Models. SysBiol 2014.
-namespace splittree {
+namespace SPLITT {
 template<class PruningTree>
 class ThreePointMultivariate: public TraversalSpecification<PruningTree> {
 public:
@@ -64,7 +64,7 @@ public:
 
   void set_X_and_Y(arma::mat const& X, arma::mat const& Y) {
     if(X.n_rows != this->ref_tree_.num_tips() || Y.n_rows != this->ref_tree_.num_tips()) {
-      throw std::invalid_argument("ERR:01301:SPLiTTree:ThreePointMultivariate.h:Set_X_and_Y:: The matrices X and Y must have the same number of rows as V.");
+      throw std::invalid_argument("ERR:01301:SPLITT:ThreePointMultivariate.h:Set_X_and_Y:: The matrices X and Y must have the same number of rows as V.");
     } else {
       this->X = X; this->Y = Y;
 

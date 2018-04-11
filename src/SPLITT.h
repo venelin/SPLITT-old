@@ -1,31 +1,31 @@
 /*
- *  splittree.h
- *  SPLiTTree
+ *  SPLITT.h
+ *  SPLITT
  *
  * Copyright 2017 Venelin Mitov
  *
- * This file is part of SPLiTTree: a generic C++ library for Serial and Parallel
+ * This file is part of SPLITT: a generic C++ library for Serial and Parallel
  * Lineage Traversal of Trees.
  *
- * SPLiTTree is free software: you can redistribute it and/or modify
+ * SPLITT is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * SPLiTTree is distributed in the hope that it will be useful,
+ * SPLITT is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with SPLiTTree.  If not, see
+ * License along with SPLITT.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Venelin Mitov
  */
 
-#ifndef SPLiTTree_splittree_H_
-#define SPLiTTree_splittree_H_
+#ifndef SPLITT_SPLITT_H_
+#define SPLITT_SPLITT_H_
 
 #include <algorithm>
 #include <vector>
@@ -68,13 +68,13 @@
 #endif // #ifdef _OPENMP
 
 
-//' @name splittree
-//' @title namespace splittree;
+//' @name SPLITT
+//' @title namespace SPLITT;
 //' 
-//' @description All functions and classes defined in the namespace splittree.
+//' @description All functions and classes defined in the namespace SPLITT.
 //' 
 //' [[Rcpp::export]]
-namespace splittree{
+namespace SPLITT{
 
 //' @name uint
 //' @title typedef unsigned int uint;
@@ -134,7 +134,7 @@ inline VectorValues At(VectorValues const& v, VectorPositions const& positions) 
 template<class VectorValues>
 inline VectorValues At(VectorValues const& v, bvec const& mask) {
   if(mask.size() != v.size()) {
-    throw std::length_error("ERR:01001:SPLiTTree:splittree.h:At:: bool vector mask should have the same length as v.");
+    throw std::length_error("ERR:01001:SPLITT:SPLITT.h:At:: bool vector mask should have the same length as v.");
   }
 
   size_t res_size = 0;
@@ -300,7 +300,7 @@ public:
 
     if(branch_start_nodes.size() != branch_end_nodes.size()) {
       std::ostringstream oss;
-      oss<<"ERR:01011:SPLiTTree:splittree.h:Tree::"<<
+      oss<<"ERR:01011:SPLITT:SPLITT.h:Tree::"<<
         " branch_start_nodes and branch_end_nodes should be the same size, but were "
          <<branch_start_nodes.size()<<" and "<<
       branch_end_nodes.size()<<" respectively.";
@@ -339,7 +339,7 @@ public:
     for(uint i = 0; i < branch_start_nodes.size(); ++i) {
       if(branch_start_nodes[i] == branch_end_nodes[i]) {
         std::ostringstream oss;
-        oss<<"ERR:01012:SPLiTTree:splittree.h:Tree:: Found a branch with the same start and end node ("<<
+        oss<<"ERR:01012:SPLITT:SPLITT.h:Tree:: Found a branch with the same start and end node ("<<
           branch_start_nodes[i]<<"). Not allowed. ";
         throw std::logic_error(oss.str());
       }
@@ -388,7 +388,7 @@ public:
         // node has been previously encountered
         if(ending_at[it2.first->second] != NA_UINT) {
           std::ostringstream oss;
-          oss<<"ERR:01013:SPLiTTree:splittree.h:Tree:: Found at least two branches ending at the same node ("<<
+          oss<<"ERR:01013:SPLITT:SPLITT.h:Tree:: Found at least two branches ending at the same node ("<<
             it2.first->first<<"). Check for cycles or repeated branches. ";
           throw std::logic_error(oss.str());
         } else {
@@ -406,7 +406,7 @@ public:
 
     if(map_node_to_id_.size() != num_nodes_) {
       std::ostringstream oss;
-      oss<<"ERR:01014:SPLiTTree:splittree.h:Tree:: The number of distinct nodes ("<<map_node_to_id_.size()<<
+      oss<<"ERR:01014:SPLITT:SPLITT.h:Tree:: The number of distinct nodes ("<<map_node_to_id_.size()<<
         ") should equal the number-of-branches+1 ("<<num_nodes_<<").";
       throw std::logic_error(oss.str());
     }
@@ -414,7 +414,7 @@ public:
     auto num_roots = count(node_types.begin(), node_types.end(), ROOT);
     if(num_roots != 1) {
       std::ostringstream oss;
-      oss<<"ERR:01015:SPLiTTree:splittree.h:Tree:: There should be exactly one ROOT node, but "<<num_roots<<
+      oss<<"ERR:01015:SPLITT:SPLITT.h:Tree:: There should be exactly one ROOT node, but "<<num_roots<<
         " were found. Check for cycles or for multiple trees.";
       throw std::logic_error(oss.str());
     }
@@ -422,7 +422,7 @@ public:
     this->num_tips_ = count(node_types.begin(), node_types.end(), TIP);
     if(num_tips_ == 0) {
       std::ostringstream oss;
-      oss<<"ERR:01016:SPLiTTree:splittree.h:Tree:: There should be at least one TIP node, but none"<<
+      oss<<"ERR:01016:SPLITT:SPLITT.h:Tree:: There should be at least one TIP node, but none"<<
         " was found. Check for cycles.";
       throw std::logic_error(oss.str());
     }
@@ -457,7 +457,7 @@ public:
       this->lengths_ = std::vector<LengthType>(num_nodes_ - 1);
     } else if(branch_lengths.size() != 0) {
       std::ostringstream oss;
-      oss<<"ERR:01017:SPLiTTree:splittree.h:Tree:: branch_lengths should be either empty or of size num_nodes_-1 ("<<
+      oss<<"ERR:01017:SPLITT:SPLITT.h:Tree:: branch_lengths should be either empty or of size num_nodes_-1 ("<<
         num_nodes_-1<<") but is "<<branch_lengths.size()<<"."<<std::endl;
       throw std::invalid_argument(oss.str());
     }
@@ -530,7 +530,7 @@ public:
   LengthType const& LengthOfBranch(uint i) const {
     if(i >= lengths_.size()) {
       std::ostringstream oss;
-      oss<<"ERR:01021:SPLiTTree:splittree.h:LengthOfBranch:: i is beyond the size of the lengths_ vector."<<
+      oss<<"ERR:01021:SPLITT:SPLITT.h:LengthOfBranch:: i is beyond the size of the lengths_ vector."<<
         "Check i and that the tree has branches."<<std::endl;
     }
     return lengths_[i];
@@ -564,7 +564,7 @@ public:
   void SetLengthOfBranch(uint i, LengthType const& value) {
     if(!HasBranchLengths()) {
       std::ostringstream oss;
-      oss<<"ERR:01031:SPLiTTree:splittree.h:SetLengthOfBranch:: Trying to set a branch length on a tree without branch lengths. "<<
+      oss<<"ERR:01031:SPLITT:SPLITT.h:SetLengthOfBranch:: Trying to set a branch length on a tree without branch lengths. "<<
         "Use a SetBranchLengths method to add branch lengths first."<<std::endl;
       throw std::logic_error(oss.str());
     } else if(i >= lengths_.size()) {
@@ -594,7 +594,7 @@ public:
   void SetBranchLengths(std::vector<LengthType> const& lengths) {
     if(lengths.size() != 0 && lengths.size() != num_nodes_ - 1) {
       std::ostringstream oss;
-      oss<<"ERR:01041:SPLiTTree:splittree.h:SetBranchLengths:: lengths should be either empty or of size num_nodes_-1 ("<<
+      oss<<"ERR:01041:SPLITT:SPLITT.h:SetBranchLengths:: lengths should be either empty or of size num_nodes_-1 ("<<
         num_nodes_-1<<") but is "<<lengths.size()<<"."<<std::endl;
     } else {
       lengths_ = lengths;
@@ -623,12 +623,12 @@ public:
   void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
                         std::vector<LengthType> const& lengths) {
     if(nodes_branch_ends.size() != lengths.size()) {
-      throw std::invalid_argument("ERR:01051:SPLiTTree:splittree.h:SetBranchLengths:: The vectors nodes_branch_ends and lengths should be the same size.");
+      throw std::invalid_argument("ERR:01051:SPLITT:SPLITT.h:SetBranchLengths:: The vectors nodes_branch_ends and lengths should be the same size.");
     }
     if( !HasBranchLengths() ) {
       if(nodes_branch_ends.size() != num_nodes_ - 1) {
         std::ostringstream oss;
-        oss<<"ERR:01052:SPLiTTree:splittree.h:SetBranchLengths:: Trying to set branch lengths on a tree without such."<<
+        oss<<"ERR:01052:SPLITT:SPLITT.h:SetBranchLengths:: Trying to set branch lengths on a tree without such."<<
           " In this case, the vectors nodes_branch_ends and lengths should have an"<<
             "element for each branch but their size is "<<
               nodes_branch_ends.size()<<" (should be "<<num_nodes_ - 1<<")."<<std::endl;
@@ -641,12 +641,12 @@ public:
       uint id = FindIdOfNode(nodes_branch_ends[i]);
       if(i == NA_UINT || i == num_nodes_ - 1) {
         std::ostringstream oss;
-        oss<<"ERR:01053:SPLiTTree:splittree.h:SetBranchLengths:: No branch ends at node identified as "<<id<<
+        oss<<"ERR:01053:SPLITT:SPLITT.h:SetBranchLengths:: No branch ends at node identified as "<<id<<
           ". Check that nodes_branch_ends correspond to tips or internal nodes (excluding the root)"<<std::endl;
         throw std::logic_error(oss.str());
       } else if(visited[id]) {
         std::ostringstream oss;
-        oss<<"ERR:01054:SPLiTTree:splittree.h:SetBranchLengths:: Trying to set the length of the same branch twice. Check nodes_branch_ends for duplicates."<<std::endl;
+        oss<<"ERR:01054:SPLITT:SPLITT.h:SetBranchLengths:: Trying to set the length of the same branch twice. Check nodes_branch_ends for duplicates."<<std::endl;
         throw std::logic_error(oss.str());
       }
       visited[id] = true;
@@ -740,7 +740,7 @@ public:
     } else if(i - this->num_tips() < id_child_nodes_.size()) {
       return id_child_nodes_[i - this->num_tips()];
     } else {
-      throw std::invalid_argument("ERR:01061:SPLiTTree:splittree.h:FindChildren:: i must be smaller than the number of nodes.");
+      throw std::invalid_argument("ERR:01061:SPLITT:SPLITT.h:FindChildren:: i must be smaller than the number of nodes.");
     }
   }
 
@@ -783,7 +783,7 @@ public:
       auto it = this->map_node_to_id_.find(nodes[i]);
       if(it == this->map_node_to_id_.end()) {
         std::ostringstream oss;
-        oss<<"ERR:01071:SPLiTTree:splittree.h:OrderNodesPosType:: At least one of the nodes is not present in the tree ("<<
+        oss<<"ERR:01071:SPLITT:SPLITT.h:OrderNodesPosType:: At least one of the nodes is not present in the tree ("<<
           nodes[i]<<").";
         throw std::invalid_argument(oss.str());
       } else {
@@ -1121,6 +1121,44 @@ this->num_threads_ = 1;
 template<class TraversalSpecification>
 class PostOrderTraversal: public TraversalAlgorithm<TraversalSpecification> {
   
+  // un internal class for rethrowing exception caught within parallel sections.
+  // This is inspired from the following stackoverflow discussion:
+  // https://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
+  class ThreadExceptionHandler {
+    std::exception_ptr ptr_;
+    std::mutex         lock_;
+  public:
+    ThreadExceptionHandler(): ptr_(nullptr) {}
+    // Copy initialization (non-thread-safe)
+    ThreadExceptionHandler(const ThreadExceptionHandler& other): ptr_(other.ptr_) {}
+      
+    // If there is an exception it gets rethrowed and the ptr_ is set to nullptr.
+    void Rethrow() {
+      if(this->ptr_) {
+        std::exception_ptr ptr = this->ptr_;
+        // reset ptr_ to nullptr so the handler object is cleaned and reusable
+        // after the call to Rethrow().
+        this->ptr_ = nullptr;
+        std::rethrow_exception(ptr);
+      }
+    }
+    void CaptureException() { 
+      std::unique_lock<std::mutex> guard(this->lock_);
+      this->ptr_ = std::current_exception(); 
+    }
+    
+    template <typename Function, typename... Parameters>
+    void Run(Function f, Parameters... params) {
+      try {
+        f(params...);
+      }
+      catch (...) {
+        CaptureException();
+      }
+    }
+  };
+  ThreadExceptionHandler exception_handler_;  
+  
 public:
   typedef TraversalAlgorithm<TraversalSpecification> ParentType;
 
@@ -1143,6 +1181,7 @@ public:
     case ModeType::HYBRID_LOOP_VISITS: TraverseTreeHybridLoopVisits(); break;
     default: TraverseTreeAuto();
     }
+    exception_handler_.Rethrow();
   }
 protected:
   uint current_step_tuning_ = 0;
@@ -1322,7 +1361,9 @@ protected:
 {
   _PRAGMA_OMP_FOR_SIMD
   for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-    ParentType::ref_spec_.InitNode(i);
+    exception_handler_.Run([=]{
+      ParentType::ref_spec_.InitNode(i);  
+    });
   }
 
   uint i_prune = 0;
@@ -1333,7 +1374,9 @@ protected:
     auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-        ParentType::ref_spec_.VisitNode(i);
+        exception_handler_.Run([=]{
+          ParentType::ref_spec_.VisitNode(i);
+        });
       }
 
       uint num_branches_done = 0;
@@ -1344,7 +1387,9 @@ protected:
 
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
-          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          exception_handler_.Run([=]{
+            ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          });
         }
 
         num_branches_done +=  range_prune[1] - range_prune[0] + 1;
@@ -1366,23 +1411,27 @@ protected:
 
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-      ParentType::ref_spec_.InitNode(i);
+      exception_handler_.Run([=]{
+        ParentType::ref_spec_.InitNode(i);
+      });
     }
 
     for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
       auto range_visit = ParentType::ref_tree_.RangeIdVisitNode(i_level);
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-        if(i < ParentType::ref_tree_.num_tips()) {
-          // i is a tip (only Visit)
-          ParentType::ref_spec_.VisitNode(i);
-        } else {
-          // i is internal
-          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
-            ParentType::ref_spec_.PruneNode(j, i);
+        exception_handler_.Run([=]{
+          if(i < ParentType::ref_tree_.num_tips()) {
+            // i is a tip (only Visit)
+            ParentType::ref_spec_.VisitNode(i);
+          } else {
+            // i is internal
+            for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+              ParentType::ref_spec_.PruneNode(j, i);
+            }
+            ParentType::ref_spec_.VisitNode(i);
           }
-          ParentType::ref_spec_.VisitNode(i);
-        }
+        });
       }
     }
 }
@@ -1396,38 +1445,40 @@ protected:
     ParentType::visit_queue_.Init(ParentType::num_children_);
 #pragma omp parallel
 {
-  while(true) {
-    uint i = ParentType::visit_queue_.NextInQueue();
-    if(i == NA_UINT) {
-      continue;
-    } else if(i == ParentType::ref_tree_.num_nodes()) {
-      break;
-    } else if(i < ParentType::ref_tree_.num_tips()) {
-      // i is a tip (only Visit)
-      ParentType::ref_spec_.InitNode(i);
-      ParentType::ref_spec_.VisitNode(i);
-      ParentType::visit_queue_.RemoveVisitedNode(i);
-    } else if(i < ParentType::ref_tree_.num_nodes() - 1){
-      // i is internal
-      ParentType::ref_spec_.InitNode(i);
-      uvec const& children = ParentType::ref_tree_.FindChildren(i);
-      for(uint j: children) {
-        ParentType::ref_spec_.PruneNode(j, i);
+  exception_handler_.Run([=]{
+    while(true) {
+      uint i = ParentType::visit_queue_.NextInQueue();
+      if(i == NA_UINT) {
+        continue;
+      } else if(i == ParentType::ref_tree_.num_nodes()) {
+        break;
+      } else if(i < ParentType::ref_tree_.num_tips()) {
+        // i is a tip (only Visit)
+        ParentType::ref_spec_.InitNode(i);
+        ParentType::ref_spec_.VisitNode(i);
+        ParentType::visit_queue_.RemoveVisitedNode(i);
+      } else if(i < ParentType::ref_tree_.num_nodes() - 1){
+        // i is internal
+        ParentType::ref_spec_.InitNode(i);
+        uvec const& children = ParentType::ref_tree_.FindChildren(i);
+        for(uint j: children) {
+          ParentType::ref_spec_.PruneNode(j, i);
+        }
+        ParentType::ref_spec_.VisitNode(i);
+        ParentType::visit_queue_.RemoveVisitedNode(i);
+      } else {
+        // i is the root
+        ParentType::ref_spec_.InitNode(i);
+        uvec const& children = ParentType::ref_tree_.FindChildren(i);
+        for(uint j: children) {
+          ParentType::ref_spec_.PruneNode(j, i);
+        }
+        // don't visit the root
       }
-      ParentType::ref_spec_.VisitNode(i);
-      ParentType::visit_queue_.RemoveVisitedNode(i);
-    } else {
-      // i is the root
-      ParentType::ref_spec_.InitNode(i);
-      uvec const& children = ParentType::ref_tree_.FindChildren(i);
-      for(uint j: children) {
-        ParentType::ref_spec_.PruneNode(j, i);
-      }
-      // don't visit the root
     }
-  }
+  });
 }
-  }
+}
 
   void TraverseTreeMultiThreadLoopPrunes() {
 
@@ -1435,7 +1486,9 @@ protected:
 {
   _PRAGMA_OMP_FOR_SIMD
   for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-    ParentType::ref_spec_.InitNode(i);
+    exception_handler_.Run([=]{
+      ParentType::ref_spec_.InitNode(i);
+    });
   }
 
   for(uint i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
@@ -1443,8 +1496,10 @@ protected:
 
     _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
-        ParentType::ref_spec_.VisitNode(i);
-        ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+        exception_handler_.Run([=]{
+          ParentType::ref_spec_.VisitNode(i);
+          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+        });
       }
   }
 }
@@ -1463,7 +1518,9 @@ protected:
 
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-      ParentType::ref_spec_.InitNode(i);
+      exception_handler_.Run([=]{
+        ParentType::ref_spec_.InitNode(i);
+      });
     }
 
     uint i_prune = 0;
@@ -1474,13 +1531,17 @@ protected:
          ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-          ParentType::ref_spec_.VisitNode(i);
+          exception_handler_.Run([=]{
+            ParentType::ref_spec_.VisitNode(i);
+          });
         }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-        ParentType::ref_spec_.VisitNode(i);
+        exception_handler_.Run([=]{
+          ParentType::ref_spec_.VisitNode(i);
+        });
       }
     }
 
@@ -1491,7 +1552,9 @@ protected:
         auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
         _PRAGMA_OMP_SIMD
           for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
-            ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+            exception_handler_.Run([=]{
+              ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+            });
           }
 
           num_branches_done +=  range_prune[1] - range_prune[0] + 1;
@@ -1515,7 +1578,9 @@ protected:
 
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-      ParentType::ref_spec_.InitNode(i);
+      exception_handler_.Run([=]{
+        ParentType::ref_spec_.InitNode(i);
+      });
     }
 
 
@@ -1526,15 +1591,19 @@ protected:
             ParentType::num_threads_ * min_size_chunk_prune) {
         _PRAGMA_OMP_FOR_SIMD
         for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
-          ParentType::ref_spec_.VisitNode(i);
-          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          exception_handler_.Run([=]{
+            ParentType::ref_spec_.VisitNode(i);
+            ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          });
         }
       } else if (tid == 0) {
         // only one (master) thread executes this
         _PRAGMA_OMP_SIMD
         for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
-          ParentType::ref_spec_.VisitNode(i);
-          ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          exception_handler_.Run([=]{
+            ParentType::ref_spec_.VisitNode(i);
+            ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+          });
         }
       }
     }
@@ -1554,7 +1623,9 @@ protected:
 
   _PRAGMA_OMP_FOR_SIMD
     for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
-      ParentType::ref_spec_.InitNode(i);
+      exception_handler_.Run([=]{
+        ParentType::ref_spec_.InitNode(i);
+      });
     }
 
   for(uint i_level = 0; i_level < ParentType::ref_tree_.num_levels(); i_level++) {
@@ -1564,41 +1635,46 @@ protected:
          ParentType::num_threads_ * min_size_chunk_visit) {
       _PRAGMA_OMP_FOR_SIMD
       for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-        if(i < ParentType::ref_tree_.num_tips()) {
-          // i is a tip (only Visit)
-          ParentType::ref_spec_.VisitNode(i);
-        } else if(i < ParentType::ref_tree_.num_nodes() - 1){
-          // i is internal
-          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
-            ParentType::ref_spec_.PruneNode(j, i);
+        exception_handler_.Run([=]{
+          if(i < ParentType::ref_tree_.num_tips()) {
+            // i is a tip (only Visit)
+            ParentType::ref_spec_.VisitNode(i);
+          } else if(i < ParentType::ref_tree_.num_nodes() - 1){
+            // i is internal
+            for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+              ParentType::ref_spec_.PruneNode(j, i);
+            }
+            ParentType::ref_spec_.VisitNode(i);
           }
-          ParentType::ref_spec_.VisitNode(i);
-        }
+        });
       }
     } else if(tid == 0) {
       // only the master thread executes this
       _PRAGMA_OMP_SIMD
       for(uint i = range_visit[0]; i <= range_visit[1]; i++) {
-        if(i < ParentType::ref_tree_.num_tips()) {
-          // i is a tip (only Visit)
-          ParentType::ref_spec_.VisitNode(i);
-        } else if(i < ParentType::ref_tree_.num_nodes() - 1){
-          // i is internal
-          for(uint j: ParentType::ref_tree_.FindChildren(i)) {
-            ParentType::ref_spec_.PruneNode(j, i);
+        exception_handler_.Run([=]{
+          if(i < ParentType::ref_tree_.num_tips()) {
+            // i is a tip (only Visit)
+            ParentType::ref_spec_.VisitNode(i);
+          } else if(i < ParentType::ref_tree_.num_nodes() - 1){
+            // i is internal
+            for(uint j: ParentType::ref_tree_.FindChildren(i)) {
+              ParentType::ref_spec_.PruneNode(j, i);
+            }
+            ParentType::ref_spec_.VisitNode(i);
           }
-          ParentType::ref_spec_.VisitNode(i);
-        }
+        });
       }
     }
   }
 }
     // VisitNode not called on the root
     for(uint j: ParentType::ref_tree_.FindChildren(ParentType::ref_tree_.num_nodes() - 1)) {
-      ParentType::ref_spec_.PruneNode(j, ParentType::ref_tree_.num_nodes() - 1);
+      exception_handler_.Run([=]{
+        ParentType::ref_spec_.PruneNode(j, ParentType::ref_tree_.num_nodes() - 1);
+      });
     }
   }
-
 };
 
 
@@ -1860,7 +1936,7 @@ protected:
   AlgorithmType algorithm_;
 };
 
-// The following class defines the main interface of the SPLiTTree library.
+// The following class defines the main interface of the SPLITT library.
 // The user must provide a TraversalSpecificationImplementation class implementing
 // this class' methods as described in the comments below. It is
 // highly recommended to inherit from this class. However, this is not at all
@@ -1933,4 +2009,4 @@ public:
 // and to call their TraverseTree method.
 // typedef TraversalTask<TraversalSpecificationImplementation> > MyTraversalTask;
 }
-#endif // SPLiTTree_splittree_H_
+#endif // SPLITT_SPLITT_H_
