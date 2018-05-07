@@ -963,6 +963,7 @@ enum PostOrderMode {
   MULTI_THREAD_LOOP_VISITS = 22,
   MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES = 23,
   MULTI_THREAD_VISIT_QUEUE = 24,
+  MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION = 25,
   HYBRID_LOOP_PRUNES = 31,
   HYBRID_LOOP_VISITS = 32,
   HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES = 33
@@ -978,6 +979,7 @@ inline std::ostream& operator<< (std::ostream& os, PostOrderMode mode) {
   case PostOrderMode::MULTI_THREAD_LOOP_VISITS: os<<"MULTI_THREAD_LOOP_VISITS"; break;
   case PostOrderMode::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
   case PostOrderMode::MULTI_THREAD_VISIT_QUEUE: os<<"MULTI_THREAD_VISIT_QUEUE"; break;
+  case PostOrderMode::MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION: os<<"MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION"; break;
   case PostOrderMode::HYBRID_LOOP_PRUNES: os<<"HYBRID_LOOP_PRUNES"; break;
   case PostOrderMode::HYBRID_LOOP_VISITS: os<<"HYBRID_LOOP_VISITS"; break;
   case PostOrderMode::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: os<<"HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES"; break;
@@ -1118,45 +1120,46 @@ this->num_threads_ = 1;
   }
 };
 
+// un internal class for rethrowing exception caught within parallel sections.
+// This is inspired from the following stackoverflow discussion:
+// https://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
+class ThreadExceptionHandler {
+  std::exception_ptr ptr_;
+  std::mutex         lock_;
+public:
+  ThreadExceptionHandler(): ptr_(nullptr) {}
+  // Copy initialization (non-thread-safe)
+  ThreadExceptionHandler(const ThreadExceptionHandler& other): ptr_(other.ptr_) {}
+  
+  // If there is an exception it gets rethrowed and the ptr_ is set to nullptr.
+  void Rethrow() {
+    if(this->ptr_) {
+      std::exception_ptr ptr = this->ptr_;
+      // reset ptr_ to nullptr so the handler object is cleaned and reusable
+      // after the call to Rethrow().
+      this->ptr_ = nullptr;
+      std::rethrow_exception(ptr);
+    }
+  }
+  void CaptureException() { 
+    std::unique_lock<std::mutex> guard(this->lock_);
+    this->ptr_ = std::current_exception(); 
+  }
+  
+  template <typename Function, typename... Parameters>
+  void Run(Function f, Parameters... params) {
+    try {
+      f(params...);
+    }
+    catch (...) {
+      CaptureException();
+    }
+  }
+};
+
 template<class TraversalSpecification>
 class PostOrderTraversal: public TraversalAlgorithm<TraversalSpecification> {
   
-  // un internal class for rethrowing exception caught within parallel sections.
-  // This is inspired from the following stackoverflow discussion:
-  // https://stackoverflow.com/questions/11828539/elegant-exceptionhandling-in-openmp
-  class ThreadExceptionHandler {
-    std::exception_ptr ptr_;
-    std::mutex         lock_;
-  public:
-    ThreadExceptionHandler(): ptr_(nullptr) {}
-    // Copy initialization (non-thread-safe)
-    ThreadExceptionHandler(const ThreadExceptionHandler& other): ptr_(other.ptr_) {}
-      
-    // If there is an exception it gets rethrowed and the ptr_ is set to nullptr.
-    void Rethrow() {
-      if(this->ptr_) {
-        std::exception_ptr ptr = this->ptr_;
-        // reset ptr_ to nullptr so the handler object is cleaned and reusable
-        // after the call to Rethrow().
-        this->ptr_ = nullptr;
-        std::rethrow_exception(ptr);
-      }
-    }
-    void CaptureException() { 
-      std::unique_lock<std::mutex> guard(this->lock_);
-      this->ptr_ = std::current_exception(); 
-    }
-    
-    template <typename Function, typename... Parameters>
-    void Run(Function f, Parameters... params) {
-      try {
-        f(params...);
-      }
-      catch (...) {
-        CaptureException();
-      }
-    }
-  };
   ThreadExceptionHandler exception_handler_;  
   
 public:
@@ -1176,6 +1179,7 @@ public:
     case ModeType::MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES: TraverseTreeMultiThreadLoopVisitsThenLoopPrunes(); break;
     case ModeType::MULTI_THREAD_LOOP_VISITS: TraverseTreeMultiThreadLoopVisits(); break;
     case ModeType::MULTI_THREAD_VISIT_QUEUE: TraverseTreeMultiThreadVisitQueue(); break;
+    case ModeType::MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION: TraverseTreeMultiThreadLoopPrunesNoException(); break;
     case ModeType::HYBRID_LOOP_PRUNES: TraverseTreeHybridLoopPrunes(); break;
     case ModeType::HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES: TraverseTreeHybridLoopVisitsThenLoopPrunes(); break;
     case ModeType::HYBRID_LOOP_VISITS: TraverseTreeHybridLoopVisits(); break;
@@ -1504,6 +1508,28 @@ protected:
   }
 }
   }
+  
+  void TraverseTreeMultiThreadLoopPrunesNoException() {
+    
+#pragma omp parallel
+{
+  _PRAGMA_OMP_FOR_SIMD
+  for(uint i = 0; i < ParentType::ref_tree_.num_nodes(); i++) {
+    ParentType::ref_spec_.InitNode(i);
+  }
+  
+  for(uint i_prune = 0; i_prune < ParentType::ref_tree_.num_parallel_ranges_prune(); i_prune++) {
+    auto range_prune = ParentType::ref_tree_.RangeIdPruneNode(i_prune);
+    
+    _PRAGMA_OMP_FOR_SIMD
+      for(uint i = range_prune[0]; i <= range_prune[1]; i++) {
+        ParentType::ref_spec_.VisitNode(i);
+        ParentType::ref_spec_.PruneNode(i, ParentType::ref_tree_.FindIdOfParent(i));
+      }
+  }
+}
+  }
+  
 
   void TraverseTreeHybridLoopVisitsThenLoopPrunes() {
     uint min_size_chunk_visit = this->min_size_chunk_visit();

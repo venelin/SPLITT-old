@@ -1,7 +1,7 @@
 Package: SPLITT
 Type: Package
 Title: A generic library for Serial and Parallel Lineage Traversal of Trees
-Version: 1.0
+Version: 1.1
 Date: 2018-01-04
 Authors@R: person("Venelin", "Mitov", email = "vmitov@gmail.com",
                  role = c("aut", "cre", "cph"))
