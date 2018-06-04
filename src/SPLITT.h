@@ -580,7 +580,7 @@ public:
 //' 
 //' @title Set a new internally stored vector of branch lenthts
 //' 
-//' @description 
+//' @description Set a new internally stored vector of branch lenthts.
 //' @section Signature:
 //' \code{void \link{Tree}::SetBranchLengths(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const& lengths);}
 //' @param lengths \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{LengthType}> const&}; 
@@ -766,7 +766,7 @@ public:
 //' \describe{
 //' \item{PosType}{an integer type for the positions in the returned vector.}}
 //' @section Signature:
-//' \code{template<class PosType> \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> \link{Tree}::OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes, PosType const& NA) const;
+//' \code{template<class PosType> \href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> \link{Tree}::OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes, PosType const& NA) const;}
 //' @param nodes \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> \link{Tree}::OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
 //'   a vector of application-specific nodes.
 //' @param NA \code{PosType const&}; NA value used mainly for the purpose of template-specification.
