@@ -2,9 +2,45 @@
 % Please edit documentation in R/RcppExports.R
 \name{SPLITT}
 \alias{SPLITT}
-\title{namespace SPLITT;}
+\title{SPLITT: A generic C++ library for Serial and Parallel Lineage Traversal of Trees}
 \description{
-All functions and classes defined in the namespace SPLITT.
+All basic types, functions and classes defined in SPLITT.
+
+\if{html}{\figure{UmlDiagram8.pdf}{options: width=100\%}}
+\if{latex}{\figure{UmlDiagram8.pdf}{options: width=15cm}}
+}
+\section{Basic types}{
+
+\describe{
+\item{\link[=SPLITT::uint]{uint}}{}
+\item{\link[=SPLITT::uvec]{uvec}}{}
+\item{\link[=SPLITT::vec]{vec}}{}
+\item{\link[=SPLITT::bvec]{bvec}}{}
+}
+}
+
+\section{Global functions}{
+
+\describe{
+\item{\link[=SPLITT::SortIndices]{SortIndices}}{}
+\item{\link[=SPLITT::At]{At}}{}
+\item{\link[=SPLITT::Match]{Match}}{}
+\item{\link[=SPLITT::Seq]{Seq}}{}
+\item{\link[=SPLITT::IsNA]{IsNA}}{}
+\item{\link[=SPLITT::NotIsNA]{NotIsNA}}{}
+}
+}
+
+\section{Classes}{
+
+\describe{
+\item{\link[=SPLITT::TraversalSpecification]{TraversalSpecification}}{}
+\item{\link[=SPLITT::TraversalTask]{TraversalTask}}{}
+\item{\link[=SPLITT::TraversalTaskLightweight]{TraversalTaskLightweight}}{}
+\item{\link[=SPLITT::Tree]{Tree}}{}
+\item{\link[=SPLITT::OrderedTree]{OrderedTree}}{}
+}
 
 [[Rcpp::export]]
 }
+
