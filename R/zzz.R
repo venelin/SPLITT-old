@@ -22,6 +22,9 @@
 # 
 # @author Venelin Mitov
 
+#' @useDynLib SPLITT
+NULL
+
 ## Up until R 2.15.0, the require("methods") is needed but (now)
 ## triggers an warning from R CMD check
 #.onLoad <- function(libname, pkgname){
