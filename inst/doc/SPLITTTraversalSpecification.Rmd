@@ -1,0 +1,53 @@
+---
+title: "Writing a SPLITT TraversalSpecification class"
+author: "Venelin Mitov"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Writing a SPLITT TraversalSpecification class}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Packages used
+```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
+treeProcessing <- c("ape")
+data <- c("data.table")
+poumm <- c("POUMM")
+testing <- c("testthat")
+boot <- c("boot")
+ 
+packagesUsed <- c(treeProcessing, data, poumm, boot, testing)
+
+printPackages <- function(packs) {
+  res <- ""
+  for(i in 1:length(packs)) {
+    res <- paste0(res, paste0(packs[i], ' v', packageVersion(packs[i]), ' [@R-', packs[i], ']'))
+    if(i < length(packs)) {
+      res <- paste0(res, ', ')
+    }
+  }
+  res
+}
+
+# Write bib information (this line is executed manually and the bib-file is edited manually after that)
+#knitr::write_bib(packagesUsed, file = "./REFERENCES-R.bib")
+```
+
+Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
+
+* For tree processing: `r printPackages(treeProcessing)`;
+* For reporting: `r printPackages(data)`;
+* For the POUMM and PP estimates: `r printPackages(c(poumm, boot))`;
+* For testing: `r printPackages(testing)`.
+
+# References
+

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • SPLiTTree</title>
+<title>Function reference • SPLITT</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -18,13 +18,22 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
+
+<!-- sticky kit -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Function reference" />
+
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +56,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">SPLiTTree</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">SPLITT</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.2</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -58,13 +71,35 @@
   </a>
 </li>
 <li>
+  <a href="../articles/SPLITT.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/SPLITTArchitecture.html">SPLITT Architecture</a>
+    </li>
+    <li>
+      <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
+    </li>
+    <li>
+      <a href="../articles/SPLITTTraversalSpecification.html">Writing a SPLITT TraversalSpecification class</a>
+    </li>
+  </ul>
 </li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -72,173 +107,338 @@
       
       </header>
 
-      <div class="row">
-  <div class="col-md-9">
+<div class="row">
+  <div class="contents col-md-9">
     <div class="page-header">
-      <h1>
-        Reference
-        <small>version&nbsp;1.0</small>
-      </h1>
+      <h1>Reference</h1>
     </div>
 
-    <div class="contents">
-      <table class="ref-index">
+    <table class="ref-index">
 
-      <colgroup>
-        <col class="alias" />
-        <col class="title" />
-      </colgroup>
+    <colgroup>
+      
+      <col class="alias" />
+      <col class="title" />
+    </colgroup>
 
-      <tbody>
-        <tr>
-          <th colspan="2">
-            <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-            <p class="section-desc"></p>
-          </th>
-        </tr>
-        <tr>
-          <!--  -->
-          <td>
-            <p><code><a href="bvec.html">bvec</a></code> </p>
-          </td>
-          <td><p>typedef <a href='http://en.cppreference.com/w/cpp/container/vector'>std::vector</a>&lt;bool&gt; bvec;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="splittree.html">splittree</a></code> </p>
-          </td>
-          <td><p>namespace splittree;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-BranchLengths.html">Tree::BranchLengths</a></code> </p>
-          </td>
-          <td><p>Get a reference to the internal vector of branch lengths.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-FindChildren.html">Tree::FindChildren</a></code> </p>
-          </td>
-          <td><p>Get a vector with the ids of the children of a node.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-FindIdOfNode.html">Tree::FindIdOfNode</a></code> </p>
-          </td>
-          <td><p>Get the internally stored id of a node</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-FindIdOfParent.html">Tree::FindIdOfParent</a></code> </p>
-          </td>
-          <td><p>Get the parent id of a node with id id_child.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-FindNodeWithId.html">Tree::FindNodeWithId</a></code> </p>
-          </td>
-          <td><p>Get the node with the specified id.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-HasBranchLengths.html">Tree::HasBranchLengths</a></code> </p>
-          </td>
-          <td><p>Does a tree has lengths associated with its branches?</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-LengthOfBranch.html">Tree::LengthOfBranch</a></code> </p>
-          </td>
-          <td><p>Get the length of a branch ending at node with id <code>i</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-LengthType.html">Tree::LengthType</a></code> </p>
-          </td>
-          <td><p>typedef Length LengthType;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-NodeType.html">Tree::NodeType</a></code> </p>
-          </td>
-          <td><p>typedef Node NodeType;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-num_nodes.html">Tree::num_nodes</a></code> </p>
-          </td>
-          <td><p>Number of nodes in a tree</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-num_tips.html">Tree::num_tips</a></code> </p>
-          </td>
-          <td><p>Number of tips (a.k.a. leaves) in the tree</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-OrderNodes.html">Tree::OrderNodes</a></code> </p>
-          </td>
-          <td><p>Reorder a vector of nodes</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-OrderNodesPosType.html">Tree::OrderNodesPosType</a></code> </p>
-          </td>
-          <td><p>Reorder a vector of nodes (generic w.r.t. the position type).</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-SetBranchLengths.html">Tree::SetBranchLengths</a></code> </p>
-          </td>
-          <td><p>Set a new internally stored vector of branch lenthts</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-SetBranchLengths2.html">Tree::SetBranchLengths2</a></code> </p>
-          </td>
-          <td><p>Set new branch lenthts to the branches in the order given by their 
-  application-specific end-nodes.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-SetLengthOfBranch.html">Tree::SetLengthOfBranch</a></code> </p>
-          </td>
-          <td><p>Set the length of a branch ending at node with id <code>i</code> to a given <code>value</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree-colon-colon-Tree.html">Tree::Tree</a></code> </p>
-          </td>
-          <td><p>Constructor for class Tree</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Tree.html">Tree</a></code> </p>
-          </td>
-          <td><p>template&lt;class Node, class Length&gt;class Tree</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="uint.html">uint</a></code> </p>
-          </td>
-          <td><p>typedef unsigned int uint;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="uvec.html">uvec</a></code> </p>
-          </td>
-          <td><p>typedef <a href='http://en.cppreference.com/w/cpp/container/vector'>std::vector</a>&lt;<a href='reference/uint.html'>uint</a>&gt; uvec;</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="vec.html">vec</a></code> </p>
-          </td>
-          <td><p>typedef <a href='http://en.cppreference.com/w/cpp/container/vector'>std::vector</a>&lt;double&gt; vec;</p></td>
-        </tr>
-      </tbody>
-      </table>
-    </div>
+    <tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
+          <p class="section-desc"></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="MiniBenchmark.html">MiniBenchmark()</a></code> </p>
+        </td>
+        <td><p>Perform a quick test of the PMM example likelihood calculation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NewPMMCppObject.html">NewPMMCppObject()</a></code> </p>
+        </td>
+        <td><p>Create an instance of the RCPP_PMM module for a given tree and trait data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="PMMLogLik.html">PMMLogLik()</a></code> </p>
+        </td>
+        <td><p>Calculate the PMM log-likelihood for a given tree, data and model parameters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="PMMLogLikCpp.html">PMMLogLikCpp()</a></code> </p>
+        </td>
+        <td><p>Calculate the PMM log-likelihood for a given tree, data and model parameters using the RCPP_PMM module</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="PlotParallelTraversal.html">PlotParallelTraversal()</a></code> </p>
+        </td>
+        <td><p>Global definitions needed for the R-check to pass</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-At.html">SPLITT::At</a></code> </p>
+        </td>
+        <td><p>A sub-vector with the elements at given positions.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-G_EMPTY_UVEC.html">SPLITT::G_EMPTY_UVEC</a></code> </p>
+        </td>
+        <td><p>A global constant for the empty <code>uvec</code>;</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-G_NA_UINT.html">SPLITT::G_NA_UINT</a></code> </p>
+        </td>
+        <td><p>A global constant for the integer NA.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-G_PI.html">SPLITT::G_PI</a></code> </p>
+        </td>
+        <td><p>The mathematical constant Pi.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-IsNA.html">SPLITT::IsNA</a></code> </p>
+        </td>
+        <td><p>Check a vector for <code>NA</code>s.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Match.html">SPLITT::Match</a></code> </p>
+        </td>
+        <td><p>Match the first occurrences of elements in a vector of integers.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-NotIsNA.html">SPLITT::NotIsNA</a></code> </p>
+        </td>
+        <td><p>Check a vector for <code>NA</code>s.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-LengthType.html">SPLITT::OrderedTree::LengthType</a></code> </p>
+        </td>
+        <td><p>Abstract type for the branch-lengths in a <code>OrderedTree</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-NodeType.html">SPLITT::OrderedTree::NodeType</a></code> </p>
+        </td>
+        <td><p>Abstract type for nodes in the tree.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-OrderedTree.html">SPLITT::OrderedTree::OrderedTree</a></code> </p>
+        </td>
+        <td><p>Constructor for class <code>OrderedTree</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-RangeIdPruneNode.html">SPLITT::OrderedTree::RangeIdPruneNode</a></code> </p>
+        </td>
+        <td><p>First and last id (0-based node indices) of the PruneNode-range at a step</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-RangeIdVisitNode.html">SPLITT::OrderedTree::RangeIdVisitNode</a></code> </p>
+        </td>
+        <td><p>First and last id (0-based node indices) of the VisitNode-range at a level</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-num_levels.html">SPLITT::OrderedTree::num_levels</a></code> </p>
+        </td>
+        <td><p>Number of levels (ranges) of parallel <code>VisitNode</code> operations 
+during post-order traversal.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-num_parallel_ranges_prune.html">SPLITT::OrderedTree::num_parallel_ranges_prune</a></code> </p>
+        </td>
+        <td><p>Number of parallel ranges of nodeduring</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-ranges_id_prune.html">SPLITT::OrderedTree::ranges_id_prune</a></code> </p>
+        </td>
+        <td><p>Internally stored vector of start ids for each PruneNode-range</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree-colon-colon-ranges_id_visit.html">SPLITT::OrderedTree::ranges_id_visit</a></code> </p>
+        </td>
+        <td><p>Internally stored vector of start ids for each VisitNode-range</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-OrderedTree.html">SPLITT::OrderedTree</a></code> </p>
+        </td>
+        <td><p>A generic tree class optimized for parallel ordered traversal.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Seq.html">SPLITT::Seq</a></code> </p>
+        </td>
+        <td><p>Generate a sequence of consecutive integers.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-SortIndices.html">SPLITT::SortIndices</a></code> </p>
+        </td>
+        <td><p>Indices in a vector ordered in ascending order of the corresponding values.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-ThreadExceptionHandler.html">SPLITT::ThreadExceptionHandler</a></code> </p>
+        </td>
+        <td><p>An internal class for thread-safe exception hadling within parallel sections.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-TraversalAlgorithm.html">SPLITT::TraversalAlgorithm</a></code> </p>
+        </td>
+        <td><p>Base-class for parallel tree traversal implementations.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-TraversalSpecification.html">SPLITT::TraversalSpecification</a></code> </p>
+        </td>
+        <td><p>An abstract base class for specifying node traversal operations.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-TraversalTask.html">SPLITT::TraversalTask</a></code> </p>
+        </td>
+        <td><p>A composite of a tree, a traversal specification and a traversal algorithm.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-TraversalTaskLightweight.html">SPLITT::TraversalTaskLightweight</a></code> </p>
+        </td>
+        <td><p>A lighter TraversalTask class which gets a reference to an already 
+constructed tree.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-BranchLengths.html">SPLITT::Tree::BranchLengths</a></code> </p>
+        </td>
+        <td><p>Get a reference to the internal vector of branch lengths.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-FindChildren.html">SPLITT::Tree::FindChildren</a></code> </p>
+        </td>
+        <td><p>Get a vector with the ids of the children of a node.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-FindIdOfNode.html">SPLITT::Tree::FindIdOfNode</a></code> </p>
+        </td>
+        <td><p>Get the internally stored id of a node.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-FindIdOfParent.html">SPLITT::Tree::FindIdOfParent</a></code> </p>
+        </td>
+        <td><p>Get the parent id of a node with id id_child.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-FindNodeWithId.html">SPLITT::Tree::FindNodeWithId</a></code> </p>
+        </td>
+        <td><p>Get the node with the specified id.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-HasBranchLengths.html">SPLITT::Tree::HasBranchLengths</a></code> </p>
+        </td>
+        <td><p>Does a tree has lengths associated with its branches?</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-LengthOfBranch.html">SPLITT::Tree::LengthOfBranch</a></code> </p>
+        </td>
+        <td><p>Get the length of a branch ending at node with id <code>i</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-LengthType.html">SPLITT::Tree::LengthType</a></code> </p>
+        </td>
+        <td><p>Abstract type for the branch-lengths in a <code>Tree</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-NodeType.html">SPLITT::Tree::NodeType</a></code> </p>
+        </td>
+        <td><p>Abstract type for nodes in the tree.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-OrderNodes.html">SPLITT::Tree::OrderNodes</a></code> </p>
+        </td>
+        <td><p>Reorder a vector of nodes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-OrderNodesPosType.html">SPLITT::Tree::OrderNodesPosType</a></code> </p>
+        </td>
+        <td><p>Reorder a vector of nodes (generic w.r.t. the position type).</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-SetBranchLengths.html">SPLITT::Tree::SetBranchLengths</a></code> </p>
+        </td>
+        <td><p>Set new branch lengths to selected or all branches in a tree.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-SetLengthOfBranch.html">SPLITT::Tree::SetLengthOfBranch</a></code> </p>
+        </td>
+        <td><p>Set the length of a branch ending at node with id <code>i</code> to a given <code>value</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-Tree.html">SPLITT::Tree::Tree</a></code> </p>
+        </td>
+        <td><p>Constructor for class <code>Tree</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-num_nodes.html">SPLITT::Tree::num_nodes</a></code> </p>
+        </td>
+        <td><p>Number of nodes in a tree.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree-colon-colon-num_tips.html">SPLITT::Tree::num_tips</a></code> </p>
+        </td>
+        <td><p>Number of tips (a.k.a. leaves) in the tree</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-Tree.html">SPLITT::Tree</a></code> </p>
+        </td>
+        <td><p>Base class <code>Tree</code>.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-bvec.html">SPLITT::bvec</a></code> </p>
+        </td>
+        <td><p>a vector of <code>bool</code>s.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-uint.html">SPLITT::uint</a></code> </p>
+        </td>
+        <td><p>An alias for the <code>'unsigned int'</code> basic type.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-uvec.html">SPLITT::uvec</a></code> </p>
+        </td>
+        <td><p>a vector of <code>uint</code>'s.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT-colon-colon-vec.html">SPLITT::vec</a></code> </p>
+        </td>
+        <td><p>a vector of <code>double</code>s.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SPLITT.html">SPLITT</a></code> </p>
+        </td>
+        <td><p>SPLITT: A generic C++ library for Serial and Parallel Lineage Traversal of Trees</p></td>
+      </tr>
+    </tbody>
+    </table>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -255,11 +455,14 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

@@ -21,7 +21,11 @@ Synopsis:
 }
 
 \seealso{
+\link[=SPLITT::TraversalAlgorithm]{TraversalAlgorithm}
+
 \link[=SPLITT::PostOrderTraversal]{PostOrderTraversal}
+
+\link[=SPLITT::PreOrderTraversal]{PreOrderTraversal}
 
 \link{SPLITT}
 }

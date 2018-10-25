@@ -898,7 +898,9 @@ NULL
 #' \item{\link[=SPLITT::ThreadExceptionHandler::CaptureException]{\code{CaptureException}}}{}
 #' \item{\link[=SPLITT::ThreadExceptionHandler::Rethrow]{\code{Rethrow}}}{}
 #' }
+#' @seealso \link[=SPLITT::TraversalAlgorithm]{TraversalAlgorithm}
 #' @seealso \link[=SPLITT::PostOrderTraversal]{PostOrderTraversal}
+#' @seealso \link[=SPLITT::PreOrderTraversal]{PreOrderTraversal}
 #' @seealso \link{SPLITT} 
 NULL
 

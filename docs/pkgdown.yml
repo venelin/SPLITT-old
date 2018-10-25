@@ -1,0 +1,9 @@
+pandoc: 1.19.2.1
+pkgdown: 1.1.0
+pkgdown_sha: ~
+articles:
+  SPLITT: SPLITT.html
+  SPLITTArchitecture: SPLITTArchitecture.html
+  SPLITTRcppModules: SPLITTRcppModules.html
+  SPLITTTraversalSpecification: SPLITTTraversalSpecification.html
+
