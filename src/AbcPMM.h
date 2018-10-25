@@ -97,50 +97,23 @@ public:
     } else {
       a[i] = b[i] = c[i] = 0;
     }
-    
-    // uncomment if needed
-    // double t = this->ref_tree_.LengthOfBranch(i);
-    // std::cout<<"InitNode("<<i+1<<"): x[i] t[i] a[i] b[i] c[i] : "
-    //          <<(i<this->ref_tree_.num_tips()? round(x[i]*100)/100 : std::nan(""))
-    //          <<" "<<t
-    //          <<" "<<round(a[i]*100)/100
-    //          <<" "<<round(b[i]*100)/100
-    //          <<" "<<round(c[i]*100)/100
-    //          <<" "<<"\n";
   }
 
   inline void VisitNode(uint i) {
     double t = this->ref_tree_.LengthOfBranch(i);
-    double d = 1 - 2*a[i]*sigma2*t;
     
-    // the order is important here because for c[i] we use the previous values of a[i] and b[i].
+    double d = 1 - 2*a[i]*sigma2*t;
+    // the order is important here because for c[i] we use the previous values 
+    // of a[i] and b[i].
     c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
     a[i] /= d;
     b[i] /= d;
-    
-    // uncomment if needed
-    // std::cout<<"VisitNode("<<i+1<<"): x[i] t[i] a[i] b[i] c[i] : "
-    //          <<(i<this->ref_tree_.num_tips()? round(x[i]*100)/100 : std::nan(""))
-    //          <<" "<<t
-    //          <<" "<<round(a[i]*100)/100
-    //          <<" "<<round(b[i]*100)/100
-    //          <<" "<<round(c[i]*100)/100<<"\n";
   }
 
   inline void PruneNode(uint i, uint j) {
     a[j] = a[j] + a[i];
     b[j] = b[j] + b[i];
     c[j] = c[j] + c[i];
-    
-    
-    // uncomment if needed
-    // double t = this->ref_tree_.LengthOfBranch(i);
-    // std::cout<<"PruneNode("<<i+1<<", "<<j+1<<"): x[i] t[i] a[j] b[j] c[j] : "
-    //          <<(i<this->ref_tree_.num_tips()? round(x[i]*100)/100 : std::nan(""))
-    //          <<" "<<t
-    //          <<" "<<round(a[j]*100)/100
-    //          <<" "<<round(b[j]*100)/100
-    //          <<" "<<round(c[j]*100)/100<<"\n";
   }
 
 };

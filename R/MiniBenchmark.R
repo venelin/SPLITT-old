@@ -36,7 +36,7 @@ MiniBenchmark <- function(N = 10000, Ntests = 10) {
   speedupX <- NULL
   `time (ms)` <- NULL
   
-  cat("Performing a mini-benchmark of the POUMM log-likelihood calculation with 
+  cat("Performing a mini-benchmark of the PMM log-likelihood calculation with 
       a tree of size N=", 
       N, ";\nCalling each likelihood calculation Ntests=", 
       Ntests, " times ...\n")
