@@ -7,9 +7,9 @@
 A public typedef in class \code{\link[=SPLITT::Tree]{Tree}}. A synonym for the 
   template argument \code{Node}. Defines a 
   hash-able type such as \code{int} or 
-  \code{\href{http://en.cppreference.com/w/cpp/string/basic_string}{std::string}}. 
+  \href{http://en.cppreference.com/w/cpp/string/basic_string}{\code{std::string}}. 
   Specifically, this should be a type for which 
-  \code{\href{http://en.cppreference.com/w/cpp/utility/hash}{std::hash}}
+  \href{http://en.cppreference.com/w/cpp/utility/hash}{\code{std::hash}}
   specialization does exist. This is the application-specific node-type. 
   The branches in the tree are defined as couples of nodes 
   <branch_start_node, branch_end_node>.
@@ -21,4 +21,6 @@ During the construction of \code{\link[=SPLITT::Tree]{Tree}} object, the
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 }

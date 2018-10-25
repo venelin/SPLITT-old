@@ -7,7 +7,7 @@
 \item{first, last}{\code{T const&} first and last elements in the sequence.}
 }
 \value{
-a \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<T>} object.
+a \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<T>} object.
 }
 \description{
 This is a template function.
@@ -16,7 +16,7 @@ This is a template function.
 template<class T> inline std::vector<T> Seq(T const& first, T const& last);}
 
 Currently the function is implemented as a wrapper for 
-\code{\href{https://en.cppreference.com/w/cpp/algorithm/iota}{std::iota}<T>}.
+\href{https://en.cppreference.com/w/cpp/algorithm/iota}{\code{std::iota}}\code{<T>}.
 }
 \seealso{
 \link{SPLITT}

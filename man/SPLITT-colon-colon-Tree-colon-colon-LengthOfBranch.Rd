@@ -4,16 +4,18 @@
 \alias{SPLITT::Tree::LengthOfBranch}
 \title{Get the length of a branch ending at node with id \code{i}.}
 \arguments{
-\item{i}{\code{\link{uint}}; the id of the end-node for the branch}
+\item{i}{\code{\link[=SPLITT::uint]{uint}}; the id of the end-node for the branch}
 }
 \value{
-\code{\link{LengthType}}; the length associated with the branch ending at node \code{i}.
+\code{\link[=SPLITT::Tree::LengthType]{LengthType}}; the length associated with the branch ending at node \code{i}.
 }
 \description{
-\code{\link{LengthType} const& \link[=SPLITT::Tree]{Tree}::LengthOfBranch(uint i) const;}
+\code{\link[=SPLITT::Tree::LengthType]{LengthType} const& \link[=SPLITT::Tree]{Tree}::LengthOfBranch(uint i) const;}
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

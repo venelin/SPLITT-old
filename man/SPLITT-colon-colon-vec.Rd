@@ -4,7 +4,7 @@
 \alias{SPLITT::vec}
 \title{a vector of \code{double}s.}
 \description{
-\code{typedef \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<double>} vec;}
+\code{typedef }\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<double> vec;}
 }
 \seealso{
 \link{SPLITT}

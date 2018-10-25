@@ -14,6 +14,8 @@ FindNodeWithId(\link[=SPLITT::uint]{uint} id) const;}
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
 
+\link{SPLITT}
+
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},
   \code{\link{SPLITT::Tree::FindIdOfNode}},

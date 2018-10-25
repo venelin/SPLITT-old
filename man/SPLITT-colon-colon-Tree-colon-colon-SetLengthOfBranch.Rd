@@ -4,18 +4,20 @@
 \alias{SPLITT::Tree::SetLengthOfBranch}
 \title{Set the length of a branch ending at node with id \code{i} to a given \code{value}.}
 \arguments{
-\item{i}{\code{\link{uint}}; the id of the end-node of the branch;}
+\item{i}{\code{\link[=SPLITT::uint]{uint}}; the id of the end-node of the branch;}
 
-\item{value}{\code{\link{LengthType} const&}; the new value of to set.}
+\item{value}{\code{\link[=SPLITT::Tree::LengthType]{LengthType} const&}; the new value to set.}
 }
 \value{
 \code{void}
 }
 \description{
-\code{void SetLengthOfBranch(uint i, \link[=SPLITT::Tree::LengthType]{LengthType} const& value);}
+\code{void SetLengthOfBranch(\link[=SPLITT::uint]{uint} i, \link[=SPLITT::Tree::LengthType]{LengthType} const& value);}
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

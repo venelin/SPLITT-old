@@ -2,9 +2,9 @@
 % Please edit documentation in src/SPLITT.h
 \name{SPLITT::uvec}
 \alias{SPLITT::uvec}
-\title{a vector of \link[=SPLITT::uint]{\code{uint}}s.}
+\title{a vector of \code{\link[=SPLITT::uint]{uint}}'s.}
 \description{
-\code{typedef \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<uint>} uvec;}
+\code{typedef }\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<uint> uvec;}
 }
 \seealso{
 Other basic types: \code{\link{SPLITT::bvec}},

@@ -27,7 +27,7 @@ template<class TraversalSpecification> class TraversalTask;
 }
 
 \seealso{
-\link{SPLITT}
-
 \link{SPLITT::TraversalSpecification}
+
+\link{SPLITT}
 }

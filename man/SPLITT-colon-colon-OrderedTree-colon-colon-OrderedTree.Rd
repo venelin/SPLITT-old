@@ -4,14 +4,14 @@
 \alias{SPLITT::OrderedTree::OrderedTree}
 \title{Constructor for class \code{\link[=SPLITT::OrderedTree]{OrderedTree}}.}
 \arguments{
-\item{branch_start_nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::OrderedTree::NodeType]{NodeType}> const&}: 
+\item{branch_start_nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::OrderedTree::NodeType]{NodeType}> const&}: 
 starting node for every branch in the tree.}
 
-\item{branch_end_nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::OrderedTree::NodeType]{NodeType}> const&}:
+\item{branch_end_nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::OrderedTree::NodeType]{NodeType}> const&}:
 ending node for every branch in the tree; must be the same length as 
 \code{branch_start_nodes}.}
 
-\item{branch_lengths}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::OrderedTree::LengthType]{LengthType}> const&}: 
+\item{branch_lengths}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::OrderedTree::LengthType]{LengthType}> const&}: 
 lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 for a tree without branch lengths (i.e. only a topology).}
 }
@@ -29,6 +29,12 @@ Constructs the tree object given a list of branches. The list of branches
 \seealso{
 \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 
-Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\link{SPLITT::OrderedTree::num_levels}},
-  \code{\link{SPLITT::OrderedTree::num_parallel_ranges_prune}}
+\link{SPLITT}
+
+Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\link{SPLITT::OrderedTree::RangeIdPruneNode}},
+  \code{\link{SPLITT::OrderedTree::RangeIdVisitNode}},
+  \code{\link{SPLITT::OrderedTree::num_levels}},
+  \code{\link{SPLITT::OrderedTree::num_parallel_ranges_prune}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_prune}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_visit}}
 }

@@ -20,9 +20,17 @@ template<class Node, class Length>class OrderedTree: public Tree<Node, Length>}
 \section{Public Methods}{
 
 \describe{
+\item{\code{\link[=SPLITT::OrderedTree::num_levels]{num_levels}}}{}
+\item{\code{\link[=SPLITT::OrderedTree::num_parallel_ranges_prune]{num_parallel_ranges_prune}}}{}
+\item{\code{\link[=SPLITT::OrderedTree::ranges_id_visit]{ranges_id_visit}}}{}
+\item{\code{\link[=SPLITT::OrderedTree::RangeIdVisitNode]{RangeIdVisitNode}}}{}
+\item{\code{\link[=SPLITT::OrderedTree::ranges_id_prune]{ranges_id_prune}}}{}
+\item{\code{\link[=SPLITT::OrderedTree::RangeIdPruneNode]{RangeIdPruneNode}}}{}
 }
 }
 
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 }

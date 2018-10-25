@@ -6,3 +6,21 @@
 
 using namespace Rcpp;
 
+
+RcppExport SEXP _rcpp_module_boot_SPLITT__AbcPMM();
+RcppExport SEXP _rcpp_module_boot_SPLITT__Tree();
+RcppExport SEXP _rcpp_module_boot_SPLITT__OrderedTree();
+RcppExport SEXP _rcpp_module_boot_SPLITT__OrderedTreeStringNodes();
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_rcpp_module_boot_SPLITT__AbcPMM", (DL_FUNC) &_rcpp_module_boot_SPLITT__AbcPMM, 0},
+    {"_rcpp_module_boot_SPLITT__Tree", (DL_FUNC) &_rcpp_module_boot_SPLITT__Tree, 0},
+    {"_rcpp_module_boot_SPLITT__OrderedTree", (DL_FUNC) &_rcpp_module_boot_SPLITT__OrderedTree, 0},
+    {"_rcpp_module_boot_SPLITT__OrderedTreeStringNodes", (DL_FUNC) &_rcpp_module_boot_SPLITT__OrderedTreeStringNodes, 0},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_SPLITT(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

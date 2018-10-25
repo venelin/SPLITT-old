@@ -4,7 +4,7 @@
 \alias{SPLITT::NotIsNA}
 \title{Check a vector for \code{NA}s.}
 \arguments{
-\item{x}{a \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<T> const&} 
+\item{x}{a \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<T> const&} 
 of elements to be checked.}
 
 \item{NA}{\code{T const&} value specifying NA (can be any value).}

@@ -1,8 +1,8 @@
 Package: SPLITT
 Type: Package
 Title: A generic library for Serial and Parallel Lineage Traversal of Trees
-Version: 1.1
-Date: 2018-01-04
+Version: 1.2
+Date: 2018-10-01
 Authors@R: person("Venelin", "Mitov", email = "vmitov@gmail.com",
                  role = c("aut", "cre", "cph"))
 Description: SPLITT is a one-header-only generic C++ library for serial and
@@ -12,24 +12,23 @@ Description: SPLITT is a one-header-only generic C++ library for serial and
  and data. To use the library, the user writes an implementation of the implicit
  interface class TraversalSpecification defining the types of the input data, 
  node state, and traversal type and the operation to be performed on each node 
- during the traversal. As an example, the package provides a parallel 
- implementation of the 3-point structure algorithm for calculating the 
- determinant and quadratic forms of 3-point structured matrices, which are often
- encountered in Gaussian phylogenetic comparative models (Ho and Ane, 2014). The
- example includes an Rcpp module exposing the algorithm to the R environment.
+ during the traversal. 
 License: LGPL (>= 3.0)
 LazyData: true
 Depends:
     R (>= 3.1.0),
     Rcpp,
+    methods
 LinkingTo: Rcpp, RcppArmadillo
 Imports:
     ape,
-    Rcpp
+    data.table
 Suggests:
-    testthat,
-    microbenchmark
+    POUMM,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.0.1
-VignetteBuilder: knitr
+BuildVignettes: false
+VignetteBuilder: knitr, rmarkdown
 ByteCompile: yes
 NeedsCompilation: yes

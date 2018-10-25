@@ -1,5 +1,5 @@
-/*
- *  NumericTraitData.h
+/**
+ *  AbcPMM.h
  *  SPLITT
  *
  * Copyright 2017 Venelin Mitov
@@ -23,24 +23,21 @@
  *
  * @author Venelin Mitov
  */
-
 #ifndef NumericTraitData_H_
 #define NumericTraitData_H_
 
-
-#include "SPLITT.h"
+#include "./SPLITT.h"
+#include <iostream>
 
 namespace SPLITT {
 template<class NameType>
 struct NumericTraitData {
   // use const references to avoid copying of long vectors
   std::vector<NameType> const& names_;
-  vec const& z_;
-  vec const& se_;
+  vec const& x_;
   NumericTraitData(
     std::vector<NameType> const& names,
-    vec const& z, vec const& se): names_(names), z_(z), se_(se) {}
+    vec const& x): names_(names), x_(x) {}
 };
 }
-
-#endif //#ifndef NumericTraitData_H_
+#endif //NumericTraitData_H_

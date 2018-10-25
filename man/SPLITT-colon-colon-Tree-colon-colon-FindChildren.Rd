@@ -9,7 +9,7 @@
 \value{
 a \code{uvec const&}: a const reference to an internally stored vector 
 of the ids of the children of \code{i}. If \code{i} is a tip, 
-  \code{\link[=SPLITT::EMPTY_UVEC]{EMPTY_UVEC}} is returned. The returned 
+  \code{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}} is returned. The returned 
   vector reference is valid as long as the tree object is not destroyed.
 }
 \description{
@@ -17,6 +17,8 @@ of the ids of the children of \code{i}. If \code{i} is a tip,
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindIdOfNode}},

@@ -4,14 +4,14 @@
 \alias{SPLITT::Tree::Tree}
 \title{Constructor for class \code{\link[=SPLITT::Tree]{Tree}}.}
 \arguments{
-\item{branch_start_nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}: 
+\item{branch_start_nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}: 
 starting node for every branch in the tree.}
 
-\item{branch_end_nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}:
+\item{branch_end_nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}:
 ending node for every branch in the tree; must be the same length as 
 \code{branch_start_nodes}.}
 
-\item{branch_lengths}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}: 
+\item{branch_lengths}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}: 
 lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 for a tree without branch lengths (i.e. only a topology).}
 }
@@ -27,6 +27,8 @@ arguments.
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

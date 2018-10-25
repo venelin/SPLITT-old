@@ -4,7 +4,7 @@
 \alias{SPLITT::bvec}
 \title{a vector of \code{bool}s.}
 \description{
-\code{typedef \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<bool>} bvec;}
+\code{typedef }\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<bool> bvec;}
 }
 \seealso{
 \link{SPLITT}

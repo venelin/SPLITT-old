@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{SPLITT::OrderedTree::num_levels}
 \alias{SPLITT::OrderedTree::num_levels}
-\title{Number of levels (ranges) of parallel \code{VisitNode} operations during post-order traversal.}
+\title{Number of levels (ranges) of parallel \code{VisitNode} operations 
+during post-order traversal.}
 \description{
 \code{
 \link[=SPLITT::uint]{uint} num_levels() const;}
@@ -10,14 +11,22 @@
 During range-based post-order traversal, levels represent groups of nodes
 that can be visited independent from one another and, therefore, in parallel.
 In a balanced tree the number of levels is in the order of O(log2(N)), where N
-is the number of tips in the tree and, therefore, parallelization can be 
-highly efficient. In a strongly unbalanced tree, the number of levels is in 
-the order of O(N), and the parallelization of the \code{VisitNode} operation
-cannot improve the speed.
+is the number of tips in the tree. Hence, parallelization can be efficient.
+In a strongly unbalanced tree, the number of levels is in the order of O(N), 
+and the parallelization of the \code{VisitNode} operation cannot improve the 
+speed.
 }
 \seealso{
-\code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}}
+\code{\link[=SPLITT::Tree]{Tree}} 
+ \code{\link[=SPLITT::OrderedTree]{OrderedTree}}
+ \code{\link[=SPLITT::OrderedTree::num_parallel_ranges_prune]{num_parallel_ranges_prune}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\link{SPLITT::OrderedTree::OrderedTree}},
-  \code{\link{SPLITT::OrderedTree::num_parallel_ranges_prune}}
+  \code{\link{SPLITT::OrderedTree::RangeIdPruneNode}},
+  \code{\link{SPLITT::OrderedTree::RangeIdVisitNode}},
+  \code{\link{SPLITT::OrderedTree::num_parallel_ranges_prune}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_prune}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_visit}}
 }

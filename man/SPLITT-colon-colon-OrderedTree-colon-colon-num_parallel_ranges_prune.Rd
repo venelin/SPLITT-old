@@ -12,7 +12,7 @@ visited. This is the so called operation \code{PruneNode}. Prune-ranges
 represent groups of nodes that can be pruned independent from one another 
 and, therefore, in parallel. Conceptually prune-ranges are similar to levels 
 of (parallel) \code{VisitNode} operations (see also
-\link[=SPLITT::OrderedTree::num_levels]{num_levels}()), but 
+\link[=SPLITT::OrderedTree::num_levels]{num_levels}()).
 In a balanced tree the number of levels is in the order of O(log2(N)), where N
 is the number of tips in the tree and, therefore, parallelization can be 
 beneficial. In a strongly unbalanced tree, the number of levels is in the 
@@ -22,6 +22,12 @@ cannot improve the speed.
 \seealso{
 \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 
+\link{SPLITT}
+
 Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\link{SPLITT::OrderedTree::OrderedTree}},
-  \code{\link{SPLITT::OrderedTree::num_levels}}
+  \code{\link{SPLITT::OrderedTree::RangeIdPruneNode}},
+  \code{\link{SPLITT::OrderedTree::RangeIdVisitNode}},
+  \code{\link{SPLITT::OrderedTree::num_levels}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_prune}},
+  \code{\link{SPLITT::OrderedTree::ranges_id_visit}}
 }

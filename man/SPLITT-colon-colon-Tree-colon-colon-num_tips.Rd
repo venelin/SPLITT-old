@@ -7,10 +7,12 @@
 \code{\link[=SPLITT::uint]{uint}}, the number of tips in the tree.
 }
 \description{
-\code{\link{uint} \link[=SPLITT::Tree]{Tree}::num_nodes() const;}
+\code{\link[=SPLITT::uint]{uint} \link[=SPLITT::Tree]{Tree}::num_nodes() const;}
 }
 \seealso{
-\code{\link{Tree}}
+\code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

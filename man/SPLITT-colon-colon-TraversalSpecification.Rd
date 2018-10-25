@@ -4,13 +4,13 @@
 \alias{SPLITT::TraversalSpecification}
 \title{An abstract base class for specifying node traversal operations.}
 \description{
-This is an abstract class (not intended for instantiation) that defines the 
-
-entities 
+This is an abstract class (not intended for instantiation).
 The user must provide a TraversalSpecificationImplementation class implementing
-this class' methods as described in the below. It is
-recommended to inherit from this class, but it is not obligatory (it is not 
-checked during compilation).
+this class' methods as described below. It is
+recommended to inherit from this class, but it is not obligatory, because 
+this is is not checked during compilation. Use the documentation of this 
+class as a guide through the steps of writing a tree traversal specification
+based on \code{\link{SPLITT}}.
 }
 \seealso{
 \code{\link{SPLITT}}

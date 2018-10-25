@@ -14,4 +14,6 @@ A public typedef in class \code{\link[=SPLITT::Tree]{Tree}}.
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 }

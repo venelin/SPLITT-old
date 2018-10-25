@@ -13,7 +13,7 @@ basic operations with a tree.
 
 \itemize{
 \item{class Node}{see \code{\link[=SPLITT::Tree::NodeType]{NodeType}}.}
-\item{class Length}{see \code{\link[=SPLITT::Tree::Length]{LengthType}}.}
+\item{class Length}{see \code{\link[=SPLITT::Tree::LengthType]{LengthType}}.}
 }
 }
 

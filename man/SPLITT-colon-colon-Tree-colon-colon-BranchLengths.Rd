@@ -4,14 +4,16 @@
 \alias{SPLITT::Tree::BranchLengths}
 \title{Get a reference to the internal vector of branch lengths.}
 \value{
-\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}; 
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}; 
   a const reference to the internally stored vector of branch lengths, in the order of the end-node ids.
 }
 \description{
-\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const& BranchLengths() const;}
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const& BranchLengths() const;}
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::FindChildren}},
   \code{\link{SPLITT::Tree::FindIdOfNode}},

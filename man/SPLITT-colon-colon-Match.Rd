@@ -14,7 +14,7 @@ matched against the elements in \code{x}.}
 in \code{x} and \code{table}.}
 }
 \value{
-an \code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType>}.
+an \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<PosType>}.
 }
 \description{
 This is a template function optimized for searching integer types (internal 

@@ -4,13 +4,11 @@
 \alias{SPLITT::Tree::SetBranchLengths}
 \title{Set new branch lengths to selected or all branches in a tree.}
 \arguments{
-\item{nodes_branch_ends}{\code{
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}: 
-  a const reference to a new vector of branch lengths, in the order of the 
-  nodes in \code{nodes_branch_ends}.}
+\item{nodes_branch_ends}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}: 
+a const reference to a new vector of branch lengths, in the order of the 
+nodes in \code{nodes_branch_ends}.}
 
-\item{lengths}{\code{
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}: 
+\item{lengths}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}: 
 \describe{
 \item{For overwrite 1.}{a const reference to a new vector of branch lengths, 
 in the order of the nodes in \code{nodes_branch_ends};} 
@@ -25,17 +23,17 @@ length M-1, where M is the number of nodes in the tree.}
 \description{
 This method has two overwrites:
 \describe{
-\item{1. Set the lengths of the branches in the order given by their application-specific end-nodes:}
-{\code{
-void SetBranchLengths(
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const& nodes_branch_ends, 
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const& lengths);}}
-
-\item{2. Set a new internally stored vector of branch lengths:}
-{\code{
-void SetBranchLengths(
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::LengthType]{LengthType}> const& lengths);}}
+\item{1. Set the lengths of the branches in the order given by their application-specific end-nodes:}{
+\code{void SetBranchLengths(}
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const& nodes_branch_ends,} 
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const& lengths);}
 }
+\item{2. Set a new internally stored vector of branch lengths:}{
+\code{void SetBranchLengths(}
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const& lengths);}
+}
+}
+
 
 If the tree has no branch lengths, the supplied arguments should
   be of length M-1, where M is the total number of nodes in the tree (-1, 
@@ -43,6 +41,8 @@ If the tree has no branch lengths, the supplied arguments should
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

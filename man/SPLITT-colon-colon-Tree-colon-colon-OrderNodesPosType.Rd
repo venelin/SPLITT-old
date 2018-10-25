@@ -4,21 +4,21 @@
 \alias{SPLITT::Tree::OrderNodesPosType}
 \title{Reorder a vector of nodes (generic w.r.t. the position type).}
 \arguments{
-\item{nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}; 
+\item{nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<PosType> OrderNodesPosType(}\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}; 
 a vector of application-specific nodes.}
 
 \item{NA}{\code{PosType const&}: \code{NA} value used mainly for the purpose of template-specification.}
 }
 \value{
-\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType>}: 
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<PosType>}: 
 a vector of positions in nodes in the order of their internally stored ids.
 the element-type of the returned vector can be specified as a template argument 
 or dedcued from the type of \code{NA}.
 }
 \description{
 \code{
-template<class PosType> 
-\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<PosType> OrderNodesPosType(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link[=SPLITT::Tree::NodeType]{NodeType}> const& nodes, PosType const& NA) const;}
+template<class PosType>} 
+\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<PosType> OrderNodesPosType(}\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const& nodes, PosType const& NA) const;}
 }
 \section{Template Arguments}{
 
@@ -28,6 +28,8 @@ template<class PosType>
 
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},

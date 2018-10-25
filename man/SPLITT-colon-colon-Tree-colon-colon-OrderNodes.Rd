@@ -4,7 +4,7 @@
 \alias{SPLITT::Tree::OrderNodes}
 \title{Reorder a vector of nodes}
 \arguments{
-\item{nodes}{\code{\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const&}; 
+\item{nodes}{\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const&}; 
 a vector of application-specific nodes.}
 }
 \value{
@@ -13,10 +13,12 @@ a vector of application-specific nodes.}
 }
 \description{
 \code{
-\link[=SPLITT::uvec]{uvec} OrderNodes(\href{http://en.cppreference.com/w/cpp/container/vector}{std::vector}<\link{NodeType}> const& nodes) const;}
+\link[=SPLITT::uvec]{uvec} OrderNodes(}\href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::NodeType]{NodeType}> const& nodes) const;}
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}
+
+\link{SPLITT}
 
 Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::BranchLengths}},
   \code{\link{SPLITT::Tree::FindChildren}},
