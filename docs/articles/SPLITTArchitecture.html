@@ -89,13 +89,20 @@
 
     
     
-<p>The library defines two layers (fig. S1):</p>
-
-<p>The bridge between the two layers is provided by an object of the  template class (fig. S1). Once the  implementation has been written, the user instantiates a  object passing the tree and the input data as arguments. This triggers the creation of the internal objects of the framework, i.e. an  object maintaining the order in which the nodes are processed and a  or a  object implementing different parallelization modes of the two traversal types. In the ideal use-case, the ’s  method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference. %In the current version of the framework any change in the tree topology invalidates the associated  object, so a new one has to be created. Thus, in the case of inferring a tree topology, the overall performance would depend on the frequency of changes in the topology per traversal and the time for re-creating the  object relative to the total time of one traversal.</p>
+<div id="the-splitt-class-diagram" class="section level1">
+<h1 class="hasAnchor">
+<a href="#the-splitt-class-diagram" class="anchor"></a>The <strong>SPLITT</strong> class diagram</h1>
+<p>The figure below represents a UML class diagram of the <strong>SPLITT</strong> library:</p>
 <div class="figure">
 <embed src="figures/UmlDiagram8.pdf" width="792" height="612"></embed>
 </div>
-<p>Here I show how to use <strong>SPLITT</strong> to estimate the broad-sense heritability, <span class="math inline">\(H^2\)</span>, of a numeric pathogen trait. <span class="math inline">\(H^2\)</span> is defined as the proportion of the trait variance attributable to genotypic variation in a population of hosts <span class="citation">(Mitov and Stadler 2016; Mitov and Stadler 2018)</span>:</p>
+<p>The library is divided in two layaers:</p>
+<ul>
+<li>a framework layer defining the main logical and data structures. These include a linear algorithm for initial reordering and splitting of the input tree into generations of nodes, which can be visited in parallel, both during post-order as well as pre-order traversal, and a growing collection of pre-order and post-order traversal algorithms, targeting different parallelization modes (e.g. queue-based versus range-based parallelization) on different computing devices (currently implemented for CPUs only).</li>
+<li>a user layer at which the user of the library must write a <code>CustomTraversalSpecification</code> class defining all typedefs and methods of the interface <code>TraversalSpecification</code>. The methods that should be defined by the user are: -<code>SetParameter(par)</code>: sets parameter values, such as model parameters, prior to tree-traversal. -<code>InitNode(i)</code>: called for each node, <em>i</em>, at the beginning of the traversal; performs node-specific initialization, based on the parameter-values and the input data; can be executed both, sequentially or in parallel, depending on the selected parallelization mode; this function is the perfect place to define the calculation of node-specific state fields or other node-specific data, which depend on the parameters, the tree and the input data but do not depend on the state/data associated with other nodes; -<code>VisitNode(i)</code>: called for the root (in pre-order traversals only) and for every internal and tip node, <em>i</em>, (both, pre-order and post-order traversals) after <code>InitNode(i)</code> and either after <code>VisitNode(j)</code> and <code>PruneNode(j, i)</code> has been called for each <span class="math inline">\(j\in Desc(i)\)</span> in post-order traversals, or after <code>VisitNode($Parent(i))</code> has been called in pre-order traversals. This method is suitable for implementing the logic in the the function <span class="math inline">\(R_i\)</span>, depending on the parameters, the input data, and the state of the nodes, on which <em>i</em>’s state depends. -<code>PruneNode(i, i\_parent)</code>: called solely in post-order traversals for every node, <em>i</em>, after the call to <code>VisitNode(i)</code> and before calling <code>VisitNode(Parent(i))</code>. This method is suitable for updating fields associated with <code>Parent(i)</code> before it gets visited. It is logically equivalent to leave the implementation of <code>PruneNode(i, i\_parent)</code> empty and have the implementation of  consult the states of its daughter nodes. -<code>StateAtRoot()</code>: returns the state associated with the root of the tree.</li>
+</ul>
+<p>The bridge between the two layers is provided by an object of the <code>TraversalTask</code> template class. Once the <code>TraversalSpecification</code> implementation has been written, the user instantiates a <code>TraversalTask</code> object passing the tree and the input data as arguments. This triggers the creation of the internal objects of the framework, i.e. an <code>OrderedTree</code> object maintaining the order in which the nodes are processed and a <code>PreOrderTraversal</code> or a <code>PostOrderTraversal</code> object implementing different parallelization modes of the two traversal types. In the ideal use-case, the <code>TraversalTask</code>’s <code>TraverseTree()</code> method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference.</p>
+</div>
 <div id="packages-used" class="section level1">
 <h1 class="hasAnchor">
 <a href="#packages-used" class="anchor"></a>Packages used</h1>
@@ -117,14 +124,8 @@
 <div id="ref-R-data-table">
 <p>Dowle, Matt, and Arun Srinivasan. 2016. <em>Data.table: Extension of ‘Data.frame‘</em>. <a href="https://CRAN.R-project.org/package=data.table" class="uri">https://CRAN.R-project.org/package=data.table</a>.</p>
 </div>
-<div id="ref-Mitov:2016kd">
-<p>Mitov, Venelin, and Tanja Stadler. 2016. “The heritability of pathogen traits - definitions and estimators.” <em>Unpublished Data</em> https://www.biorxiv.org/content/early/2016/06/12/058503.</p>
-</div>
 <div id="ref-R-POUMM">
-<p>———. 2017. <em>Fast and Robust Inference of Phylogenetic Ornstein-Uhlenbeck Models Using Parallel Likelihood Calculation</em>. <em>BiorXiv</em>. <a href="http://biorxiv.org/content/early/2017/05/30/115089" class="uri">http://biorxiv.org/content/early/2017/05/30/115089</a>.</p>
-</div>
-<div id="ref-Mitov:2018pg">
-<p>———. 2018. “A Practical Guide to Estimating the Heritability of Pathogen Traits.” <em>Molecular Biology and Evolution</em>, msx328. doi:<a href="https://doi.org/10.1093/molbev/msx328">10.1093/molbev/msx328</a>.</p>
+<p>Mitov, Venelin, and Tanja Stadler. 2017. <em>Fast and Robust Inference of Phylogenetic Ornstein-Uhlenbeck Models Using Parallel Likelihood Calculation</em>. <em>BiorXiv</em>. <a href="http://biorxiv.org/content/early/2017/05/30/115089" class="uri">http://biorxiv.org/content/early/2017/05/30/115089</a>.</p>
 </div>
 <div id="ref-R-ape">
 <p>Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. <em>Ape: Analyses of Phylogenetics and Evolution</em>. <a href="https://CRAN.R-project.org/package=ape" class="uri">https://CRAN.R-project.org/package=ape</a>.</p>
@@ -141,7 +142,8 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#packages-used">Packages used</a></li>
+<li><a href="#the-splitt-class-diagram">The <strong>SPLITT</strong> class diagram</a></li>
+      <li><a href="#packages-used">Packages used</a></li>
       <li><a href="#references">References</a></li>
       </ul>
 </div>

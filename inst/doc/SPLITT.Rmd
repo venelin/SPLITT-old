@@ -1,5 +1,5 @@
 ---
-title: "Getting started with the SPLITT library"
+title: "Getting started with the SPLITT C++ library"
 author: "Venelin Mitov"
 output: 
   rmarkdown::html_vignette:
@@ -67,22 +67,22 @@ If you don't, I recommend not trying **SPLITT**, before you have written that
 program. One reason for that is that, as every C++ code, **SPLITT** needs to 
 be compiled before it can be run. Because you will be including the file "SPLITT.h"
 in your program, it will be re-compiled every time you make a change in your program
-and wish to test it. Typically, this would needs about two minutes. Hence, you 
-risk to spend hours or days if you are heavily debugging your C++ code. Of course,
+and wish to test it. Typically, this would need about two minutes. Hence, you 
+risk to spend hours or days debug->compile->test->debug cycle. Of course,
 if you only know how to program in C++, then no need to learn R now - stick to 
-C++ but be prepared with some snacks and coffee. 
+C++ for now. 
 
 # The easiest way to start using **SPLITT**
-Being a software library **SPLITT** does not provide a high-level end-user interface. 
-Rather, **SPLITT** is used via its application programming interface (API). 
-In other words, you use the library by putting your application specific code in 
-several C++ classes. The easiest way to do this is to start from an example of 
-such classes and use this example as a skeleton for your own code, i.e. replace 
-the code in the example with your application specific data-types, and traversal
-operations. Because I was using **SPLITT** mostly from an R-package, at present, 
-there is only an R-package example. Even if you are not familiar with R, this 
-guide should still help you understand how to use **SPLITT** from within your
-C++ program. 
+Being a software library **SPLITT** does not provide a high-level end-user 
+interface.Rather, **SPLITT** is used via its application programming interface 
+(API).In other words, you use the library by putting your application specific 
+code in several C++ classes. The easiest way to do this is to start from an 
+example of such classes and use this example as a skeleton for your own code, 
+i.e. replace the code in the example with your application specific data-types, 
+and traversal operations. Because I was using **SPLITT** mostly from an 
+R-package, at present, there is only an R-package example. Even if you are not 
+familiar with R, this guide should still help you understand how to use 
+**SPLITT** from within your C++ program. 
 
 ## Installing the **SPLITT** R-package
 I recommend installing the latest package version from github. From the R-prompt,
@@ -145,107 +145,6 @@ x <- g + rnorm(n = length(tree$tip.label), mean = 0, sd = sqrt(sigmae2))
 PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, mode = 1)
 ```
 
-```{Rcpp, eval=FALSE, echo=TRUE}
-#ifndef AbcPMM_H_
-#define AbcPMM_H_
-
-#include "./SPLITT.h"
-#include "./NumericTraitData.h"
-#include <iostream>
-#include <cmath>
-
-namespace SPLITT {
-
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-
-public:
-  typedef AbcPMM<Tree> MyType;
-  typedef TraversalSpecification<Tree> BaseType;
-  typedef Tree TreeType;
-  typedef PostOrderTraversal<MyType> AlgorithmType;
-  typedef vec ParameterType;
-  typedef NumericTraitData<typename TreeType::NodeType> DataType;
-  typedef vec StateType;
-
-  double sigmae2, sigma2;
-  vec x;
-  vec a, b, c;
-
-  AbcPMM(TreeType const& tree, DataType const& input_data):
-    BaseType(tree) {
-
-    if(input_data.x_.size() != this->ref_tree_.num_tips()) {
-      std::ostringstream oss;
-      oss<<"The vector x must be the same length as the number of tips ("<<
-        this->ref_tree_.num_tips()<<"), but were"<<input_data.x_.size()<<".";
-      throw std::invalid_argument(oss.str());
-    } else {
-
-      uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
-      this->x = At(input_data.x_, ordNodes);
-      this->a = vec(this->ref_tree_.num_nodes());
-      this->b = vec(this->ref_tree_.num_nodes());
-      this->c = vec(this->ref_tree_.num_nodes());
-    }
-  };
-
-  StateType StateAtRoot() const {
-    vec res(3);
-    res[0] = a[this->ref_tree_.num_nodes() - 1];
-    res[1] = b[this->ref_tree_.num_nodes() - 1];
-    res[2] = c[this->ref_tree_.num_nodes() - 1];
-    return res;
-  };
-
-  void SetParameter(ParameterType const& par) {
-    if(par.size() != 2) {
-      throw std::invalid_argument(
-      "The par vector should be of length 2 with \
-      elements corresponding to sigma2 and sigmae2.");
-    }
-    if(par[0] <= 0 || par[1] <= 0) {
-      throw std::logic_error("The parameters sigma2 and sigmae2 should be positive.");
-    }
-    this->sigma2 = par[0];
-    this->sigmae2 = par[1];
-  }
-
-  inline void InitNode(uint i) {
-    
-    if(i < this->ref_tree_.num_tips()) {
-      a[i] = -0.5 / sigmae2;  
-      b[i] = x[i] / sigmae2;
-      c[i] = -0.5 * (x[i]*b[i] + log(2*G_PI*sigmae2));
-    } else {
-      a[i] = b[i] = c[i] = 0;
-    }
-  }
-
-  inline void VisitNode(uint i) {
-    double t = this->ref_tree_.LengthOfBranch(i);
-    
-    double d = 1 - 2*a[i]*sigma2*t;
-    // the order is important here because for c[i] we use the previous values 
-    // of a[i] and b[i].
-    c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
-    a[i] /= d;
-    b[i] /= d;
-  }
-
-  inline void PruneNode(uint i, uint j) {
-    a[j] = a[j] + a[i];
-    b[j] = b[j] + b[i];
-    c[j] = c[j] + c[i];
-  }
-
-};
-
-typedef TraversalTask<
-  AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
-}
-#endif //AbcPMM_H_
-```
 
 ```{r fig1a, dpi=150, fig.width=4.6}
 par(mfrow=c(1,5))

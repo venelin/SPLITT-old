@@ -31,8 +31,6 @@
 
 # loading the RCPP C++ modules
 
-#' @name SPLITT__AbcPMM-class
 loadModule( "SPLITT__AbcPMM", TRUE )
 
-#' @name SPLITT__OrderedTreeStringNodes-class
 loadModule("SPLITT__OrderedTreeStringNodes", TRUE)

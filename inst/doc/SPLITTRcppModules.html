@@ -17,6 +17,44 @@
 
 
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
 
 
 
@@ -40,6 +78,67 @@
 </ul>
 </div>
 
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;RcppArmadillo.h&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;R_ext/Rdynload.h&gt;</span>
+    
+<span class="pp">#include </span><span class="im">&quot;./AbcPMM.h&quot;</span>
+    
+<span class="co">// [[Rcpp::plugins(&quot;cpp11&quot;)]]</span>
+<span class="co">// [[Rcpp::plugins(openmp)]]</span>
+<span class="co">// [[Rcpp::depends(RcppArmadillo)]]</span>
+
+<span class="kw">using</span> <span class="kw">namespace</span> SPLITT;
+
+ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
+    Rcpp::List <span class="at">const</span>&amp; tree, vec <span class="at">const</span>&amp; x) {
+  arma::umat branches = tree[<span class="st">&quot;edge&quot;</span>];
+  uvec br_0 = arma::conv_to&lt;uvec&gt;::from(branches.col(<span class="dv">0</span>));
+  uvec br_1 = arma::conv_to&lt;uvec&gt;::from(branches.col(<span class="dv">1</span>));
+  vec t = Rcpp::as&lt;vec&gt;(tree[<span class="st">&quot;edge.length&quot;</span>]);
+  <span class="ex">uint</span> num_tips = Rcpp::as&lt;Rcpp::CharacterVector&gt;(tree[<span class="st">&quot;tip.label&quot;</span>]).size();
+  uvec node_names = Seq(<span class="ex">uint</span>(<span class="dv">1</span>), num_tips);
+  <span class="kw">typename</span> ParallelPruningAbcPMM::DataType data(node_names, x);
+  <span class="cf">return</span> <span class="kw">new</span> ParallelPruningAbcPMM(br_0, br_1, t, data);
+}
+
+RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::TreeType)
+RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::TraversalSpecificationType)
+RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::AlgorithmType)
+  
+  
+RCPP_MODULE(SPLITT__AbcPMM) {
+  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::TreeType::Tree&gt; ( <span class="st">&quot;SPLITT__AbcPMM__Tree&quot;</span> )
+  .property(<span class="st">&quot;num_nodes&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::num_nodes )
+  .property(<span class="st">&quot;num_tips&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::num_tips )
+  .method(<span class="st">&quot;LengthOfBranch&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::LengthOfBranch )
+  .method(<span class="st">&quot;FindNodeWithId&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::FindNodeWithId )
+  .method(<span class="st">&quot;FindIdOfNode&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::FindIdOfNode )
+  .method(<span class="st">&quot;FindIdOfParent&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::FindIdOfParent )
+  .method(<span class="st">&quot;OrderNodes&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::Tree::OrderNodes )
+  ;
+  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::TreeType&gt;( <span class="st">&quot;SPLITT__AbcPMM__OrderedTree&quot;</span> )
+    .derives&lt;ParallelPruningAbcPMM::TreeType::Tree&gt; ( <span class="st">&quot;SPLITT__AbcPMM__Tree&quot;</span> )
+    .method(<span class="st">&quot;RangeIdPruneNode&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::RangeIdPruneNode )
+    .method(<span class="st">&quot;RangeIdVisitNode&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::RangeIdVisitNode )
+    .property(<span class="st">&quot;num_levels&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::num_levels )
+    .property(<span class="st">&quot;ranges_id_visit&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::ranges_id_visit )
+    .property(<span class="st">&quot;ranges_id_prune&quot;</span>, &amp;ParallelPruningAbcPMM::TreeType::ranges_id_prune )
+  ;
+  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::AlgorithmType::ParentType&gt; ( <span class="st">&quot;SPLITT__AbcPMM__TraversalAlgorithm&quot;</span> )
+    .property( <span class="st">&quot;VersionOPENMP&quot;</span>, &amp;ParallelPruningAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
+    .property( <span class="st">&quot;NumOmpThreads&quot;</span>, &amp;ParallelPruningAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
+  ;
+  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::AlgorithmType&gt; ( <span class="st">&quot;SPLITT__AbcPMM__AlgorithmType&quot;</span> )
+    .derives&lt;ParallelPruningAbcPMM::AlgorithmType::ParentType&gt;( <span class="st">&quot;SPLITT__AbcPMM__TraversalAlgorithm&quot;</span> )
+  ;
+  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM&gt;( <span class="st">&quot;SPLITT__AbcPMM&quot;</span> )
+  .factory&lt;Rcpp::List <span class="at">const</span>&amp;, vec <span class="at">const</span>&amp;&gt;(&amp;CreateParallelPruningAbcPMM)
+  .method( <span class="st">&quot;DoPruning&quot;</span>, &amp;ParallelPruningAbcPMM::TraverseTree )
+  .property( <span class="st">&quot;tree&quot;</span>, &amp;ParallelPruningAbcPMM::tree )
+  .property( <span class="st">&quot;spec&quot;</span>, &amp;ParallelPruningAbcPMM::spec )
+  .property( <span class="st">&quot;algorithm&quot;</span>, &amp;ParallelPruningAbcPMM::algorithm )
+  ;
+}</code></pre></div>
 <div id="packages-used" class="section level1">
 <h1>Packages used</h1>
 <p>Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:</p>
