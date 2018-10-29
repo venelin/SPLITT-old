@@ -17,4 +17,144 @@ bibliography: REFERENCES.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# A note on generic programming
+
+SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as "generic programming". Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading [this tutorial](http://www.cplusplus.com/doc/oldtutorial/templates/) in case you are not familiar with the topic. 
+
+# What is a TraversalSpecification class?
+
+A TraversalSpecification class is a C++ class (optionally inheriting from the class `SPLITT::TraversalSpecification`). The following C++ code shows how the class is defined for the PMM-example:
+
+```{Rcpp, eval=FALSE}
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+
+// Typedefs
+// Methods
+
+};
+```
+
+The template-parameter `<class Tree>` allows to define `AbcPMM` classes for different `Tree`-types, e.g. for `Tree`s with nodes of type `int` as well as for `Tree`s with nodes of type `std::string`. 
+
+## What does `AbcPMM` inherit from `SPLITT::TraversalSpecification`?
+
+`AbcPMM` inherits from its base-class `TraversalSpecification<Tree>` the following entities:
+
+- a reference to a `Tree` object which has to be initialized during construction.
+- empty definitions of the three node-traversal operations. 
+
+```{Rcpp, eval=FALSE}
+template<class Tree> class TraversalSpecification {
+protected:
+  // A reference to a Tree available for inheriting classes
+  Tree const& ref_tree_;
+  // A protected constructor that initializes the tree-reference. This constructor
+  // must be called explicitly in the initalization list of inheriting class constructors.
+  TraversalSpecification(Tree const& tree): ref_tree_(tree) {}
+  
+  // Node-traversal operations - to be overwritten by inheriting classes
+  void InitNode(uint i) {}
+  void VisitNode(uint i) {}
+  void PruneNode(uint i, uint i_parent) {}
+};
+```
+
+## What does `AbcPMM` define on its own? 
+
+* `Typedefs`
+  
+    - the type of the tree object. Usually, this should be the class `SPLITT::OrderedTree` with specified template parameters for the type of node and branch-length in the tree. In the PMM, example this
+    - the type of travefsal algorithm, i.e. `PostOrderTraversal` or `PreOrderTraversal`;
+    - the type of parameter passed before each traversal;
+    - the type of data associated with the nodes in the tree;
+    - the type of state calculated for each node during the traversal.
+    
+* Methods
+
+    - A constructor for the TraversalSpecification object
+    - The methods defining the node-traversal operations:
+        - InitNode(uint i);
+        - VisitNode(uint i);
+        - PruneNode(uint i, uint j);
+    - StateAtRoot(): a method returning the root-state a the end of a traversal.
+
+SPLITT treats all of the above methods and types as 
+
+* A global `typedef` defining the TraversalTask class for the TraversalSpecification.
+
+
+
+```{Rcpp, eval=FALSE}
+template<class Tree> class TraversalSpecification {
+protected:
+  // A reference to a Tree available for inheriting classes
+  Tree const& ref_tree_;
+  // A protected constructor that initializes the tree-reference. This constructor
+  // must be called explicitly in the initalization list of inheriting class constructors.
+  TraversalSpecification(Tree const& tree): ref_tree_(tree) {}
+public:
+  // public typedefs. These typedefs must be provided by an implementation class.
+  // 1. typedef Tree TreeType;
+  // 2. typedef PostOrderTraversal<ImlementationClass> AlgorithmType;
+  // 3. typedef ImplementationSpecificParameterType ParameterType;
+  // 4. typedef ImplementationSpecificDataType DataType;
+  // 5. typedef ImplementationSpecificStateType StateType;
+  
+  
+  // The following methods must be present any implementation
+  // 6. constructor: will be called by a TraversalTask object; Here, it is
+  // commented out, because the DataType is not known.
+  // ImplementationClassName(TreeType & tree, DataType & input_data) :
+  //   TraversalSpecification(tree) {
+  //     implementation specific initialization using the tree and the input_data.
+  // }
+  
+  
+  // The following methods get called by the TraversalAlgorithm implementation:
+  
+  // 7. Setting the model parameters prior to starting the pruning procedure on the tree.
+  // This method is called by the TraversalTask.TraverseTree(ParamterType const&, uint mode)
+  // method. The method declaration is commented out because ParameterType is not known
+  // and must be specified by the implementing class.
+  // void SetParameter(ParameterType const& par);
+  
+  // 8. InitNode(i) is called on each node in the tree right after SetParameter and
+  // before any of the VisitNode and PruneNode has been called. There is no predefined
+  // order of the calls to InitNode and they may be executed in parallel. Therefore, only
+  // node-specific data initialization, including the length of the branch
+  // leading to node i, can take place in this method.
+  void InitNode(uint i) {}
+  
+  
+  // 9. VisitNode(i) is called on each tip or internal node (EXCLUDING THE ROOT),
+  // in the tree after PruneNode has been called on each descendant of i.
+  // The method is the perfect place to calculate the state of node i using the
+  // pre-calculated states of its descendants. Although, it is guaranteed
+  // that VisitNode(i) is called before VisitNode(i_parent), this method SHOULD NOT BE USED
+  // FOR ALTERING THE STATE of i_parent, because this would conflict with
+  // a concurrent execution of VisitNode on a sibling of i (see also PruneNode).
+  void VisitNode(uint i) {}
+  
+  // 10. PruneNode(i, i_parent) is called on each tip or internal node (EXCLUDING THE ROOT)
+  // after VisitNode(i) and in sync with PruneNode(k, i_parent), for any sibling k of i.
+  // Thus, it is safe to use PruneNode to update the state of i_parent.
+  void PruneNode(uint i, uint i_parent) {}
+  
+  // 11. StateType StateAtRoot() is called after PruneNode has been called on each
+  // direct descendant of the root node. If necessary, VisitNode(i_root) can be called
+  // here, in order to calculate the final state of the root. The value returned by this
+  // function is also returned by the TraversalTask.TraverseTree(ParameterType const& par, uint mode)
+  // method.
+};
+
+// 12. After the class TraversalSpecificationImplementation has been defined it is
+// time to specify the TraversalTask template. This is not obligatory but can be very
+// convinient for creating TraversalTask objects with the user specific implementation
+// and to call their TraverseTree method.
+// typedef TraversalTask<TraversalSpecificationImplementation> > MyTraversalTask;
+
+```
+
+# Defining the type of data
 
