@@ -3,7 +3,6 @@ pkgdown: 1.1.0
 pkgdown_sha: ~
 articles:
   SPLITT: SPLITT.html
-  SPLITTArchitecture: SPLITTArchitecture.html
+  SPLITTClasses: SPLITTClasses.html
   SPLITTRcppModules: SPLITTRcppModules.html
-  SPLITTTraversalSpecification: SPLITTTraversalSpecification.html
 

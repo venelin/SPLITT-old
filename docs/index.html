@@ -25,7 +25,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -62,13 +62,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/SPLITTArchitecture.html">SPLITT Architecture</a>
+      <a href="articles/SPLITTClasses.html">SPLITT Classes</a>
     </li>
     <li>
       <a href="articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
-    </li>
-    <li>
-      <a href="articles/SPLITTTraversalSpecification.html">Writing a SPLITT TraversalSpecification class</a>
     </li>
   </ul>
 </li>
@@ -83,18 +80,39 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-    SPLITT is a one-header-only generic C++ library for serial and
- parallel pre-order and post-order traversal of trees. The library implements
- several algorithms for parallel lineage traversal and is capable to choose 
- automatically the fastest implementation for a particular visit-node operation
- and data. To use the library, the user writes an implementation of the implicit
- interface class TraversalSpecification defining the types of the input data, 
- node state, and traversal type and the operation to be performed on each node 
- during the traversal. 
+  <div class="col-md-9 contents">
+    
+
+    
+    
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+<div id="splitt-serial-and-parallel-lineage-traversal-of-trees" class="section level1">
+<div class="page-header"><h1 class="hasAnchor">
+<a href="#splitt-serial-and-parallel-lineage-traversal-of-trees" class="anchor"></a>SPLITT: Serial and Parallel LIneage Traversal of Trees</h1></div>
+<p>SPLITT is a one-header C++ library that makes it easy to program fast pre-order and post-order traversal algorithms over tree-like data structures. The library is written in C++11. If <a href="https://www.openmp.org">OpenMP</a> is enabled during compilation, SPLITT can take advantage of a multi-core CPU and/or vectorized instructions to execute the tree traversal in parallel.</p>
+<div id="the-splitt-h-file" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-splitt-h-file" class="anchor"></a>The SPLITT.h file</h2>
+<p>The SPLITT library represents a C++ header file called “SPLITT.h”. Technically, downloading the latest version of the file from [github] (<a href="https://github.com/venelin/SPLITT/raw/master/src/SPLITT.h" class="uri">https://github.com/venelin/SPLITT/raw/master/src/SPLITT.h</a>) and including it in one or more of your C++ files is all you need to start using it. However, before you can do anything useful with SPLITT you will need to get familiar with some of its classes, i.e. its programming interface.</p>
+</div>
+<div id="the-splitt-r-package" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-splitt-r-package" class="anchor"></a>The SPLITT R-package</h2>
+<p>The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don’t need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. Nevertheless, if your final goal is to write a C++ extension that uses SPLITT as a fast back-end for an R-package of your own, the SPLITT package provides an example how you can do that.</p>
+</div>
+<div id="resources" class="section level2">
+<h2 class="hasAnchor">
+<a href="#resources" class="anchor"></a>Resources</h2>
+<p>The section “Materials and Methods” in the research article “Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library” provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is used as the first coding example in the SPLITT online documentation.</p>
+<p>The SPLITT source code and online documentation is available from the <a href="https://github.com/venelin/SPLITT">SPLITT github page</a>.</p>
+<p>The <a href="https://github.com/venelin/SPLITT">Getting started</a> guide shows how to write a console application using SPLITT.</p>
+<p>The <a href="https://github.com/venelin/SPLITT">SPLITT classes</a> guide overviews the SPLITT classes.</p>
+<p>The <a href="https://github.com/venelin/SPLITT">Calling SPLITT from an R-package</a> guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.</p>
+</div>
+</div>
   </div>
 
-  <div class="col-md-3" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
@@ -115,7 +133,8 @@
 </ul>
 </div>
 
-  </div>
+      </div>
+
 </div>
 
 
