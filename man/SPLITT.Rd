@@ -6,8 +6,8 @@
 \description{
 All basic types, functions and classes defined in SPLITT.
 
-\if{html}{\figure{UmlDiagram8.pdf}{options: width=100\%}}
-\if{latex}{\figure{UmlDiagram8.pdf}{options: width=15cm}}
+%\if{html}{\figure{UmlDiagram8.pdf}{options: width=100\%}}
+%\if{latex}{\figure{UmlDiagram8.pdf}{options: width=15cm}}
 }
 \section{Basic types}{
 

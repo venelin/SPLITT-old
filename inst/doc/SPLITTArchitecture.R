@@ -1,6 +1,9 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
+## ---- echo=FALSE, out.width = "792px", out.height = "612px"--------------
+knitr::include_graphics("figures/Uml1.png")
+
 ## ----create-references, echo=FALSE, include=FALSE, eval=TRUE-------------
 treeProcessing <- c("ape")
 data <- c("data.table")

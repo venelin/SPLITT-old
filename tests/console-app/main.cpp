@@ -1,35 +1,24 @@
----
-title: "Writing a SPLITT TraversalSpecification class"
-author: "Venelin Mitov"
-output: 
-  rmarkdown::html_vignette:
-    fig_caption: yes
-    toc: true
-    toc_depth: 2
-vignette: >
-  %\VignetteIndexEntry{Writing a SPLITT TraversalSpecification class}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-bibliography: REFERENCES.bib
----
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{Rcpp, eval=FALSE, echo=TRUE}
-#ifndef AbcPMM_H_
-#define AbcPMM_H_
-
-#include "./SPLITT.h"
-#include "./NumericTraitData.h"
+#include "SPLITT.h"
 #include <iostream>
-#include <cmath>
+#include <fstream>
 
-namespace SPLITT {
+
+using namespace SPLITT;
+
+template<class NameType>
+struct NumericTraitData {
+  // use const references to avoid copying of long vectors
+  std::vector<NameType> const& names_;
+  vec const& x_;
+  NumericTraitData(
+    std::vector<NameType> const& names,
+    vec const& x): names_(names), x_(x) {}
+};
+
 
 template<class Tree>
 class AbcPMM: public TraversalSpecification<Tree> {
-
+  
 public:
   typedef AbcPMM<Tree> MyType;
   typedef TraversalSpecification<Tree> BaseType;
@@ -38,21 +27,21 @@ public:
   typedef vec ParameterType;
   typedef NumericTraitData<typename TreeType::NodeType> DataType;
   typedef vec StateType;
-
+  
   double sigmae2, sigma2;
   vec x;
   vec a, b, c;
-
+  
   AbcPMM(TreeType const& tree, DataType const& input_data):
     BaseType(tree) {
-
+    
     if(input_data.x_.size() != this->ref_tree_.num_tips()) {
       std::ostringstream oss;
       oss<<"The vector x must be the same length as the number of tips ("<<
         this->ref_tree_.num_tips()<<"), but were"<<input_data.x_.size()<<".";
       throw std::invalid_argument(oss.str());
     } else {
-
+      
       uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
       this->x = At(input_data.x_, ordNodes);
       this->a = vec(this->ref_tree_.num_nodes());
@@ -60,7 +49,7 @@ public:
       this->c = vec(this->ref_tree_.num_nodes());
     }
   };
-
+  
   StateType StateAtRoot() const {
     vec res(3);
     res[0] = a[this->ref_tree_.num_nodes() - 1];
@@ -68,11 +57,11 @@ public:
     res[2] = c[this->ref_tree_.num_nodes() - 1];
     return res;
   };
-
+  
   void SetParameter(ParameterType const& par) {
     if(par.size() != 2) {
       throw std::invalid_argument(
-      "The par vector should be of length 2 with \
+          "The par vector should be of length 2 with \
       elements corresponding to sigma2 and sigmae2.");
     }
     if(par[0] <= 0 || par[1] <= 0) {
@@ -81,7 +70,7 @@ public:
     this->sigma2 = par[0];
     this->sigmae2 = par[1];
   }
-
+  
   inline void InitNode(uint i) {
     
     if(i < this->ref_tree_.num_tips()) {
@@ -92,7 +81,7 @@ public:
       a[i] = b[i] = c[i] = 0;
     }
   }
-
+  
   inline void VisitNode(uint i) {
     double t = this->ref_tree_.LengthOfBranch(i);
     
@@ -103,53 +92,57 @@ public:
     a[i] /= d;
     b[i] /= d;
   }
-
+  
   inline void PruneNode(uint i, uint j) {
     a[j] = a[j] + a[i];
     b[j] = b[j] + b[i];
     c[j] = c[j] + c[i];
   }
-
+  
 };
 
-typedef TraversalTask<
-  AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
-}
-#endif //AbcPMM_H_
-```
+typedef TraversalTask<AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
 
 
-# Packages used
-```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
-treeProcessing <- c("ape")
-data <- c("data.table")
-poumm <- c("POUMM")
-testing <- c("testthat")
-boot <- c("boot")
- 
-packagesUsed <- c(treeProcessing, data, poumm, boot, testing)
-
-printPackages <- function(packs) {
-  res <- ""
-  for(i in 1:length(packs)) {
-    res <- paste0(res, paste0(packs[i], ' v', packageVersion(packs[i]), ' [@R-', packs[i], ']'))
-    if(i < length(packs)) {
-      res <- paste0(res, ', ')
+int main() {
+  
+  std::fstream fin;
+  fin.open("test-input.txt", std::fstream::in);
+  
+  uint M, N;
+  fin>>M>>N;
+  uvec daughters(M-1);
+  uvec parents(M-1);
+  vec t(M-1);
+  vec x(N);
+  
+  for(int i=0; i < M-1; i++) {
+    fin>>daughters[i]>>parents[i]>>t[i];
+    if(daughters[i] <= N) {
+      fin>>x[i];
     }
   }
-  res
+  
+  double sigma, sigmae;
+  
+  fin>>sigma>>sigmae;
+  
+  vec param(2); 
+  
+  param[0] = sigma*sigma;
+  param[1] = sigmae*sigmae;
+  
+  uvec node_names = Seq(uint(1), N);
+  typename ParallelPruningAbcPMM::DataType data(node_names, x);
+  
+  ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
+   
+   
+  vec abc = pruningTask.TraverseTree(param, 0);
+  
+  std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
+  
+  std::cout<<abc[0]<<" "<<abc[1]<<" "<<abc[2]<<std::endl;
+  return 0;
 }
-
-# Write bib information (this line is executed manually and the bib-file is edited manually after that)
-#knitr::write_bib(packagesUsed, file = "./REFERENCES-R.bib")
-```
-
-Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
-
-* For tree processing: `r printPackages(treeProcessing)`;
-* For reporting: `r printPackages(data)`;
-* For the POUMM and PP estimates: `r printPackages(c(poumm, boot))`;
-* For testing: `r printPackages(testing)`.
-
-# References
 

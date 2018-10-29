@@ -1,5 +1,5 @@
 ---
-title: "SPLITT Architecture"
+title: "SPLITT Classes"
 author: "Venelin Mitov"
 output: 
   rmarkdown::html_vignette:
@@ -7,11 +7,12 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{SPLITT Architecture}
+  %\VignetteIndexEntry{SPLITT Classes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: REFERENCES.bib
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -20,7 +21,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The figure below represents a UML class diagram of the **SPLITT** library:
 
-![](figures/UmlDiagram8.pdf){width=792px height=612px}
+
+```{r, echo=FALSE, out.width = "792px", out.height = "612px"}
+knitr::include_graphics("figures/Uml1.png")
+```
 
 The library is divided in two layaers:
 
