@@ -97,5 +97,6 @@ If the OpenMP-version is equal to 0, then, most likely your compiler does not su
 
 # Next steps
 
-The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the article [Writing a traversal specification]()
+The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the article [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html).
+
 
