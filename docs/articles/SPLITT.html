@@ -96,29 +96,39 @@
 <div id="do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure" class="section level2">
 <h2 class="hasAnchor">
 <a href="#do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure" class="anchor"></a>Do you use pre-order or post-order traversal of a tree-like data-structure?</h2>
-<p>If you don’t understand what I mean, chances are high that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I’ve encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a <em>large tree</em>, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its <em>daughter nodes</em>. This is what I mean by <em>post-order traversal</em>. A <em>pre-order traversal</em> is the same with only one difference – replace the term <em>daughter nodes</em> with the term <em>parent node</em> in the sentence above.</p>
-</div>
-<div id="how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="anchor"></a>How big are your trees and how complex is your node traversal operation?</h2>
-<p>When I said <em>large tree</em> I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but typically parallel traversal has a performance benefit only on big trees. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea if you currently have an implementation in R and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to between 10 and 100 times faster than the R-implementation.</p>
+<p>If you don’t understand what I mean, chances are high that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I’ve encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a <em>big tree</em>, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its <em>daughter nodes</em>. This is what I mean by <em>post-order traversal</em>. A <em>pre-order traversal</em> is the same with only one difference – replace the term <em>daughter nodes</em> with the term <em>parent node</em> in the sentence above.</p>
 </div>
 <div id="do-you-need-the-tree-traversal-to-be-fast" class="section level2">
 <h2 class="hasAnchor">
 <a href="#do-you-need-the-tree-traversal-to-be-fast" class="anchor"></a>Do you need the tree-traversal to be fast?</h2>
-<p>This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don’t see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operationduring the analysis of my biological data. It<br>
-would not be an exaggeration, if I say that,without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. Thanks to the fast C++ implementation of my models, based on SPLITT, I was able to tune my models by running many more analyses with different parameter settings, such as prior distributions for a Bayesian model inference.</p>
+<p>This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don’t see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operation during the analysis of the biological data at my disposal. It would not be an exaggeration, if I say that, without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. This was reduced to a few months, thanks to the fast C++ implementation, based on SPLITT.</p>
 </div>
-<div id="do-you-have-a-program-solving-your-computational-problem-in-a-higher-level-language-e-g-r" class="section level2">
+<div id="how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="section level2">
 <h2 class="hasAnchor">
-<a href="#do-you-have-a-program-solving-your-computational-problem-in-a-higher-level-language-e-g-r" class="anchor"></a>Do you have a program solving your computational problem in a higher level language, e.g. R?</h2>
-<p>If you don’t, I recommend not trying SPLITT, before you have written that program. One reason for that is that, as every C++ code, SPLITT needs to be compiled before it can be run. Because you will be including the file “SPLITT.h” in your program, it will be re-compiled every time you make a change in your program and wish to test it. Typically, this would need about two minutes. Hence, you risk to spend hours or days debug-&gt;compile-&gt;test-&gt;debug cycle. Of course, if you only know how to program in C++, then no need to learn R now - stick to C++ for now.</p>
+<a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="anchor"></a>How big are your trees and how complex is your node traversal operation?</h2>
+<p>When I said <em>big tree</em> I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version.</p>
 </div>
+</div>
+<div id="prerequisites" class="section level1">
+<h1 class="hasAnchor">
+<a href="#prerequisites" class="anchor"></a>Prerequisites</h1>
+<p>Here is what you need before you can start working with SPLITT:</p>
+<ul>
+<li>
+<p>A C++11 compiler. So far I’ve been able to compile a SPLITT-based program on OS X and Linux using the following compilers:</p>
+<ul>
+<li>clang++ version 6.0.0 on OS X. To my knowledge, this is the first version of clang++ that has the omp.h header, so it is possible to compile code using OpenMP. I am not an expert on the topic of C++ compilers, so I don’t know how the clang++ compiler behaves on other systems. On my Mac OS X, I’ve installed this compiler as part of my R toolchain. I’ve found <a href="http://thecoatlessprofessor.com/programming/r-compiler-tools-for-rcpp-on-macos/">these instructions</a> very helpful. In case the above link has become outdated, or you wish to use clang without R, maybe start by reading the <a href="http://llvm.org/">llvm project home-page</a>.</li>
+<li>Previous clang++ versions on OS X. Before installing clang++ v6.0.0, I’ve been able to compile SPLITT-code with earlier versions but these were not supporting OpenMP, so I was able to run SPLITT only in serial mode.</li>
+<li>Intel compiler. Previously, I’ve been able to compile SPLITT-based code with the Intel compiler (Mac OS X and Linux). This compiler is likely to generate the fastest binary code running on Intel processors. You can try downloading the Intel compiler, following the instructions on the <a href="https://software.intel.com/en-us/c-compilers">Intel C++ compilers page</a>.</li>
+</ul>
+</li>
+<li><p>Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package you are writing.</p></li>
+</ul>
 </div>
 <div id="the-easiest-way-to-start-using-splitt" class="section level1">
 <h1 class="hasAnchor">
 <a href="#the-easiest-way-to-start-using-splitt" class="anchor"></a>The easiest way to start using SPLITT</h1>
-<p>Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API).In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program.</p>
+<p>Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program.</p>
 <div id="installing-the-splitt-r-package" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installing-the-splitt-r-package" class="anchor"></a>Installing the SPLITT R-package</h2>
@@ -129,7 +139,7 @@ would not be an exaggeration, if I say that,without SPLITT, my PhD would have ne
 <pre><code>## Installing SPLITT</code></pre>
 <pre><code>## '/Library/Frameworks/R.framework/Resources/bin/R' --no-site-file --no-environ --no-save --no-restore --quiet CMD  \
 ##   INSTALL  \
-##   '/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/RtmpmzSJ3B/devtools2b7f657129a/venelin-SPLITT-33409fa'  \
+##   '/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/Rtmp8yPtMN/devtools8ae05d066e24/venelin-SPLITT-5d6f057'  \
 ##   --library='/Users/vmitov/Library/R/3.5/library' --install-tests</code></pre>
 <pre><code>## </code></pre>
 <pre><code>## Building SPLITT vignettes
@@ -164,19 +174,19 @@ would not be an exaggeration, if I say that,without SPLITT, my PhD would have ne
 ## Number of threads: 8 
 ## Measuring likelihood calculation times...
 ##     model                                            mode time (ms) speedupX
-##  1:   PMM                                      R (serial)     0.230   1.0000
-##  2:   PMM                                      C++ (AUTO)     0.011  20.9091
-##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.011  20.9091
-##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.012  19.1667
-##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.013  17.6923
-##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.083   2.7711
-##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.088   2.6136
-##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.253   0.9091
-##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.242   0.9504
-## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.062   3.7097
-## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.048   4.7917
-## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.055   4.1818
-## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.060   3.8333</code></pre>
+##  1:   PMM                                      R (serial)     0.220   1.0000
+##  2:   PMM                                      C++ (AUTO)     0.012  18.3333
+##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.011  20.0000
+##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.012  18.3333
+##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.012  18.3333
+##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.081   2.7160
+##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.046   4.7826
+##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.061   3.6066
+##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.290   0.7586
+## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.052   4.2308
+## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.040   5.5000
+## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.054   4.0741
+## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.050   4.4000</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
 newick &lt;-<span class="st"> '(((1:3,2:2.8)6:4.2,3:4.1)7:4.5,(4:4,5:5)8:6)0;'</span>
 tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text=</span>newick)
@@ -200,7 +210,7 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
 
 <span class="kw"><a href="../reference/PlotParallelTraversal.html">PlotParallelTraversal</a></span>(tree)</code></pre></div>
 <p><img src="SPLITT_files/figure-html/fig1a-1.png" width="690"></p>
-<pre><code>## C++ object &lt;0x7f9a078e2e10&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7f9a07d20fe0&gt;</code></pre>
+<pre><code>## C++ object &lt;0x7ff995644970&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7ff995727a60&gt;</code></pre>
 </div>
 </div>
   </div>
@@ -213,11 +223,11 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
 <li>
 <a href="#before-you-start">Before you start</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure">Do you use pre-order or post-order traversal of a tree-like data-structure?</a></li>
-      <li><a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation">How big are your trees and how complex is your node traversal operation?</a></li>
       <li><a href="#do-you-need-the-tree-traversal-to-be-fast">Do you need the tree-traversal to be fast?</a></li>
-      <li><a href="#do-you-have-a-program-solving-your-computational-problem-in-a-higher-level-language-e-g-r">Do you have a program solving your computational problem in a higher level language, e.g. R?</a></li>
+      <li><a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation">How big are your trees and how complex is your node traversal operation?</a></li>
       </ul>
 </li>
+      <li><a href="#prerequisites">Prerequisites</a></li>
       <li>
 <a href="#the-easiest-way-to-start-using-splitt">The easiest way to start using SPLITT</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#installing-the-splitt-r-package">Installing the SPLITT R-package</a></li>

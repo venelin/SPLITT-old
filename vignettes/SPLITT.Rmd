@@ -33,8 +33,20 @@ This very much depends on how frequently do you need to perform the tree-travers
 ## How big are your trees and how complex is your node traversal operation?
 When I said *big tree* I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version. 
 
+# Prerequisites 
+
+Here is what you need before you can start working with SPLITT:
+
+* A C++11 compiler. So far I've been able to compile a SPLITT-based program on OS X and Linux using the following compilers:
+
+    - clang++ version 6.0.0 on OS X. To my knowledge, this is the first version of clang++ that has the omp.h header, so it is possible to compile code using OpenMP. I am not an expert on the topic of C++ compilers, so I don't know how the clang++ compiler behaves on other systems. On my Mac OS X, I've installed this compiler as part of my R toolchain. I've found [these instructions](http://thecoatlessprofessor.com/programming/r-compiler-tools-for-rcpp-on-macos/) very helpful. In case the above link has become outdated, or you wish to use clang without R, maybe start by reading the [llvm project  home-page](http://llvm.org/).
+    - Previous clang++ versions on OS X. Before installing clang++ v6.0.0, I've been able to compile SPLITT-code with earlier versions but these were not supporting OpenMP, so I was able to run SPLITT only in serial mode.
+    - Intel compiler. Previously, I've been able to compile SPLITT-based code with the Intel compiler (Mac OS X and Linux). This compiler is likely to generate the fastest binary code running on Intel processors. You can try downloading the Intel compiler, following the instructions on the [Intel C++ compilers page](https://software.intel.com/en-us/c-compilers). 
+
+* Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package of your own.
+
 # The easiest way to start using SPLITT
-Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API).In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program. 
+Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program. 
 
 ## Installing the SPLITT R-package
 I recommend installing the latest package version from github. From the R-prompt,
