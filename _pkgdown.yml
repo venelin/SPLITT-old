@@ -1,0 +1,28 @@
+url: http://venelin.github.io/SPLITT
+
+navbar:
+  title: SPLITT
+  type: default
+  left:
+  - icon: fa-home fa-lg
+    href: index.html
+  - text: Get started
+    href: articles/SPLITT.html
+  - text: Reference
+    href: reference/index.html
+  - text: Articles
+    menu:
+    - text: SPLITT classes
+      href: articles/SPLITTClasses.html
+    - text: Calling SPLITT from an R-package
+      href: articles/SPLITTRcppModules.html
+  - text: News
+    href: news/index.html
+  right: []
+
+articles:
+- title: All vignettes
+  desc: ~
+  contents:
+  - '`SPLITTClasses`'
+  - '`SPLITTRcppModules`'
