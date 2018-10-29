@@ -28,7 +28,8 @@ The R-package called with the same name (SPLITT) bundles the SPLITT.h header tog
 
 The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
 
-* The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to write a console application using SPLITT. 
+* The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to compile and run a console application using SPLITT. 
+* The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations for execution with SPLITT. 
 * The [SPLITT classes](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
 * The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
@@ -36,4 +37,5 @@ The research article "Parallel Likelihood Calculation for Phylogenetic Comparati
 
 The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT). 
 
+Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 

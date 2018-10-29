@@ -1,5 +1,5 @@
 ---
-title: "Writing a Traversal Specification"
+title: "Writing a traversal specification"
 author: "Venelin Mitov"
 output: 
   rmarkdown::html_vignette:
@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Writing a Traversal Specification}
+  %\VignetteIndexEntry{Writing a traversal specification}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: REFERENCES.bib

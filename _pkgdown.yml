@@ -10,7 +10,7 @@ navbar:
     href: articles/SPLITT.html
   - text: Articles
     menu:
-    - text: Writing a Traversal Specification
+    - text: Writing a traversal specification
       href: articles/SPLITTTraversalSpecification.html
     - text: SPLITT classes
       href: articles/SPLITTClasses.html

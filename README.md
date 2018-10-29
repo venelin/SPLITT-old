@@ -3,7 +3,7 @@
 SPLITT: Serial and Parallel LIneage Traversal of Trees
 ======================================================
 
-SPLITT is a one-header C++ library that makes it easy to program fast pre-order and post-order traversal algorithms over tree-like data structures. The library is written in C++11. If [OpenMP](https://www.openmp.org) is enabled during compilation, SPLITT can take advantage of a multi-core CPU and/or vectorized instructions to execute the tree traversal in parallel.
+SPLITT is a one-header C++ library that makes it easy to program fast pre-order and post-order traversal algorithms over tree-like data. The library is written in C++11. If [OpenMP](https://www.openmp.org) is enabled during compilation, SPLITT can take advantage of a multi-core CPU and/or vectorized instructions to execute the tree traversal in parallel.
 
 The SPLITT.h file
 -----------------
@@ -20,7 +20,8 @@ Resources
 
 The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html).
 
--   The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to write a console application using SPLITT.
+-   The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to compile and run a console application using SPLITT.
+-   The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations for execution with SPLITT.
 -   The [SPLITT classes](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes.
 -   The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
