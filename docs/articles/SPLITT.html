@@ -45,7 +45,7 @@
   <a href="../articles/SPLITT.html">Get started</a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../reference/SPLITT.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -55,12 +55,15 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/SPLITTClasses.html">SPLITT Classes</a>
+      <a href="../articles/SPLITTClasses.html">SPLITT classes</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -126,7 +129,7 @@ would not be an exaggeration, if I say that,without SPLITT, my PhD would have ne
 <pre><code>## Installing SPLITT</code></pre>
 <pre><code>## '/Library/Frameworks/R.framework/Resources/bin/R' --no-site-file --no-environ --no-save --no-restore --quiet CMD  \
 ##   INSTALL  \
-##   '/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/RtmpRnuLWR/devtools123cd1fccce40/venelin-SPLITT-89d538e'  \
+##   '/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/RtmpmzSJ3B/devtools2b7f657129a/venelin-SPLITT-33409fa'  \
 ##   --library='/Users/vmitov/Library/R/3.5/library' --install-tests</code></pre>
 <pre><code>## </code></pre>
 <pre><code>## Building SPLITT vignettes
@@ -161,19 +164,19 @@ would not be an exaggeration, if I say that,without SPLITT, my PhD would have ne
 ## Number of threads: 8 
 ## Measuring likelihood calculation times...
 ##     model                                            mode time (ms) speedupX
-##  1:   PMM                                      R (serial)     0.220   1.0000
-##  2:   PMM                                      C++ (AUTO)     0.012  18.3333
-##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.014  15.7143
-##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.013  16.9231
-##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.011  20.0000
-##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.091   2.4176
-##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.075   2.9333
-##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.137   1.6058
-##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.248   0.8871
-## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.067   3.2836
-## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.065   3.3846
-## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.046   4.7826
-## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.041   5.3659</code></pre>
+##  1:   PMM                                      R (serial)     0.230   1.0000
+##  2:   PMM                                      C++ (AUTO)     0.011  20.9091
+##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.011  20.9091
+##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.012  19.1667
+##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.013  17.6923
+##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.083   2.7711
+##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.088   2.6136
+##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.253   0.9091
+##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.242   0.9504
+## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.062   3.7097
+## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.048   4.7917
+## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.055   4.1818
+## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.060   3.8333</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
 newick &lt;-<span class="st"> '(((1:3,2:2.8)6:4.2,3:4.1)7:4.5,(4:4,5:5)8:6)0;'</span>
 tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text=</span>newick)
@@ -197,7 +200,7 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
 
 <span class="kw"><a href="../reference/PlotParallelTraversal.html">PlotParallelTraversal</a></span>(tree)</code></pre></div>
 <p><img src="SPLITT_files/figure-html/fig1a-1.png" width="690"></p>
-<pre><code>## C++ object &lt;0x7ffafa6f6cc0&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7ffafa76dee0&gt;</code></pre>
+<pre><code>## C++ object &lt;0x7f9a078e2e10&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7f9a07d20fe0&gt;</code></pre>
 </div>
 </div>
   </div>

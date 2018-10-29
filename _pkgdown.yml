@@ -9,7 +9,7 @@ navbar:
   - text: Get started
     href: articles/SPLITT.html
   - text: Reference
-    href: reference/index.html
+    href: reference/SPLITT.html
   - text: Articles
     menu:
     - text: SPLITT classes
