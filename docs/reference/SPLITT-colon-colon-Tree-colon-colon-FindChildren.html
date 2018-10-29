@@ -76,9 +76,6 @@
 <li>
   <a href="../articles/SPLITT.html">Get started</a>
 </li>
-<li>
-  <a href="../reference/SPLITT.html">Reference</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -87,12 +84,18 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/SPLITTTraversalSpecification.html">Writing a Traversal Specification</a>
+    </li>
+    <li>
       <a href="../articles/SPLITTClasses.html">SPLITT classes</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../reference/SPLITT.html">Reference</a>
 </li>
 <li>
   <a href="../news/index.html">News</a>
@@ -120,7 +123,7 @@
 
     <div class="ref-description">
     
-    <p><code><a href='SPLITT-colon-colon-uvec.html'>uvec</a> const&amp; FindChildren(uint i) const;</code></p>
+    <p><code>uvec const&amp; FindChildren(uint i) const;</code></p>
     
     </div>
 
@@ -130,7 +133,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>i</th>
-      <td><p><code><a href='SPLITT-colon-colon-uint.html'>uint</a></code>: the id of a node.</p></td>
+      <td><p><code>uint</code>: the id of a node.</p></td>
     </tr>
     </table>
     
@@ -138,26 +141,26 @@
 
     <p>a <code>uvec const&amp;</code>: a const reference to an internally stored vector 
 of the ids of the children of <code>i</code>. If <code>i</code> is a tip, 
-  <code><a href='SPLITT-colon-colon-G_EMPTY_UVEC.html'>G_EMPTY_UVEC</a></code> is returned. The returned 
+  <code>G_EMPTY_UVEC</code> is returned. The returned 
   vector reference is valid as long as the tree object is not destroyed.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='SPLITT-colon-colon-Tree.html'>Tree</a></code></p>
-<p><a href='SPLITT.html'>SPLITT</a></p>
-<p>Other <code><a href='SPLITT-colon-colon-Tree.html'>Tree</a></code> public methods: <code><a href='SPLITT-colon-colon-Tree-colon-colon-BranchLengths.html'>SPLITT::Tree::BranchLengths</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindIdOfNode.html'>SPLITT::Tree::FindIdOfNode</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindIdOfParent.html'>SPLITT::Tree::FindIdOfParent</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindNodeWithId.html'>SPLITT::Tree::FindNodeWithId</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-HasBranchLengths.html'>SPLITT::Tree::HasBranchLengths</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-LengthOfBranch.html'>SPLITT::Tree::LengthOfBranch</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-OrderNodesPosType.html'>SPLITT::Tree::OrderNodesPosType</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-OrderNodes.html'>SPLITT::Tree::OrderNodes</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-SetBranchLengths.html'>SPLITT::Tree::SetBranchLengths</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-SetLengthOfBranch.html'>SPLITT::Tree::SetLengthOfBranch</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-Tree.html'>SPLITT::Tree::Tree</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-num_nodes.html'>SPLITT::Tree::num_nodes</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-num_tips.html'>SPLITT::Tree::num_tips</a></code></p></div>
+    <div class='dont-index'><p><code>Tree</code></p>
+<p>SPLITT</p>
+<p>Other <code>Tree</code> public methods: <code>SPLITT::Tree::BranchLengths</code>,
+  <code>SPLITT::Tree::FindIdOfNode</code>,
+  <code>SPLITT::Tree::FindIdOfParent</code>,
+  <code>SPLITT::Tree::FindNodeWithId</code>,
+  <code>SPLITT::Tree::HasBranchLengths</code>,
+  <code>SPLITT::Tree::LengthOfBranch</code>,
+  <code>SPLITT::Tree::OrderNodesPosType</code>,
+  <code>SPLITT::Tree::OrderNodes</code>,
+  <code>SPLITT::Tree::SetBranchLengths</code>,
+  <code>SPLITT::Tree::SetLengthOfBranch</code>,
+  <code>SPLITT::Tree::Tree</code>,
+  <code>SPLITT::Tree::num_nodes</code>,
+  <code>SPLITT::Tree::num_tips</code></p></div>
     
 
   </div>

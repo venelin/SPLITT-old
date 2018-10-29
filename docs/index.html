@@ -51,9 +51,6 @@
 <li>
   <a href="articles/SPLITT.html">Get started</a>
 </li>
-<li>
-  <a href="reference/SPLITT.html">Reference</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -62,12 +59,18 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/SPLITTTraversalSpecification.html">Writing a Traversal Specification</a>
+    </li>
+    <li>
       <a href="articles/SPLITTClasses.html">SPLITT classes</a>
     </li>
     <li>
       <a href="articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="reference/SPLITT.html">Reference</a>
 </li>
 <li>
   <a href="news/index.html">News</a>
@@ -92,7 +95,7 @@
 <div id="splitt-serial-and-parallel-lineage-traversal-of-trees" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#splitt-serial-and-parallel-lineage-traversal-of-trees" class="anchor"></a>SPLITT: Serial and Parallel LIneage Traversal of Trees</h1></div>
-<p>SPLITT is a one-header C++ library that makes it easy to program fast pre-order and post-order traversal algorithms over tree-like data structures. The library is written in C++11. If <a href="https://www.openmp.org">OpenMP</a> is enabled during compilation, SPLITT can take advantage of a multi-core CPU and/or vectorized instructions to execute the tree traversal in parallel.</p>
+<p>SPLITT is a one-header C++ library that makes it easy to program fast pre-order and post-order traversal algorithms over tree-like data. The library is written in C++11. If <a href="https://www.openmp.org">OpenMP</a> is enabled during compilation, SPLITT can take advantage of a multi-core CPU and/or vectorized instructions to execute the tree traversal in parallel.</p>
 <div id="the-splitt-h-file" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-splitt-h-file" class="anchor"></a>The SPLITT.h file</h2>

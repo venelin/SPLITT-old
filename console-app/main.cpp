@@ -107,6 +107,9 @@ typedef TraversalTask<AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
 int main() {
   
   std::fstream fin;
+  
+  std::cout<<"Hello from the SPLITT PMM example!"<<std::endl;
+  std::cout<<"Reading the input tree, data and PMM parameters from the file test-input.txt..."<<std::endl;
   fin.open("test-input.txt", std::fstream::in);
   
   uint M, N;
@@ -140,9 +143,10 @@ int main() {
    
   vec abc = pruningTask.TraverseTree(param, 0);
   
+  std::cout<<"Calculating the a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+  std::cout<<"a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
   std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
-  
-  std::cout<<abc[0]<<" "<<abc[1]<<" "<<abc[2]<<std::endl;
+  std::cout<<"Good bye!"<<std::endl;
   return 0;
 }
 

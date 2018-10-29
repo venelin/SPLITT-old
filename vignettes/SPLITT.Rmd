@@ -18,20 +18,22 @@ bibliography: REFERENCES.bib
 set.seed(1)
 knitr::opts_chunk$set(cache = FALSE)
 options(digits = 4, width=120, scipen = 999)
-remove.packages("SPLITT")
 ```
 
 # Before you start
 Before you consider using the SPLITT C++ library, try to answer the following questions for yourself.
 
-## Do you use pre-order or post-order traversal of a tree-like data-structure?
-If you don't understand what I mean, chances are high that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I've encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a *big tree*, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its *daughter nodes*. This is what I mean by *post-order traversal*. A  *pre-order traversal* is the same with only one difference -- replace the term *daughter nodes* with the term *parent node* in the sentence above. 
+* Do you use pre-order or post-order traversal of a tree-like data-structure?
 
-## Do you need the tree-traversal to be fast?
-This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don't see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operation during the analysis of the biological data at my disposal. It would not be an exaggeration, if I say that, without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. This was reduced to a few months, thanks to the fast C++ implementation, based on SPLITT. 
+    If you don't understand what I mean, chances are that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I've encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a *big tree*, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its *daughter nodes*. This is what I mean by *post-order traversal*. A  *pre-order traversal* is the same with only one difference -- replace the term *daughter nodes* with the term *parent node* in the sentence above. 
 
-## How big are your trees and how complex is your node traversal operation?
-When I said *big tree* I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version. 
+* Do you need the tree-traversal to be fast?
+
+    This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don't see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operation during the analysis of the biological data at my disposal. It would not be an exaggeration, if I say that, without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. This was reduced to a few months, thanks to the fast C++ implementation, based on SPLITT. 
+
+* How big are your trees and how complex is your node traversal operation?
+
+    When I said *big tree* I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version. 
 
 # Prerequisites 
 
@@ -43,79 +45,57 @@ Here is what you need before you can start working with SPLITT:
     - Previous clang++ versions on OS X. Before installing clang++ v6.0.0, I've been able to compile SPLITT-code with earlier versions but these were not supporting OpenMP, so I was able to run SPLITT only in serial mode.
     - Intel compiler. Previously, I've been able to compile SPLITT-based code with the Intel compiler (Mac OS X and Linux). This compiler is likely to generate the fastest binary code running on Intel processors. You can try downloading the Intel compiler, following the instructions on the [Intel C++ compilers page](https://software.intel.com/en-us/c-compilers). 
 
+* Optional: If you compile with OpenMP enabled (compile flag -fopenmp), then you need a copy of the omp shared library on your link path. On an OS X system, I've used the following:
+    
+    - Before R 3.5.0 was released, I used the libiomp5.dylib included with the Intel C++ compiler;
+    - After R 3.5.0 was released, I've switched to the libomp.dylib included in R. On my system, this was available in /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/ as well as in /Library/Frameworks/R.framework/Resources/lib. 
+    
 * Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package of your own.
 
-# The easiest way to start using SPLITT
-Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program. 
+# Compiling and running the PMM example
+Being a software library SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your code where SPLITT would expect it to be. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Below I will show one such example. 
 
-## Installing the SPLITT R-package
-I recommend installing the latest package version from github. From the R-prompt,
-type the following command:
+## Downloading the example files from github
 
-```{r, echo=TRUE, eval=FALSE}
-devtools::install_github("venelin/SPLITT")
+In a local directory save the following links with the same file-names:
+
+* [SPLITT.h](https://raw.githubusercontent.com/venelin/SPLITT/master/src/SPLITT.h)
+* [main.cpp](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/main.cpp) 
+* [test-input.txt](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/test-input.txt)
+
+## Compiling your code
+
+Go to the directory with the downloaded files and execute the following command:
+
+```{bash, eval=FALSE}
+# Feel free to replace the name of the executable with your C++ compiler
+clang++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o main main.cpp
 ```
 
+This will compile and link the file main.cpp into an executable file called "main". If the compilation runs fine you should see no error messages.
 
-```{r, echo=FALSE, eval=TRUE}
-capture <- capture.output( devtools::install_github("venelin/SPLITT") )
-capture <- 'Building SPLITT vignettes
-* installing *source* package ‘SPLITT’ ...
-** libs
-/usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__AbcPMM.cpp -o RCPP__AbcPMM.o
-/usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__Tree.cpp -o RCPP__Tree.o
-/usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RcppExports.cpp -o RcppExports.o
-/usr/local/clang6/bin/clang++ -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o SPLITT.so RCPP__AbcPMM.o RCPP__Tree.o RcppExports.o -fopenmp -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
-installing to /Users/vmitov/Library/R/3.5/library/SPLITT/libs
-** R
-** tests
-** byte-compile and prepare package for lazy loading
-** help
-*** installing help indices
-*** copying figures
-** building package indices
-** testing if installed package can be loaded
-* DONE (SPLITT)'
+## Testing the program
 
-cat(capture)
+If the compilation was successful, type the following command.
+
+```{bash, eval=FALSE}
+./main
 ```
 
-## See if it works on your computer
-```{r}
-library(SPLITT)
-MiniBenchmark(N=10, Ntests = 1000)
+With the exceptino of the line starting with `"OpenMP-version:"`, the above command should produce the following output:
+
+```{bash, eval=FALSE}
+Hello from the SPLITT PMM example!
+Reading the input tree, data and PMM parameters from the file test-input.txt...
+Calculating the a, b, c at the root for sigma=0.5 and sigmae=1
+a=-0.432535, b=0.630438, c=-8.21348
+OpenMP-version: 201107
+Good bye!
 ```
 
+If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header "omp.h" was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there seems to be an unknown bug, which I am not aware of. Please, report this in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 
+# Next steps
 
-
-
-```{r treeAndDataLogLik}
-library(ape)
-newick <- '(((1:3,2:2.8)6:4.2,3:4.1)7:4.5,(4:4,5:5)8:6)0;'
-tree <- read.tree(text=newick)
-
-x0 <- 0.1
-sigma2 <- 0.25
-sigmae2 <- 1
-
-set.seed(1)
-g <- rTraitCont(tree, model = "BM", root.value = x0, 
-                sigma = sqrt(sigma2),
-                ancestor = FALSE)
-
-x <- g + rnorm(n = length(tree$tip.label), mean = 0, sd = sqrt(sigmae2))
-
-PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, mode = 1)
-```
-
-
-```{r fig1a, dpi=150, fig.width=4.6}
-par(mfrow=c(1,5))
-par(mar=c(0,0,0,0))
-par(oma=c(0, 0,0, 0))
-
-PlotParallelTraversal(tree)
-```
-
+The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the article [Writing a Traversal Specification]()
 

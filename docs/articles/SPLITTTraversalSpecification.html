@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing a SPLITT TraversalSpecification class • SPLITT</title>
+<title>Writing a Traversal Specification • SPLITT</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Writing a SPLITT TraversalSpecification class">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Writing a Traversal Specification">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -44,9 +44,6 @@
 <li>
   <a href="../articles/SPLITT.html">Get started</a>
 </li>
-<li>
-  <a href="../reference/index.html">Reference</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -55,15 +52,21 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/SPLITTArchitecture.html">SPLITT Architecture</a>
+      <a href="../articles/SPLITTTraversalSpecification.html">Writing a Traversal Specification</a>
+    </li>
+    <li>
+      <a href="../articles/SPLITTClasses.html">SPLITT classes</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
     </li>
-    <li>
-      <a href="../articles/SPLITTTraversalSpecification.html">Writing a SPLITT TraversalSpecification class</a>
-    </li>
   </ul>
+</li>
+<li>
+  <a href="../reference/SPLITT.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -78,7 +81,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Writing a SPLITT TraversalSpecification class</h1>
+      <h1>Writing a Traversal Specification</h1>
                         <h4 class="author">Venelin Mitov</h4>
             
       
@@ -89,148 +92,10 @@
 
     
     
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#ifndef AbcPMM_H_</span>
-<span class="pp">#define AbcPMM_H_</span>
 
-<span class="pp">#include </span><span class="im">"./SPLITT.h"</span>
-<span class="pp">#include </span><span class="im">"./NumericTraitData.h"</span>
-<span class="pp">#include </span><span class="im">&lt;iostream&gt;</span>
-<span class="pp">#include </span><span class="im">&lt;cmath&gt;</span>
-
-<span class="kw">namespace</span> SPLITT {
-
-<span class="kw">template</span>&lt;<span class="kw">class</span> Tree&gt;
-<span class="kw">class</span> AbcPMM: <span class="kw">public</span> TraversalSpecification&lt;Tree&gt; {
-
-<span class="kw">public</span>:
-  <span class="kw">typedef</span> AbcPMM&lt;Tree&gt; MyType;
-  <span class="kw">typedef</span> TraversalSpecification&lt;Tree&gt; BaseType;
-  <span class="kw">typedef</span> Tree TreeType;
-  <span class="kw">typedef</span> PostOrderTraversal&lt;MyType&gt; AlgorithmType;
-  <span class="kw">typedef</span> vec ParameterType;
-  <span class="kw">typedef</span> NumericTraitData&lt;<span class="kw">typename</span> TreeType::NodeType&gt; DataType;
-  <span class="kw">typedef</span> vec StateType;
-
-  <span class="dt">double</span> sigmae2, sigma2;
-  vec x;
-  vec a, b, c;
-
-  AbcPMM(TreeType <span class="at">const</span>&amp; tree, DataType <span class="at">const</span>&amp; input_data):
-    BaseType(tree) {
-
-    <span class="cf">if</span>(input_data.<span class="va">x_</span>.size() != <span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_tips()) {
-      <span class="bu">std::</span>ostringstream oss;
-      oss&lt;&lt;<span class="st">"The vector x must be the same length as the number of tips ("</span>&lt;&lt;
-        <span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_tips()&lt;&lt;<span class="st">"), but were"</span>&lt;&lt;input_data.<span class="va">x_</span>.size()&lt;&lt;<span class="st">"."</span>;
-      <span class="cf">throw</span> <span class="bu">std::</span>invalid_argument(oss.str());
-    } <span class="cf">else</span> {
-
-      uvec ordNodes = <span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.OrderNodes(input_data.<span class="va">names_</span>);
-      <span class="kw">this</span>-&gt;x = At(input_data.<span class="va">x_</span>, ordNodes);
-      <span class="kw">this</span>-&gt;a = vec(<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes());
-      <span class="kw">this</span>-&gt;b = vec(<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes());
-      <span class="kw">this</span>-&gt;c = vec(<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes());
-    }
-  };
-
-  StateType StateAtRoot() <span class="at">const</span> {
-    vec res(<span class="dv">3</span>);
-    res[<span class="dv">0</span>] = a[<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes() - <span class="dv">1</span>];
-    res[<span class="dv">1</span>] = b[<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes() - <span class="dv">1</span>];
-    res[<span class="dv">2</span>] = c[<span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_nodes() - <span class="dv">1</span>];
-    <span class="cf">return</span> res;
-  };
-
-  <span class="dt">void</span> SetParameter(ParameterType <span class="at">const</span>&amp; par) {
-    <span class="cf">if</span>(par.size() != <span class="dv">2</span>) {
-      <span class="cf">throw</span> <span class="bu">std::</span>invalid_argument(
-      <span class="st">"The par vector should be of length 2 with \</span>
-<span class="st">      elements corresponding to sigma2 and sigmae2."</span>);
-    }
-    <span class="cf">if</span>(par[<span class="dv">0</span>] &lt;= <span class="dv">0</span> || par[<span class="dv">1</span>] &lt;= <span class="dv">0</span>) {
-      <span class="cf">throw</span> <span class="bu">std::</span>logic_error(<span class="st">"The parameters sigma2 and sigmae2 should be positive."</span>);
-    }
-    <span class="kw">this</span>-&gt;sigma2 = par[<span class="dv">0</span>];
-    <span class="kw">this</span>-&gt;sigmae2 = par[<span class="dv">1</span>];
-  }
-
-  <span class="kw">inline</span> <span class="dt">void</span> InitNode(<span class="ex">uint</span> i) {
-    
-    <span class="cf">if</span>(i &lt; <span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.num_tips()) {
-      a[i] = <span class="dv">-0</span>.<span class="dv">5</span> / sigmae2;  
-      b[i] = x[i] / sigmae2;
-      c[i] = <span class="dv">-0</span>.<span class="dv">5</span> * (x[i]*b[i] + log(<span class="dv">2</span>*G_PI*sigmae2));
-    } <span class="cf">else</span> {
-      a[i] = b[i] = c[i] = <span class="dv">0</span>;
-    }
-  }
-
-  <span class="kw">inline</span> <span class="dt">void</span> VisitNode(<span class="ex">uint</span> i) {
-    <span class="dt">double</span> t = <span class="kw">this</span>-&gt;<span class="va">ref_tree_</span>.LengthOfBranch(i);
-    
-    <span class="dt">double</span> d = <span class="dv">1</span> - <span class="dv">2</span>*a[i]*sigma2*t;
-    <span class="co">// the order is important here because for c[i] we use the previous values </span>
-    <span class="co">// of a[i] and b[i].</span>
-    c[i] = c[i] - <span class="fl">0.5</span>*log(d) + <span class="fl">0.5</span>*b[i]*b[i]*sigma2*t/d;
-    a[i] /= d;
-    b[i] /= d;
-  }
-
-  <span class="kw">inline</span> <span class="dt">void</span> PruneNode(<span class="ex">uint</span> i, <span class="ex">uint</span> j) {
-    a[j] = a[j] + a[i];
-    b[j] = b[j] + b[i];
-    c[j] = c[j] + c[i];
-  }
-
-};
-
-<span class="kw">typedef</span> TraversalTask&lt;
-  AbcPMM&lt;OrderedTree&lt;<span class="ex">uint</span>, <span class="dt">double</span>&gt;&gt; &gt; ParallelPruningAbcPMM;
-}
-<span class="pp">#endif </span><span class="co">//AbcPMM_H_</span></code></pre></div>
-<div id="packages-used" class="section level1">
-<h1 class="hasAnchor">
-<a href="#packages-used" class="anchor"></a>Packages used</h1>
-<p>Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:</p>
-<ul>
-<li>For tree processing: ape v5.2 <span class="citation">(Paradis et al. 2016)</span>;</li>
-<li>For reporting: data.table v1.11.8 <span class="citation">(Dowle and Srinivasan 2016)</span>;</li>
-<li>For the POUMM and PP estimates: POUMM v2.1.0 <span class="citation">(Mitov and Stadler 2017)</span>, boot v1.3.20 <span class="citation">(Canty and Ripley 2016)</span>;</li>
-<li>For testing: testthat v2.0.0 <span class="citation">(Wickham 2016)</span>.</li>
-</ul>
-</div>
-<div id="references" class="section level1 unnumbered">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
-<div id="refs" class="references">
-<div id="ref-R-boot">
-<p>Canty, Angelo, and Brian Ripley. 2016. <em>Boot: Bootstrap R (S-Plus) Functions.</em> <em>R-Package</em>. <a href="https://cran.r-project.org/web/packages/boot/index.html" class="uri">https://cran.r-project.org/web/packages/boot/index.html</a>.</p>
-</div>
-<div id="ref-R-data-table">
-<p>Dowle, Matt, and Arun Srinivasan. 2016. <em>Data.table: Extension of ‘Data.frame‘</em>. <a href="https://CRAN.R-project.org/package=data.table" class="uri">https://CRAN.R-project.org/package=data.table</a>.</p>
-</div>
-<div id="ref-R-POUMM">
-<p>Mitov, Venelin, and Tanja Stadler. 2017. <em>Fast and Robust Inference of Phylogenetic Ornstein-Uhlenbeck Models Using Parallel Likelihood Calculation</em>. <em>BiorXiv</em>. <a href="http://biorxiv.org/content/early/2017/05/30/115089" class="uri">http://biorxiv.org/content/early/2017/05/30/115089</a>.</p>
-</div>
-<div id="ref-R-ape">
-<p>Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. <em>Ape: Analyses of Phylogenetics and Evolution</em>. <a href="https://CRAN.R-project.org/package=ape" class="uri">https://CRAN.R-project.org/package=ape</a>.</p>
-</div>
-<div id="ref-R-testthat">
-<p>Wickham, Hadley. 2016. <em>Testthat: Unit Testing for R</em>. <a href="https://CRAN.R-project.org/package=testthat" class="uri">https://CRAN.R-project.org/package=testthat</a>.</p>
-</div>
-</div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-        <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-<li><a href="#packages-used">Packages used</a></li>
-      <li><a href="#references">References</a></li>
-      </ul>
-</div>
       </div>
 
 </div>

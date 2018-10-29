@@ -44,9 +44,6 @@
 <li>
   <a href="../articles/SPLITT.html">Get started</a>
 </li>
-<li>
-  <a href="../reference/SPLITT.html">Reference</a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Articles
@@ -55,12 +52,18 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/SPLITTTraversalSpecification.html">Writing a Traversal Specification</a>
+    </li>
+    <li>
       <a href="../articles/SPLITTClasses.html">SPLITT classes</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../reference/SPLITT.html">Reference</a>
 </li>
 <li>
   <a href="../news/index.html">News</a>
@@ -93,21 +96,20 @@
 <h1 class="hasAnchor">
 <a href="#before-you-start" class="anchor"></a>Before you start</h1>
 <p>Before you consider using the SPLITT C++ library, try to answer the following questions for yourself.</p>
-<div id="do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure" class="section level2">
-<h2 class="hasAnchor">
-<a href="#do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure" class="anchor"></a>Do you use pre-order or post-order traversal of a tree-like data-structure?</h2>
-<p>If you don’t understand what I mean, chances are high that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I’ve encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a <em>big tree</em>, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its <em>daughter nodes</em>. This is what I mean by <em>post-order traversal</em>. A <em>pre-order traversal</em> is the same with only one difference – replace the term <em>daughter nodes</em> with the term <em>parent node</em> in the sentence above.</p>
-</div>
-<div id="do-you-need-the-tree-traversal-to-be-fast" class="section level2">
-<h2 class="hasAnchor">
-<a href="#do-you-need-the-tree-traversal-to-be-fast" class="anchor"></a>Do you need the tree-traversal to be fast?</h2>
+<ul>
+<li>
+<p>Do you use pre-order or post-order traversal of a tree-like data-structure?</p>
+<p>If you don’t understand what I mean, chances are that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I’ve encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a <em>big tree</em>, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its <em>daughter nodes</em>. This is what I mean by <em>post-order traversal</em>. A <em>pre-order traversal</em> is the same with only one difference – replace the term <em>daughter nodes</em> with the term <em>parent node</em> in the sentence above.</p>
+</li>
+<li>
+<p>Do you need the tree-traversal to be fast?</p>
 <p>This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don’t see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operation during the analysis of the biological data at my disposal. It would not be an exaggeration, if I say that, without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. This was reduced to a few months, thanks to the fast C++ implementation, based on SPLITT.</p>
-</div>
-<div id="how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation" class="anchor"></a>How big are your trees and how complex is your node traversal operation?</h2>
+</li>
+<li>
+<p>How big are your trees and how complex is your node traversal operation?</p>
 <p>When I said <em>big tree</em> I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version.</p>
-</div>
+</li>
+</ul>
 </div>
 <div id="prerequisites" class="section level1">
 <h1 class="hasAnchor">
@@ -122,96 +124,57 @@
 <li>Intel compiler. Previously, I’ve been able to compile SPLITT-based code with the Intel compiler (Mac OS X and Linux). This compiler is likely to generate the fastest binary code running on Intel processors. You can try downloading the Intel compiler, following the instructions on the <a href="https://software.intel.com/en-us/c-compilers">Intel C++ compilers page</a>.</li>
 </ul>
 </li>
-<li><p>Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package you are writing.</p></li>
+<li>
+<p>Optional: If you compile with OpenMP enabled (compile flag -fopenmp), then you need a copy of the omp shared library on your link path. On an OS X system, I’ve used the following:</p>
+<ul>
+<li>Before R 3.5.0 was released, I used the libiomp5.dylib included with the Intel C++ compiler;</li>
+<li>After R 3.5.0 was released, I’ve switched to the libomp.dylib included in R. On my system, this was available in /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/ as well as in /Library/Frameworks/R.framework/Resources/lib.</li>
+</ul>
+</li>
+<li><p>Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package of your own.</p></li>
 </ul>
 </div>
-<div id="the-easiest-way-to-start-using-splitt" class="section level1">
+<div id="compiling-and-running-the-pmm-example" class="section level1">
 <h1 class="hasAnchor">
-<a href="#the-easiest-way-to-start-using-splitt" class="anchor"></a>The easiest way to start using SPLITT</h1>
-<p>Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program.</p>
-<div id="installing-the-splitt-r-package" class="section level2">
+<a href="#compiling-and-running-the-pmm-example" class="anchor"></a>Compiling and running the PMM example</h1>
+<p>Being a software library SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your code where SPLITT would expect it to be. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Below I will show one such example.</p>
+<div id="downloading-the-example-files-from-github" class="section level2">
 <h2 class="hasAnchor">
-<a href="#installing-the-splitt-r-package" class="anchor"></a>Installing the SPLITT R-package</h2>
-<p>I recommend installing the latest package version from github. From the R-prompt, type the following command:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"venelin/SPLITT"</span>)</code></pre></div>
-<pre><code>## Downloading GitHub repo venelin/SPLITT@master
-## from URL https://api.github.com/repos/venelin/SPLITT/zipball/master</code></pre>
-<pre><code>## Installing SPLITT</code></pre>
-<pre><code>## '/Library/Frameworks/R.framework/Resources/bin/R' --no-site-file --no-environ --no-save --no-restore --quiet CMD  \
-##   INSTALL  \
-##   '/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/Rtmp8yPtMN/devtools8ae05d066e24/venelin-SPLITT-5d6f057'  \
-##   --library='/Users/vmitov/Library/R/3.5/library' --install-tests</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## Building SPLITT vignettes
-## * installing *source* package ‘SPLITT’ ...
-## ** libs
-## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__AbcPMM.cpp -o RCPP__AbcPMM.o
-## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__Tree.cpp -o RCPP__Tree.o
-## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RcppExports.cpp -o RcppExports.o
-## /usr/local/clang6/bin/clang++ -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o SPLITT.so RCPP__AbcPMM.o RCPP__Tree.o RcppExports.o -fopenmp -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
-## installing to /Users/vmitov/Library/R/3.5/library/SPLITT/libs
-## ** R
-## ** tests
-## ** byte-compile and prepare package for lazy loading
-## ** help
-## *** installing help indices
-## *** copying figures
-## ** building package indices
-## ** testing if installed package can be loaded
-## * DONE (SPLITT)</code></pre>
+<a href="#downloading-the-example-files-from-github" class="anchor"></a>Downloading the example files from github</h2>
+<p>In a local directory save the following links with the same file-names:</p>
+<ul>
+<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/src/SPLITT.h">SPLITT.h</a></li>
+<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/main.cpp">main.cpp</a></li>
+<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/test-input.txt">test-input.txt</a></li>
+</ul>
 </div>
-<div id="see-if-it-works-on-your-computer" class="section level2">
+<div id="compiling-your-code" class="section level2">
 <h2 class="hasAnchor">
-<a href="#see-if-it-works-on-your-computer" class="anchor"></a>See if it works on your computer</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(SPLITT)</code></pre></div>
-<pre><code>## Loading required package: Rcpp</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/MiniBenchmark.html">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">10</span>, <span class="dt">Ntests =</span> <span class="dv">1000</span>)</code></pre></div>
-<pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
-##       a tree of size N= 10 ;
-## Calling each likelihood calculation Ntests= 1000  times ...
-## CPU:  Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz 
-## OpenMP version:  201107 
-## Number of threads: 8 
-## Measuring likelihood calculation times...
-##     model                                            mode time (ms) speedupX
-##  1:   PMM                                      R (serial)     0.220   1.0000
-##  2:   PMM                                      C++ (AUTO)     0.012  18.3333
-##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.011  20.0000
-##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.012  18.3333
-##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.012  18.3333
-##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.081   2.7160
-##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.046   4.7826
-##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.061   3.6066
-##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.290   0.7586
-## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.052   4.2308
-## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.040   5.5000
-## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.054   4.0741
-## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.050   4.4000</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
-newick &lt;-<span class="st"> '(((1:3,2:2.8)6:4.2,3:4.1)7:4.5,(4:4,5:5)8:6)0;'</span>
-tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text=</span>newick)
-
-x0 &lt;-<span class="st"> </span><span class="fl">0.1</span>
-sigma2 &lt;-<span class="st"> </span><span class="fl">0.25</span>
-sigmae2 &lt;-<span class="st"> </span><span class="dv">1</span>
-
-<span class="kw">set.seed</span>(<span class="dv">1</span>)
-g &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/rTraitCont">rTraitCont</a></span>(tree, <span class="dt">model =</span> <span class="st">"BM"</span>, <span class="dt">root.value =</span> x0, 
-                <span class="dt">sigma =</span> <span class="kw">sqrt</span>(sigma2),
-                <span class="dt">ancestor =</span> <span class="ot">FALSE</span>)
-
-x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> <span class="kw">length</span>(tree<span class="op">$</span>tip.label), <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="kw">sqrt</span>(sigmae2))
-
-<span class="kw"><a href="../reference/PMMLogLikCpp.html">PMMLogLikCpp</a></span>(x, tree, x0, sigma2, sigmae2, <span class="dt">mode =</span> <span class="dv">1</span>)</code></pre></div>
-<pre><code>## [1] -8.157</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>))
-<span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>))
-<span class="kw">par</span>(<span class="dt">oma=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>,<span class="dv">0</span>, <span class="dv">0</span>))
-
-<span class="kw"><a href="../reference/PlotParallelTraversal.html">PlotParallelTraversal</a></span>(tree)</code></pre></div>
-<p><img src="SPLITT_files/figure-html/fig1a-1.png" width="690"></p>
-<pre><code>## C++ object &lt;0x7ff995644970&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7ff995727a60&gt;</code></pre>
+<a href="#compiling-your-code" class="anchor"></a>Compiling your code</h2>
+<p>Go to the directory with the downloaded files and execute the following command:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Feel free to replace the name of the executable with your C++ compiler</span>
+<span class="fu">clang</span>++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o main main.cpp</code></pre></div>
+<p>This will compile and link the file main.cpp into an executable file called “main”. If the compilation runs fine you should see no error messages.</p>
 </div>
+<div id="testing-the-program" class="section level2">
+<h2 class="hasAnchor">
+<a href="#testing-the-program" class="anchor"></a>Testing the program</h2>
+<p>If the compilation was successful, type the following command.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./main</span></code></pre></div>
+<p>With the exceptino of the line starting with <code>"OpenMP-version:"</code>, the above command should produce the following output:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">Hello</span> from the SPLITT PMM example!
+<span class="ex">Reading</span> the input tree, data and PMM parameters from the file test-input.txt...
+<span class="ex">Calculating</span> the a, b, c at the root for sigma=0.5 and sigmae=1
+<span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630438, <span class="va">c=</span>-8.21348
+<span class="ex">OpenMP-version</span>: 201107
+<span class="ex">Good</span> bye!</code></pre></div>
+<p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there seems to be an unknown bug, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
+</div>
+</div>
+<div id="next-steps" class="section level1">
+<h1 class="hasAnchor">
+<a href="#next-steps" class="anchor"></a>Next steps</h1>
+<p>The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the article <a href="">Writing a Traversal Specification</a></p>
 </div>
   </div>
 
@@ -220,20 +183,16 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li>
-<a href="#before-you-start">Before you start</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#do-you-use-pre-order-or-post-order-traversal-of-a-tree-like-data-structure">Do you use pre-order or post-order traversal of a tree-like data-structure?</a></li>
-      <li><a href="#do-you-need-the-tree-traversal-to-be-fast">Do you need the tree-traversal to be fast?</a></li>
-      <li><a href="#how-big-are-your-trees-and-how-complex-is-your-node-traversal-operation">How big are your trees and how complex is your node traversal operation?</a></li>
-      </ul>
-</li>
+<li><a href="#before-you-start">Before you start</a></li>
       <li><a href="#prerequisites">Prerequisites</a></li>
       <li>
-<a href="#the-easiest-way-to-start-using-splitt">The easiest way to start using SPLITT</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#installing-the-splitt-r-package">Installing the SPLITT R-package</a></li>
-      <li><a href="#see-if-it-works-on-your-computer">See if it works on your computer</a></li>
+<a href="#compiling-and-running-the-pmm-example">Compiling and running the PMM example</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#downloading-the-example-files-from-github">Downloading the example files from github</a></li>
+      <li><a href="#compiling-your-code">Compiling your code</a></li>
+      <li><a href="#testing-the-program">Testing the program</a></li>
       </ul>
 </li>
+      <li><a href="#next-steps">Next steps</a></li>
       </ul>
 </div>
       </div>

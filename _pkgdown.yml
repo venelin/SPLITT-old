@@ -8,14 +8,16 @@ navbar:
     href: index.html
   - text: Get started
     href: articles/SPLITT.html
-  - text: Reference
-    href: reference/SPLITT.html
   - text: Articles
     menu:
+    - text: Writing a Traversal Specification
+      href: articles/SPLITTTraversalSpecification.html
     - text: SPLITT classes
       href: articles/SPLITTClasses.html
     - text: Calling SPLITT from an R-package
       href: articles/SPLITTRcppModules.html
+  - text: Reference
+    href: reference/SPLITT.html
   - text: News
     href: news/index.html
   right: []
@@ -24,5 +26,6 @@ articles:
 - title: All vignettes
   desc: ~
   contents:
+  - '`SPLITTTraversalSpecification`'
   - '`SPLITTClasses`'
   - '`SPLITTRcppModules`'
