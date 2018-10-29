@@ -22,67 +22,19 @@ remove.packages("SPLITT")
 ```
 
 # Before you start
-Before you consider using the SPLITT C++ library, try to answer the following 
-questions for yourself.
+Before you consider using the SPLITT C++ library, try to answer the following questions for yourself.
 
 ## Do you use pre-order or post-order traversal of a tree-like data-structure?
-If you don't understand what I mean, chances are high that you simply do not 
-need to deal with SPLITT at that point. The reason is that I wrote 
-SPLITT to solve a very specific problem, which I've encountered many times
-during my doctoral studies: perform the same type of calculation for all nodes 
-in a *large tree*, where each node is related to some specific data and the 
-calculation for one node uses as input the result from the calculation performed
-on its *daughter nodes*. This is what I mean by *post-order traversal*. A 
-*pre-order traversal* is the same with only one difference -- replace the term
-*daughter nodes* with the term *parent node* in the sentence above. 
-
-## How big are your trees and how complex is your node traversal operation?
-When I said *large tree* I meant a tree of more than 100 tips, sometimes, more 
-than 10000 tips. This is not a hard rule of thumb, but typically parallel 
-traversal has a performance benefit only on big trees. This depends on other 
-factors as well, such as the computational and memory complexity of the
-node traversal operation. If the tree is relatively small and the operation is
-very simple (e.g. the addition or multiplication of a few double-precision 
-numbers), then it is very likely that using SPLITT in parallel mode would 
-not be faster than using it in serial mode. Yet, using SPLITT might still 
-be a good idea if you currently have an implementation in R and wish to have a
-faster C++ version - in this case a serial SPLITT-based implementation is 
-probably going to between 10 and 100 times faster than the R-implementation. 
+If you don't understand what I mean, chances are high that you simply do not need to deal with SPLITT at that point. The reason is that I wrote SPLITT to solve a very specific problem, which I've encountered many times during my doctoral studies: perform the same type of calculation for all nodes in a *big tree*, where each node is related to some specific data and the calculation for one node uses as input the result from the calculation performed on its *daughter nodes*. This is what I mean by *post-order traversal*. A  *pre-order traversal* is the same with only one difference -- replace the term *daughter nodes* with the term *parent node* in the sentence above. 
 
 ## Do you need the tree-traversal to be fast?
-This very much depends on how frequently do you need to perform the 
-tree-traversal. If you only need to do it once or a couple of times with a given 
-dataset, then I don't see much need of speeding this up. In my specific use-case,
-I needed to run a tree traversal millions of times and this was by far the
-heaviest computational operationduring the analysis of my biological data. It  
-would not be an exaggeration, if I say that,without SPLITT, my PhD would
-have needed several more decades of computation time on a modern high performance 
-computing cluster. Thanks to the fast C++ implementation of my models, based on 
-SPLITT, I was able to tune my models by running many more analyses with 
-different parameter settings, such as prior distributions for a Bayesian model
-inference. 
+This very much depends on how frequently do you need to perform the tree-traversal. If you only need to do it once or a couple of times with a given dataset, then I don't see much need of speeding this up. In my specific use-case, I needed to run a tree traversal millions of times and this was by far the heaviest computational operation during the analysis of the biological data at my disposal. It would not be an exaggeration, if I say that, without SPLITT, my PhD would have needed several more decades of computation time on a modern high performance computing cluster. This was reduced to a few months, thanks to the fast C++ implementation, based on SPLITT. 
 
-## Do you have a program solving your computational problem in a higher level language, e.g. R?
-If you don't, I recommend not trying SPLITT, before you have written that 
-program. One reason for that is that, as every C++ code, SPLITT needs to 
-be compiled before it can be run. Because you will be including the file "SPLITT.h"
-in your program, it will be re-compiled every time you make a change in your program
-and wish to test it. Typically, this would need about two minutes. Hence, you 
-risk to spend hours or days debug->compile->test->debug cycle. Of course,
-if you only know how to program in C++, then no need to learn R now - stick to 
-C++ for now. 
+## How big are your trees and how complex is your node traversal operation?
+When I said *big tree* I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version. 
 
 # The easiest way to start using SPLITT
-Being a software library SPLITT does not provide a high-level end-user 
-interface.Rather, SPLITT is used via its application programming interface 
-(API).In other words, you use the library by putting your application specific 
-code in several C++ classes. The easiest way to do this is to start from an 
-example of such classes and use this example as a skeleton for your own code, 
-i.e. replace the code in the example with your application specific data-types, 
-and traversal operations. Because I was using SPLITT mostly from an 
-R-package, at present, there is only an R-package example. Even if you are not 
-familiar with R, this guide should still help you understand how to use 
-SPLITT from within your C++ program. 
+Being a software library SPLITT does not provide a high-level end-user interface.Rather, SPLITT is used via its application programming interface (API).In other words, you use the library by putting your application specific code in several C++ classes. The easiest way to do this is to start from an example of such classes and use this example as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program. 
 
 ## Installing the SPLITT R-package
 I recommend installing the latest package version from github. From the R-prompt,
