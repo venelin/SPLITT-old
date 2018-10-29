@@ -18,7 +18,7 @@ SPLITT is a one-header C++ library that makes it easy to program fast pre-order 
 
 ## The SPLITT.h file
 
-The SPLITT library represents a C++ header file called "SPLITT.h". Technically, downloading the latest version of the file from [github] (https://github.com/venelin/SPLITT/raw/master/src/SPLITT.h) and including it in one or more of your C++ files is all you need to start using it. However, before you can do anything useful with SPLITT you will need to get familiar with some of its classes, i.e. its programming interface. 
+The SPLITT library represents a C++ header file called "SPLITT.h". Technically, downloading [the latest version of the file from github](https://github.com/venelin/SPLITT/raw/master/src/SPLITT.h) and including it in one or more of your C++ files is all you need to start using it. However, before you can do anything useful with SPLITT you will need to get familiar with some of its classes, i.e. its programming interface. 
 
 ## The SPLITT R-package
 
@@ -26,13 +26,17 @@ The R-package called with the same name (SPLITT) bundles the SPLITT.h header tog
 
 ## Resources
 
-The section "Materials and Methods" in the research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is used as the first coding example in the SPLITT online documentation. 
+The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html).
 
-The SPLITT source code and online documentation is available from the [SPLITT github page](https://github.com/venelin/SPLITT).
+The [Getting started](https://venelin.github.com/SPLITT/articles/SPLITT.html) guide shows how to write a console application using SPLITT. 
 
-The [Getting started](https://github.com/venelin/SPLITT) guide shows how to write a console application using SPLITT. 
+The [SPLITT classes](https://venelin.github.com/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
 
-The [SPLITT classes](https://github.com/venelin/SPLITT) guide overviews the SPLITT classes. 
+The [Calling SPLITT from an R-package](https://venelin.github.com/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
-The [Calling SPLITT from an R-package](https://github.com/venelin/SPLITT) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
+
+The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is in this article is used as a coding example in the SPLITT online documentation. The article is currently undergoing peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2017/12/18/235739).
+
+The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT). 
+
 
