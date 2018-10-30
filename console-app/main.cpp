@@ -23,10 +23,10 @@ public:
   typedef AbcPMM<Tree> MyType;
   typedef TraversalSpecification<Tree> BaseType;
   typedef Tree TreeType;
-  typedef PostOrderTraversal<MyType> AlgorithmType;
   typedef vec ParameterType;
   typedef NumericTraitData<typename TreeType::NodeType> DataType;
   typedef vec StateType;
+  typedef PostOrderTraversal<MyType> AlgorithmType;
   
   double sigmae2, sigma2;
   vec x;
