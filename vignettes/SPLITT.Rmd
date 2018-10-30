@@ -64,8 +64,8 @@ Being a software library SPLITT does not provide a high-level end-user interface
 In a local directory save the following links with the same file-names:
 
 * [SPLITT.h](https://raw.githubusercontent.com/venelin/SPLITT/master/src/SPLITT.h)
-* [main.cpp](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/main.cpp) 
-* [test-input.txt](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/test-input.txt)
+* [PMMLogLikelihood.cpp](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/PMMLogLikelihood.cpp) 
+* [input.txt](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/input.txt)
 
 ## Compiling your code
 
