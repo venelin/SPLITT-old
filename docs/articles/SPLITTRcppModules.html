@@ -95,6 +95,10 @@
 
     
     
+<!-- TODO Add the following to the header:
+
+bibliography: REFERENCES.bib
+-->
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;RcppArmadillo.h&gt;</span>
 <span class="pp">#include </span><span class="im">&lt;R_ext/Rdynload.h&gt;</span>
     
@@ -177,33 +181,33 @@ RCPP_MODULE(SPLITT__AbcPMM) {
 ## Number of threads: 8 
 ## Measuring likelihood calculation times...
 ##     model                                            mode time (ms)
-##  1:   PMM                                      R (serial)     0.230
+##  1:   PMM                                      R (serial)     0.260
 ##  2:   PMM                                      C++ (AUTO)     0.019
-##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.014
-##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.013
-##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.012
-##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.166
-##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.186
-##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.069
-##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.271
-## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.033
-## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.118
-## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.036
-## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.171
+##  3:   PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.013
+##  4:   PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.011
+##  5:   PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.011
+##  6:   PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.214
+##  7:   PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.212
+##  8:   PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.442
+##  9:   PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)     0.281
+## 10:   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.062
+## 11:   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.028
+## 12:   PMM                        C++ (HYBRID_LOOP_VISITS)     0.099
+## 13:   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.159
 ##       speedupX
 ##  1:  1.0000000
-##  2: 12.1052632
-##  3: 16.4285714
-##  4: 17.6923077
-##  5: 19.1666667
-##  6:  1.3855422
-##  7:  1.2365591
-##  8:  3.3333333
-##  9:  0.8487085
-## 10:  6.9696970
-## 11:  1.9491525
-## 12:  6.3888889
-## 13:  1.3450292</code></pre>
+##  2: 13.6842105
+##  3: 20.0000000
+##  4: 23.6363636
+##  5: 23.6363636
+##  6:  1.2149533
+##  7:  1.2264151
+##  8:  0.5882353
+##  9:  0.9252669
+## 10:  4.1935484
+## 11:  9.2857143
+## 12:  2.6262626
+## 13:  1.6352201</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
 newick &lt;-<span class="st"> '(((1:3,2:2.8)6:4.2,3:4.1)7:4.5,(4:4,5:5)8:6)0;'</span>
 tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text=</span>newick)
@@ -230,7 +234,7 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
 
 <span class="kw"><a href="../reference/PlotParallelTraversal.html">PlotParallelTraversal</a></span>(tree)</code></pre></div>
 <p><img src="SPLITTRcppModules_files/figure-html/fig1a-1.png" width="690"></p>
-<pre><code>## C++ object &lt;0x7fdd784c12a0&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7fdd7854a0a0&gt;</code></pre>
+<pre><code>## C++ object &lt;0x7fcd715e7820&gt; of class 'SPLITT__OrderedTreeStringNodes' &lt;0x7fcd7163f5b0&gt;</code></pre>
 <!--# Packages used-->
 <!--Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
 
