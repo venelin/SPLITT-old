@@ -49,14 +49,6 @@ public:
     }
   };
   
-  StateType StateAtRoot() const {
-    vec res(3);
-    res[0] = a[this->ref_tree_.num_nodes() - 1];
-    res[1] = b[this->ref_tree_.num_nodes() - 1];
-    res[2] = c[this->ref_tree_.num_nodes() - 1];
-    return res;
-  };
-  
   void SetParameter(ParameterType const& par) {
     if(par.size() != 2) {
       throw std::invalid_argument(
@@ -98,6 +90,14 @@ public:
     c[j] = c[j] + c[i];
   }
   
+  StateType StateAtRoot() const {
+    vec res(3);
+    res[0] = a[this->ref_tree_.num_nodes() - 1];
+    res[1] = b[this->ref_tree_.num_nodes() - 1];
+    res[2] = c[this->ref_tree_.num_nodes() - 1];
+    return res;
+  };
+  
 };
 
 typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
@@ -136,29 +136,41 @@ int main() {
   
   typename ParallelPruningAbcPMM::DataType data(tip_names, x);
   
-  cout<<"Readign PMM parameters from the standard input..."<<endl;
-  // read the model parameters
-  double gM, sigma, sigmae;
-  cin>>gM>>sigma>>sigmae;
-  cout<<"gM="<<gM<<"sigma="<<sigma<<" "<<"sigmae="<<sigmae<<endl;
-  
-  vec param(2); 
-  param[0] = sigma*sigma;
-  param[1] = sigmae*sigmae;
-  
-  // Create the TraversalTask object
+  // Create the TraversalTask object: this will create the OrderedTree and the 
+  // AbcPMM objects in the memory.
   ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-   
-  vec abc = pruningTask.TraverseTree(param, 0);
   
+  // The tree objects reorders the nodes, so that the tips are indexed from
+  // 0 to N-1, the internal nodes are from N to M-2, and the root is M-1.
   cout<<"Node-name order in the OrderedTree:"<<endl;
   for(int i = 0; i < pruningTask.tree().num_nodes(); i++) {
     cout<<i<<". "<<pruningTask.tree().FindNodeWithId(i)<<endl;
   }
-  cout<<"Calculating the a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
-  cout<<"a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
-  cout<<"Log-likelihood="<<abc[0]*gM*gM + abc[1]*gM + abc[2]<<endl;
+  
+  // model parameters
+  double gM, sigma, sigmae;
+  vec param(2); 
+  
+  cout<<"Main loop..."<<endl;
+  
+  // do this loop as long as parameters can be read from the standard input
+  while( cin>>gM>>sigma>>sigmae ) {
+    param[0] = sigma*sigma;
+    param[1] = sigmae*sigmae;
+  
+    cout<<"  Calculating a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+    vec abc = pruningTask.TraverseTree(param, 0);
+    cout<<"  a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
+    
+    cout<<"  LL(gM="<<gM<<", sigma="<<sigma<<", sigmae="<<sigmae<<"): "<<abc[0]*gM*gM + abc[1]*gM + abc[2]<<endl;
+  } 
+  
+  cout<<"Main loop finished ..."<<endl;
+  
+  // Check if OPENMP is enabled:
   std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
+  
+  // Exit politely
   std::cout<<"Good bye!"<<std::endl;
   return 0;
 }

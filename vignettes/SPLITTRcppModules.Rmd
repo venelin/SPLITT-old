@@ -92,7 +92,7 @@ devtools::install_github("venelin/SPLITT")
 ```
 
 
-```{r, echo=FALSE, eval=TRUE}
+```{r, echo=FALSE, eval=FALSE}
 capture <- capture.output( devtools::install_github("venelin/SPLITT") )
 capture <- 'Building SPLITT vignettes
 * installing *source* package ‘SPLITT’ ...
@@ -141,6 +141,7 @@ g <- rTraitCont(tree, model = "BM", root.value = x0,
 
 x <- g + rnorm(n = length(tree$tip.label), mean = 0, sd = sqrt(sigmae2))
 
+print(x)
 PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, mode = 1)
 ```
 
@@ -156,7 +157,7 @@ PlotParallelTraversal(tree)
 
 
 
-# Packages used
+<!--# Packages used-->
 ```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
 treeProcessing <- c("ape")
 data <- c("data.table")
@@ -181,7 +182,7 @@ printPackages <- function(packs) {
 #knitr::write_bib(packagesUsed, file = "./REFERENCES-R.bib")
 ```
 
-Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
+<!--Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
 
 * For tree processing: `r printPackages(treeProcessing)`;
 * For reporting: `r printPackages(data)`;
@@ -189,4 +190,4 @@ Apart from base R functionality, the patherit package uses a number of 3rd party
 * For testing: `r printPackages(testing)`.
 
 # References
-
+-->

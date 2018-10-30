@@ -12,8 +12,10 @@ navbar:
     menu:
     - text: Writing a traversal specification
       href: articles/SPLITTTraversalSpecification.html
-    - text: SPLITT classes
-      href: articles/SPLITTClasses.html
+    - text: Running a traversal
+      href: articles/SPLITTRunTraversal.html
+    - text: View from above
+      href: articles/SPLITTOverview.html
     - text: Calling SPLITT from an R-package
       href: articles/SPLITTRcppModules.html
   - text: Reference
@@ -27,5 +29,6 @@ articles:
   desc: ~
   contents:
   - '`SPLITTTraversalSpecification`'
-  - '`SPLITTClasses`'
+  - '`SPLITTRunTraversal`'
+  - '`SPLITTOverview`'
   - '`SPLITTRcppModules`'

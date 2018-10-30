@@ -160,10 +160,13 @@
     <loc>http://venelin.github.io/SPLITT/articles/SPLITT.html</loc>
   </url>
   <url>
-    <loc>http://venelin.github.io/SPLITT/articles/SPLITTClasses.html</loc>
+    <loc>http://venelin.github.io/SPLITT/articles/SPLITTOverview.html</loc>
   </url>
   <url>
     <loc>http://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html</loc>
+  </url>
+  <url>
+    <loc>http://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html</loc>
   </url>
   <url>
     <loc>http://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html</loc>

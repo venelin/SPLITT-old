@@ -55,7 +55,10 @@
       <a href="../articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a>
     </li>
     <li>
-      <a href="../articles/SPLITTClasses.html">SPLITT classes</a>
+      <a href="../articles/SPLITTRunTraversal.html">Running a traversal</a>
+    </li>
+    <li>
+      <a href="../articles/SPLITTOverview.html">View from above</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
@@ -153,28 +156,62 @@
 <a href="#compiling-your-code" class="anchor"></a>Compiling your code</h2>
 <p>Go to the directory with the downloaded files and execute the following command:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Feel free to replace the name of the executable with your C++ compiler</span>
-<span class="fu">clang</span>++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o main main.cpp</code></pre></div>
+<span class="fu">clang</span>++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp</code></pre></div>
 <p>This will compile and link the file main.cpp into an executable file called “main”. If the compilation runs fine you should see no error messages.</p>
 </div>
 <div id="testing-the-program" class="section level2">
 <h2 class="hasAnchor">
 <a href="#testing-the-program" class="anchor"></a>Testing the program</h2>
 <p>If the compilation was successful, type the following command.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./main</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./PMMLogLikelihood</span> <span class="op">&lt;</span>input.txt</code></pre></div>
 <p>With the exceptino of the line starting with <code>"OpenMP-version:"</code>, the above command should produce the following output:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">Hello</span> from the SPLITT PMM example!
-<span class="ex">Reading</span> the input tree, data and PMM parameters from the file test-input.txt...
-<span class="ex">Calculating</span> the a, b, c at the root for sigma=0.5 and sigmae=1
-<span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630438, <span class="va">c=</span>-8.21348
+<span class="ex">Reading</span> the input tree from the standard input...
+<span class="ex">bonobo</span> ancestor2 4.1
+<span class="ex">coalla</span> ancestor3 5
+<span class="ex">gorilla</span> ancestor1 2.8
+<span class="ex">dolfin</span> ancestor1 3
+<span class="ex">human</span> ancestor3 4
+<span class="ex">ancestor1</span> ancestor2 4.2
+<span class="ex">ancestor3</span> root 6
+<span class="ex">ancestor2</span> root 4.5
+<span class="ex">Reading</span> the trait data from the standard input...
+<span class="ex">gorilla</span> 1.8998
+<span class="ex">bonobo</span> 0.9606
+<span class="ex">coalla</span> -0.7435
+<span class="ex">dolfin</span> 1.7947
+<span class="ex">human</span> 0.4609
+<span class="ex">Node-name</span> order in the OrderedTree:
+<span class="ex">0.</span> bonobo
+<span class="ex">1.</span> human
+<span class="ex">2.</span> dolfin
+<span class="ex">3.</span> coalla
+<span class="ex">4.</span> gorilla
+<span class="ex">5.</span> ancestor3
+<span class="ex">6.</span> ancestor1
+<span class="ex">7.</span> ancestor2
+<span class="ex">8.</span> root
+<span class="ex">Main</span> loop...
+  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.5 and sigmae=1
+  <span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630659, <span class="va">c=</span>-8.21595
+  <span class="ex">LL</span>(gM=0.1, sigma=0.5, sigmae=1)<span class="bu">:</span> -8.15721
+  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.8 and sigmae=0.4
+  <span class="va">a=</span>-0.205491, <span class="va">b=</span>0.285864, <span class="va">c=</span>-9.09873
+  <span class="ex">LL</span>(gM=1.5, sigma=0.8, sigmae=0.4)<span class="bu">:</span> -9.13229
+<span class="ex">Main</span> loop finished ...
 <span class="ex">OpenMP-version</span>: 201107
 <span class="ex">Good</span> bye!</code></pre></div>
-<p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there seems to be an unknown bug, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
+<p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
 </div>
 </div>
 <div id="next-steps" class="section level1">
 <h1 class="hasAnchor">
 <a href="#next-steps" class="anchor"></a>Next steps</h1>
-<p>The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> guide.</p>
+<p>The next goal is to understand what the PMMLogLikelihood program actually does. We will do this in two steps:</p>
+<ul>
+<li>First, we will learn how to define a <code>TraversalSpecification</code> class in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> guide.</li>
+<li>Then, we will see how the <code>TraversalSpecification</code> class is used to create and execute a <code>TraversalTask</code> in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a> guide.</li>
+</ul>
 </div>
   </div>
 

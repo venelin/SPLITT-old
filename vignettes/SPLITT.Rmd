@@ -69,7 +69,7 @@ Go to the directory with the downloaded files and execute the following command:
 
 ```{bash, eval=FALSE}
 # Feel free to replace the name of the executable with your C++ compiler
-clang++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o main main.cpp
+clang++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp
 ```
 
 This will compile and link the file main.cpp into an executable file called "main". If the compilation runs fine you should see no error messages.
@@ -79,24 +79,60 @@ This will compile and link the file main.cpp into an executable file called "mai
 If the compilation was successful, type the following command.
 
 ```{bash, eval=FALSE}
-./main
+./PMMLogLikelihood <input.txt
 ```
 
 With the exceptino of the line starting with `"OpenMP-version:"`, the above command should produce the following output:
 
 ```{bash, eval=FALSE}
 Hello from the SPLITT PMM example!
-Reading the input tree, data and PMM parameters from the file test-input.txt...
-Calculating the a, b, c at the root for sigma=0.5 and sigmae=1
-a=-0.432535, b=0.630438, c=-8.21348
+Reading the input tree from the standard input...
+bonobo ancestor2 4.1
+coalla ancestor3 5
+gorilla ancestor1 2.8
+dolfin ancestor1 3
+human ancestor3 4
+ancestor1 ancestor2 4.2
+ancestor3 root 6
+ancestor2 root 4.5
+Reading the trait data from the standard input...
+gorilla 1.8998
+bonobo 0.9606
+coalla -0.7435
+dolfin 1.7947
+human 0.4609
+Node-name order in the OrderedTree:
+0. bonobo
+1. human
+2. dolfin
+3. coalla
+4. gorilla
+5. ancestor3
+6. ancestor1
+7. ancestor2
+8. root
+Main loop...
+  Calculating a, b, c at the root for sigma=0.5 and sigmae=1
+  a=-0.432535, b=0.630659, c=-8.21595
+  LL(gM=0.1, sigma=0.5, sigmae=1): -8.15721
+  Calculating a, b, c at the root for sigma=0.8 and sigmae=0.4
+  a=-0.205491, b=0.285864, c=-9.09873
+  LL(gM=1.5, sigma=0.8, sigmae=0.4): -9.13229
+Main loop finished ...
 OpenMP-version: 201107
 Good bye!
 ```
 
-If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header "omp.h" was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there seems to be an unknown bug, which I am not aware of. Please, report this in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
+If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header "omp.h" was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 
 # Next steps
 
-The next step is to understand what the main.cpp file, which we just compiled, actually does. This is explained in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide.
+The next goal is to understand what the PMMLogLikelihood program actually does. We will do this in two steps:
+
+- First, we will learn how to define a `TraversalSpecification` class in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide.
+- Then, we will see how the `TraversalSpecification` class is used to create and execute a `TraversalTask` in the [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.
+
+
+
 
 

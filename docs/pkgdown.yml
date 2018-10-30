@@ -3,8 +3,9 @@ pkgdown: 1.1.0
 pkgdown_sha: ~
 articles:
   SPLITT: SPLITT.html
-  SPLITTClasses: SPLITTClasses.html
+  SPLITTOverview: SPLITTOverview.html
   SPLITTRcppModules: SPLITTRcppModules.html
+  SPLITTRunTraversal: SPLITTRunTraversal.html
   SPLITTTraversalSpecification: SPLITTTraversalSpecification.html
 urls:
   reference: http://venelin.github.io/SPLITT/reference

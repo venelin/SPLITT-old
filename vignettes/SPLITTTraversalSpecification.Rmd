@@ -39,6 +39,8 @@ template<class Tree>
 class AbcPMM: public TraversalSpecification<Tree> {
 
 // Typedefs
+// Internal data-fields
+// Constructor
 // Methods
 
 };
@@ -136,14 +138,14 @@ class AbcPMM: public TraversalSpecification<Tree> {
 public:
   // Typedefs
   //...
-  typedef SPLITT::vec ParameterType; 
+  typedef vec ParameterType; 
   //...
 };
 ```
 
 #### `DataType`
 
-This is the type of data associated with the tree object. While the parameters can be updated before each run of a tree traversal, the data is specified once at the time of constructing the `TraversalSpecification`. 
+This is the type of data associated with the tree object. While the parameters can be updated before each run of a tree traversal, the data is specified once at the time of constructing the `TraversalSpecification` object. In the case of the `AbcPMM` class the data represents a numeric trait measurement for each tip in the tree. Hence, it is an association map between tip-names and double values. We define this relationship in a separate class:
 
 ```{Rcpp, eval=FALSE}
 // A global class describing a collection of single-trait measurements associated with the tips in a tree.
@@ -158,7 +160,11 @@ struct NumericTraitData {
     std::vector<NameType> const& names,
     vec const& x): names_(names), x_(x) {}
 };
+```
 
+Then, we define this class as the DataType in `AbcPMM` as follows:
+
+```{Rcpp, eval=FALSE}
 // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
 template<class Tree>
 class AbcPMM: public TraversalSpecification<Tree> {
@@ -181,7 +187,7 @@ class AbcPMM: public TraversalSpecification<Tree> {
 public:
   // Typedefs
   //...
-  typedef SPLITT::vec StateType; 
+  typedef vec StateType; 
   //...
 };
 ```
@@ -202,92 +208,209 @@ public:
 };
 ```
 
-    
-* Methods
+### Internal data fields
 
-    - A constructor for the TraversalSpecification object
-    - The methods defining the node-traversal operations:
-        - InitNode(uint i);
-        - VisitNode(uint i);
-        - PruneNode(uint i, uint j);
-    - StateAtRoot(): a method returning the root-state a the end of a traversal.
-
-SPLITT treats all of the above methods and types as 
-
-* A global `typedef` defining the TraversalTask class for the TraversalSpecification.
-
-
+SPLITT does not impose any requirement on the internal data fields in the `TraversalSpecification`-class. These are all application-specific variables needed for the execution of the node-traversal operations. In the case of `AbcPMM`, these internal fields are defined as follows:
 
 ```{Rcpp, eval=FALSE}
-template<class Tree> class TraversalSpecification {
-protected:
-  // A reference to a Tree available for inheriting classes
-  Tree const& ref_tree_;
-  // A protected constructor that initializes the tree-reference. This constructor
-  // must be called explicitly in the initalization list of inheriting class constructors.
-  TraversalSpecification(Tree const& tree): ref_tree_(tree) {}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
 public:
-  // public typedefs. These typedefs must be provided by an implementation class.
-  // 1. typedef Tree TreeType;
-  // 2. typedef PostOrderTraversal<ImlementationClass> AlgorithmType;
-  // 3. typedef ImplementationSpecificParameterType ParameterType;
-  // 4. typedef ImplementationSpecificDataType DataType;
-  // 5. typedef ImplementationSpecificStateType StateType;
+  // Typedefs
+  // Internal data-fields
   
+  // Model parameters set before each traversal
+  double sigmae2, sigma2;
   
-  // The following methods must be present any implementation
-  // 6. constructor: will be called by a TraversalTask object; Here, it is
-  // commented out, because the DataType is not known.
-  // ImplementationClassName(TreeType & tree, DataType & input_data) :
-  //   TraversalSpecification(tree) {
-  //     implementation specific initialization using the tree and the input_data.
-  // }
+  // Trait data copied from the input_data object during construction
+  vec x;
   
-  
-  // The following methods get called by the TraversalAlgorithm implementation:
-  
-  // 7. Setting the model parameters prior to starting the pruning procedure on the tree.
-  // This method is called by the TraversalTask.TraverseTree(ParamterType const&, uint mode)
-  // method. The method declaration is commented out because ParameterType is not known
-  // and must be specified by the implementing class.
-  // void SetParameter(ParameterType const& par);
-  
-  // 8. InitNode(i) is called on each node in the tree right after SetParameter and
-  // before any of the VisitNode and PruneNode has been called. There is no predefined
-  // order of the calls to InitNode and they may be executed in parallel. Therefore, only
-  // node-specific data initialization, including the length of the branch
-  // leading to node i, can take place in this method.
-  void InitNode(uint i) {}
-  
-  
-  // 9. VisitNode(i) is called on each tip or internal node (EXCLUDING THE ROOT),
-  // in the tree after PruneNode has been called on each descendant of i.
-  // The method is the perfect place to calculate the state of node i using the
-  // pre-calculated states of its descendants. Although, it is guaranteed
-  // that VisitNode(i) is called before VisitNode(i_parent), this method SHOULD NOT BE USED
-  // FOR ALTERING THE STATE of i_parent, because this would conflict with
-  // a concurrent execution of VisitNode on a sibling of i (see also PruneNode).
-  void VisitNode(uint i) {}
-  
-  // 10. PruneNode(i, i_parent) is called on each tip or internal node (EXCLUDING THE ROOT)
-  // after VisitNode(i) and in sync with PruneNode(k, i_parent), for any sibling k of i.
-  // Thus, it is safe to use PruneNode to update the state of i_parent.
-  void PruneNode(uint i, uint i_parent) {}
-  
-  // 11. StateType StateAtRoot() is called after PruneNode has been called on each
-  // direct descendant of the root node. If necessary, VisitNode(i_root) can be called
-  // here, in order to calculate the final state of the root. The value returned by this
-  // function is also returned by the TraversalTask.TraverseTree(ParameterType const& par, uint mode)
-  // method.
+  // Internal vectors used for storing the node-states, i.e. the coefficients 
+  // a[i], b[i], c[i] for each node in the tree:
+  vec a, b, c;
+  //...
 };
+```
+    
+### Constructor
 
-// 12. After the class TraversalSpecificationImplementation has been defined it is
-// time to specify the TraversalTask template. This is not obligatory but can be very
-// convinient for creating TraversalTask objects with the user specific implementation
-// and to call their TraverseTree method.
-// typedef TraversalTask<TraversalSpecificationImplementation> > MyTraversalTask;
+SPLITT requires the `TraversalSpecification`-class to have a constructor taking two arguments:
 
+- a `const` reference to a `TreeType` object;
+- a `const` reference to a `DataType` object;
+
+Here is how the constructor is defined for the `AbcPMM` class:
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  AbcPMM(TreeType const& tree, DataType const& input_data):
+    BaseType(tree) {
+    
+    // Check that the number of data-points matches the number of tips in the tree.
+    if(input_data.x_.size() != this->ref_tree_.num_tips()) {
+      std::ostringstream oss;
+      oss<<"The vector x must be the same length as the number of tips ("<<
+        this->ref_tree_.num_tips()<<"), but were"<<input_data.x_.size()<<".";
+      throw std::invalid_argument(oss.str());
+    } else {
+      
+      // IMPORTANT: reorder the data points according to the order in the tree object. 
+      uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
+      this->x = At(input_data.x_, ordNodes);
+      
+      // a[i] corresponds to the
+      this->a = vec(this->ref_tree_.num_nodes());
+      this->b = vec(this->ref_tree_.num_nodes());
+      this->c = vec(this->ref_tree_.num_nodes());
+    }
+  }
+  //...
+};
 ```
 
-# Defining the type of data
+### Methods
 
+SPLITT expect the following methods to be defined in a `TraversalSpecification`-class.
+
+#### `void SetParameter(ParameterType const& par)`
+
+This method is called before each traversal to set the values of the parameters. For the `AbcPMM` class, only $\sigma^2$ and $\sigma_{e}^2$ are needed to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$. Hence we define the method as follows:
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  void SetParameter(ParameterType const& par) {
+    if(par.size() != 2) {
+      throw std::invalid_argument(
+          "The par vector should be of length 2 with \
+      elements corresponding to sigma2 and sigmae2.");
+    }
+    if(par[0] <= 0 || par[1] <= 0) {
+      throw std::logic_error("The parameters sigma2 and sigmae2 should be positive.");
+    }
+    this->sigma2 = par[0];
+    this->sigmae2 = par[1];
+  }
+  //...
+};
+```
+
+#### `void InitNode(uint i)` 
+
+This method is called on each node in the tree right after SetParameter and before any of the `VisitNode` and `PruneNode` methods has been called. There is no predefined order of the calls to InitNode and they may be executed in parallel for all nodes in the tree. Therefore, only node-specific data initialization, including the length of the branch leading to node i, can take place in this method. For the `AbcPMM` class, this is defined as follows (see also Fig. 1c in [the article](https://www.biorxiv.org/content/early/2018/10/29/235739)):
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  //...
+  inline void InitNode(uint i) {
+    
+    if(i < this->ref_tree_.num_tips()) {
+      a[i] = -0.5 / sigmae2;  
+      b[i] = x[i] / sigmae2;
+      c[i] = -0.5 * (x[i]*b[i] + log(2*G_PI*sigmae2));
+    } else {
+      a[i] = b[i] = c[i] = 0;
+    }
+  }
+  //...
+};
+```
+
+#### `void VisitNode(uint i)` 
+
+This method is called on each tip or internal node (EXCLUDING THE ROOT) in the tree after `PruneNode` has been called on each descendant of i (if in a post-order traversal) or after `VisitNode` has been called on the parent of i (if in a pre-order traversal). In a post-order traversal, the method is the perfect place to calculate the state of node i using the previously calculated states of its descendants. This method SHOULD NOT BE USED FOR ALTERING THE STATE of i's parent, because this could enter in conflict with a concurrent execution of VisitNode on a sibling of i (see also `PruneNode` below). For the `AbcPMM` class, this is defined as follows:
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  //...
+  inline void VisitNode(uint i) {
+    double t = this->ref_tree_.LengthOfBranch(i);
+    double d = 1 - 2*a[i]*sigma2*t;
+    
+    // the order is important here because for c[i] we use the previous values 
+    // of a[i] and b[i].
+    c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
+    a[i] /= d;
+    b[i] /= d;
+  }
+  //...
+};
+```
+
+
+#### `void PruneNode(uint i, uint j)` (post-order traversal only) 
+
+This method is called on each tip or internal node (EXCLUDING THE ROOT) after `VisitNode(i)` and in sync with `PruneNode(k, i_parent)`, for any sibling k of i.  Thus, it is safe to use `PruneNode` to update the state of i_parent.  For the `AbcPMM` class, this is defined as follows:
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  //...
+  inline void PruneNode(uint i, uint j) {
+    a[j] = a[j] + a[i];
+    b[j] = b[j] + b[i];
+    c[j] = c[j] + c[i];
+  }
+  //...
+};
+```
+
+#### `StateType StateAtRoot() const` (post-order traversal only)
+
+This method is called after `PruneNode` has been called on each direct descendant of the root node, that is after the post-order traversal has been finished. If necessary, `VisitNode(i_root)` can be called here. For the `AbcPMM` class, this is defined as follows:
+
+```{Rcpp, eval=FALSE}
+// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+template<class Tree>
+class AbcPMM: public TraversalSpecification<Tree> {
+public:
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  //...
+  StateType StateAtRoot() const {
+    vec res(3);
+    res[0] = a[this->ref_tree_.num_nodes() - 1];
+    res[1] = b[this->ref_tree_.num_nodes() - 1];
+    res[2] = c[this->ref_tree_.num_nodes() - 1];
+    return res;
+  };
+};
+```
+    
+# Next steps
+With that, we finished the definition of the `AbcPMM` `TraversalSpecification`-class. The next step is to see how this specification can be applied during a traversal on some example input data. This is described in the  [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.

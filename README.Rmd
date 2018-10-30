@@ -29,8 +29,9 @@ The R-package called with the same name (SPLITT) bundles the SPLITT.h header tog
 The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
 
 * The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to compile and run a console application using SPLITT. 
-* The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations for execution with SPLITT. 
-* The [SPLITT classes](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
+* The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations. 
+* The [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide shows how to create and run a traversal task.
+* The [View from above](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
 * The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
 The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is in this article is used as a coding example in the SPLITT online documentation. The article is currently undergoing peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
