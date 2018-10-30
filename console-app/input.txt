@@ -1,0 +1,15 @@
+9 5
+bonobo ancestor2 4.1
+coalla ancestor3 5
+gorilla ancestor1 2.8
+dolfin ancestor1 3
+human ancestor3 4
+ancestor1 ancestor2 4.2
+ancestor3 root 6
+ancestor2 root 4.5
+gorilla 1.8998
+bonobo 0.9606
+coalla -0.7435
+dolfin 1.7947
+human 0.4609
+0.1 0.5 1

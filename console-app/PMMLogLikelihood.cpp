@@ -1,6 +1,5 @@
 #include "SPLITT.h"
 #include <iostream>
-#include <fstream>
 
 
 using namespace SPLITT;
@@ -84,8 +83,8 @@ public:
   
   inline void VisitNode(uint i) {
     double t = this->ref_tree_.LengthOfBranch(i);
-    
     double d = 1 - 2*a[i]*sigma2*t;
+    
     // the order is important here because for c[i] we use the previous values 
     // of a[i] and b[i].
     c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
@@ -101,50 +100,64 @@ public:
   
 };
 
-typedef TraversalTask<AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
-
+typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
 
 int main() {
   
-  std::fstream fin;
+  // will be using std::string, std::vector, std::cin and std::cout quite a lot.
+  using namespace std;
   
-  std::cout<<"Hello from the SPLITT PMM example!"<<std::endl;
-  std::cout<<"Reading the input tree, data and PMM parameters from the file test-input.txt..."<<std::endl;
-  fin.open("test-input.txt", std::fstream::in);
+  cout<<"Hello from the SPLITT PMM example!"<<endl;
+  cout<<"Reading the input tree from the standard input..."<<endl;
   
+  // Read the number of nodes and tips
   uint M, N;
-  fin>>M>>N;
-  uvec daughters(M-1);
-  uvec parents(M-1);
+  cin>>M>>N;
+  
+  // read the tree
+  vector<string> daughters(M-1);
+  vector<string> parents(M-1);
   vec t(M-1);
-  vec x(N);
   
   for(int i=0; i < M-1; i++) {
-    fin>>daughters[i]>>parents[i]>>t[i];
-    if(daughters[i] <= N) {
-      fin>>x[i];
-    }
+    cin>>daughters[i]>>parents[i]>>t[i];
+    cout<<daughters[i]<<" "<<parents[i]<<" "<<t[i]<<endl;
   }
   
-  double sigma, sigmae;
+  cout<<"Reading the trait data from the standard input..."<<endl;
+  // read the trait data
+  vector<string> tip_names(N);
+  vec x(N);
   
-  fin>>sigma>>sigmae;
+  for(int i = 0; i < N; i++) {
+    cin>>tip_names[i]>>x[i];
+    cout<<tip_names[i]<<" "<<x[i]<<endl;
+  }
+  
+  typename ParallelPruningAbcPMM::DataType data(tip_names, x);
+  
+  cout<<"Readign PMM parameters from the standard input..."<<endl;
+  // read the model parameters
+  double gM, sigma, sigmae;
+  cin>>gM>>sigma>>sigmae;
+  cout<<"gM="<<gM<<"sigma="<<sigma<<" "<<"sigmae="<<sigmae<<endl;
   
   vec param(2); 
-  
   param[0] = sigma*sigma;
   param[1] = sigmae*sigmae;
   
-  uvec node_names = Seq(uint(1), N);
-  typename ParallelPruningAbcPMM::DataType data(node_names, x);
-  
+  // Create the TraversalTask object
   ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-   
    
   vec abc = pruningTask.TraverseTree(param, 0);
   
-  std::cout<<"Calculating the a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
-  std::cout<<"a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
+  cout<<"Node-name order in the OrderedTree:"<<endl;
+  for(int i = 0; i < pruningTask.tree().num_nodes(); i++) {
+    cout<<i<<". "<<pruningTask.tree().FindNodeWithId(i)<<endl;
+  }
+  cout<<"Calculating the a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+  cout<<"a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
+  cout<<"Log-likelihood="<<abc[0]*gM*gM + abc[1]*gM + abc[2]<<endl;
   std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
   std::cout<<"Good bye!"<<std::endl;
   return 0;
