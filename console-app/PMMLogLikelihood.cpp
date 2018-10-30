@@ -104,11 +104,15 @@ typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPrunin
 
 int main() {
   
+  // Set this to true to see more information during execution.
+  bool verbose = false; 
+  
   // will be using std::string, std::vector, std::cin and std::cout quite a lot.
   using namespace std;
   
   cout<<"Hello from the SPLITT PMM example!"<<endl;
-  cout<<"Reading the input tree from the standard input..."<<endl;
+ 
+  cout<<"Reading the input tree..."<<endl;
   
   // Read the number of nodes and tips
   uint M, N;
@@ -119,19 +123,25 @@ int main() {
   vector<string> parents(M-1);
   vec t(M-1);
   
+  
   for(int i=0; i < M-1; i++) {
     cin>>daughters[i]>>parents[i]>>t[i];
-    cout<<daughters[i]<<" "<<parents[i]<<" "<<t[i]<<endl;
+    if(verbose) {
+      cout<<daughters[i]<<" "<<parents[i]<<" "<<t[i]<<endl;
+    }
   }
   
-  cout<<"Reading the trait data from the standard input..."<<endl;
+  cout<<"Reading the trait data..."<<endl;
   // read the trait data
   vector<string> tip_names(N);
   vec x(N);
   
+  
   for(int i = 0; i < N; i++) {
     cin>>tip_names[i]>>x[i];
-    cout<<tip_names[i]<<" "<<x[i]<<endl;
+    if(verbose) {
+      cout<<tip_names[i]<<" "<<x[i]<<endl;
+    }
   }
   
   typename ParallelPruningAbcPMM::DataType data(tip_names, x);
@@ -142,14 +152,20 @@ int main() {
   
   // The tree objects reorders the nodes, so that the tips are indexed from
   // 0 to N-1, the internal nodes are from N to M-2, and the root is M-1.
-  cout<<"Node-name order in the OrderedTree:"<<endl;
-  for(int i = 0; i < pruningTask.tree().num_nodes(); i++) {
-    cout<<i<<". "<<pruningTask.tree().FindNodeWithId(i)<<endl;
+  if(verbose) {
+    cout<<"Node-name order in the OrderedTree:"<<endl;
+    for(int i = 0; i < pruningTask.tree().num_nodes(); i++) {
+      cout<<i<<". "<<pruningTask.tree().FindNodeWithId(i)<<endl;
+    } 
   }
+  
+  // Check if OPENMP is enabled:
+  std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
   
   // model parameters
   double gM, sigma, sigmae;
   vec param(2); 
+  
   
   cout<<"Main loop..."<<endl;
   
@@ -165,11 +181,7 @@ int main() {
     cout<<"  LL(gM="<<gM<<", sigma="<<sigma<<", sigmae="<<sigmae<<"): "<<abc[0]*gM*gM + abc[1]*gM + abc[2]<<endl;
   } 
   
-  cout<<"Main loop finished ..."<<endl;
-  
-  // Check if OPENMP is enabled:
-  std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
-  
+  cout<<"Main loop done."<<endl;
   // Exit politely
   std::cout<<"Good bye!"<<std::endl;
   return 0;

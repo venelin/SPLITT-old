@@ -170,31 +170,9 @@ bibliography: REFERENCES.bib
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./PMMLogLikelihood</span> <span class="op">&lt;</span>input.txt</code></pre></div>
 <p>With the exceptino of the line starting with <code>"OpenMP-version:"</code>, the above command should produce the following output:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">Hello</span> from the SPLITT PMM example!
-<span class="ex">Reading</span> the input tree from the standard input...
-<span class="ex">bonobo</span> ancestor2 4.1
-<span class="ex">coalla</span> ancestor3 5
-<span class="ex">gorilla</span> ancestor1 2.8
-<span class="ex">dolfin</span> ancestor1 3
-<span class="ex">human</span> ancestor3 4
-<span class="ex">ancestor1</span> ancestor2 4.2
-<span class="ex">ancestor3</span> root 6
-<span class="ex">ancestor2</span> root 4.5
-<span class="ex">Reading</span> the trait data from the standard input...
-<span class="ex">gorilla</span> 1.8998
-<span class="ex">bonobo</span> 0.9606
-<span class="ex">coalla</span> -0.7435
-<span class="ex">dolfin</span> 1.7947
-<span class="ex">human</span> 0.4609
-<span class="ex">Node-name</span> order in the OrderedTree:
-<span class="ex">0.</span> bonobo
-<span class="ex">1.</span> human
-<span class="ex">2.</span> dolfin
-<span class="ex">3.</span> coalla
-<span class="ex">4.</span> gorilla
-<span class="ex">5.</span> ancestor3
-<span class="ex">6.</span> ancestor1
-<span class="ex">7.</span> ancestor2
-<span class="ex">8.</span> root
+<span class="ex">Reading</span> the input tree...
+<span class="ex">Reading</span> the trait data...
+<span class="ex">OpenMP-version</span>: 201107
 <span class="ex">Main</span> loop...
   <span class="ex">Calculating</span> a, b, c at the root for sigma=0.5 and sigmae=1
   <span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630659, <span class="va">c=</span>-8.21595
@@ -202,8 +180,7 @@ bibliography: REFERENCES.bib
   <span class="ex">Calculating</span> a, b, c at the root for sigma=0.8 and sigmae=0.4
   <span class="va">a=</span>-0.205491, <span class="va">b=</span>0.285864, <span class="va">c=</span>-9.09873
   <span class="ex">LL</span>(gM=1.5, sigma=0.8, sigmae=0.4)<span class="bu">:</span> -9.13229
-<span class="ex">Main</span> loop finished ...
-<span class="ex">OpenMP-version</span>: 201107
+<span class="ex">Main</span> loop done.
 <span class="ex">Good</span> bye!</code></pre></div>
 <p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
 </div>

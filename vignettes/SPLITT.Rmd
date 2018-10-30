@@ -90,31 +90,9 @@ With the exceptino of the line starting with `"OpenMP-version:"`, the above comm
 
 ```{bash, eval=FALSE}
 Hello from the SPLITT PMM example!
-Reading the input tree from the standard input...
-bonobo ancestor2 4.1
-coalla ancestor3 5
-gorilla ancestor1 2.8
-dolfin ancestor1 3
-human ancestor3 4
-ancestor1 ancestor2 4.2
-ancestor3 root 6
-ancestor2 root 4.5
-Reading the trait data from the standard input...
-gorilla 1.8998
-bonobo 0.9606
-coalla -0.7435
-dolfin 1.7947
-human 0.4609
-Node-name order in the OrderedTree:
-0. bonobo
-1. human
-2. dolfin
-3. coalla
-4. gorilla
-5. ancestor3
-6. ancestor1
-7. ancestor2
-8. root
+Reading the input tree...
+Reading the trait data...
+OpenMP-version: 201107
 Main loop...
   Calculating a, b, c at the root for sigma=0.5 and sigmae=1
   a=-0.432535, b=0.630659, c=-8.21595
@@ -122,8 +100,7 @@ Main loop...
   Calculating a, b, c at the root for sigma=0.8 and sigmae=0.4
   a=-0.205491, b=0.285864, c=-9.09873
   LL(gM=1.5, sigma=0.8, sigmae=0.4): -9.13229
-Main loop finished ...
-OpenMP-version: 201107
+Main loop done.
 Good bye!
 ```
 
