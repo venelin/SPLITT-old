@@ -1,6 +1,8 @@
+library(testthat)
+context("Test R and Cpp code calculate the same PMM log-likelihood")
+
 library(ape)
 library(SPLITT)
-library(POUMM)
 
 set.seed(10)
 
@@ -19,10 +21,11 @@ g <- rTraitCont(tree, model = "OU", root.value = x0,
 
 x <- g + rnorm(n = N, mean = 0, sd = sqrt(sigmae2))
 
-POUMMLogLik(x, tree, x0, alpha, theta, sigma2, sigmae2)
-POUMMLogLikCpp(x, tree, x0, alpha, theta, sigma2, sigmae2)
+test_that(
+  "PMMLogLik == PMMLogLikCpp",
+  expect_equal(PMMLogLik(x, tree, x0, sigma2, sigmae2), 
+               PMMLogLikCpp(x, tree, x0, sigma2, sigmae2))
+)
 
-if(require(POUMM)) {
-  likPOUMMGivenTreeVTips(x, tree, alpha, theta, sqrt(sigma2), sqrt(sigmae2), g0 = x0)
-}
-  
+
+
