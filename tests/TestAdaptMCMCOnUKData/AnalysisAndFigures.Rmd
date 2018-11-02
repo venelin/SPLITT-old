@@ -1,0 +1,92 @@
+---
+output: 
+  bookdown::pdf_document2:
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: template-sysbio.tex
+thanks: ""
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+graphics: true
+tables: true
+---
+
+```{r setup, include=FALSE}
+# Counting words in sections:
+# ~/tools/TeXcount_3_0_0_24/texcount.pl Manuscript.tex 
+#bibliography: REFERENCES.bib
+# Extracting the code into an R-file:
+# purl("Manuscript.Rmd")
+
+# set this to FALSE to avoid errors in word-counting
+echoCode <- TRUE
+# set to TRUE to include figures within text or at the end (see endfloat package in template-file); this does not matter for supplementary figures which generated separately at the end of this file.
+includeFigures <- TRUE
+
+
+library(POUMM)
+library(data.table)
+library(ggplot2)
+library(tables)
+library(ape)
+library(scales)
+library(ggtree)
+library(lmtest)
+
+
+
+```
+
+```{r load-hiv-mcmc-data, eval=FALSE, include=FALSE, results="hide"}
+# no adaptation 1e6 iterations
+#load("../DATA/TestAdaptMCMCOnUKData/poumm1.RData")
+#smm.poumm1 <- summary(poumm1, stat = c("alpha", "theta", "sigma", "sigmae", "g0"))
+# adaptation during all 1e6 iterations
+#load("../DATA/TestAdaptMCMCOnUKData/poumm2.RData")
+# adaptation during first 1e5 iterations out of 1e6 iterations
+# load("../DATA/TestAdaptMCMCOnUKData/poumm3.RData")
+# no adaptation during 1e7 iterations
+# load("../DATA/TestAdaptMCMCOnUKData/poumm4.RData")
+
+# smm.poumm3 <- summary(poumm3, thinMCMC=2000, mode="expert")
+# smm.poumm4 <- summary(poumm4, thinMCMC=2000, mode="expert")
+#save(smm.poumm3, smm.poumm4, file="../DATA/TestAdaptMCMCOnUKData/smm.poumm.RData")
+
+# loads the two summary objects: smm.poumm3 and smm.poumm4. 
+# 
+load("../DATA/TestAdaptMCMCOnUKData/smm.poumm.RData")
+
+plots3 <- plot(smm.poumm3, stat = c("alpha", "theta", "sigma", "sigmae"), doPlot=FALSE)
+
+plots4 <- plot(smm.poumm4, stat = c("alpha", "theta", "sigma", "sigmae"), doPlot=FALSE)
+```
+
+```{r fig-post-samples-hiv, include=TRUE, eval=FALSE, fig.width=6.75, fig.height=6.75}
+cowplot::plot_grid(
+  plots4$traceplot + 
+    scale_x_continuous(name = "iteration", labels=scales::scientific, 
+                       breaks = scales::pretty_breaks(n = 3)) +
+    theme(legend.position = "none", axis.text=element_text(size=8)),
+  plots3$traceplot + 
+    scale_x_continuous(name = "iteration", labels=scales::scientific,
+                       breaks = scales::pretty_breaks(n = 3)) +
+    theme(legend.position = "none", axis.text=element_text(size=8)),
+  plots4$densplot + theme(legend.position = "none", axis.text=element_text(size=8)),
+  plots3$densplot + theme(legend.position = "none", axis.text=element_text(size=8)),
+  nrow=2, ncol=2, 
+  labels=c("a", "c", "b", "d"))
+```
+
+
+```{r embed-fonts-in-figures, include=FALSE, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Need to use the extrafont package to embed the used fonts in the figures.
+library(extrafont)
+
+embed_fonts(file = "Manuscript-fig-post-quantiles-1.pdf")
+embed_fonts(file = "Manuscript-fig-plot-times-1.pdf")
+embed_fonts(file = "Manuscript-fig-plot-parallel-speedup-1.pdf")
+embed_fonts(file = "Manuscript-fig-post-samples-hiv-1.pdf")
+```
