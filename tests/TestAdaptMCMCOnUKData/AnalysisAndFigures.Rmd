@@ -56,7 +56,8 @@ library(lmtest)
 
 # loads the two summary objects: smm.poumm3 and smm.poumm4. 
 # 
-load("smm.poumm.RData")
+
+load("../DATA/TestAdaptMCMCOnUKData/smm.poumm.RData")
 
 plots3 <- plot(smm.poumm3, stat = c("alpha", "theta", "sigma", "sigmae"), doPlot=FALSE)
 
