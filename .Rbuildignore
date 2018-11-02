@@ -2,3 +2,9 @@
 ^\.Rproj\.user$
 ^docs
 ^tests/benchmark
+^tests/posterior-quantile-test
+^tests/TestAdaptMCMCOnUKData
+^README.Rmd
+^SPLITT.Rproj
+^_pkgdown.yml
+^console-app
