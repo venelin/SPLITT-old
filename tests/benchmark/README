@@ -1,3 +1,6 @@
+The benchmarks were executed with PCMBase_1.1.0.tar.gz and PCMBaseCpp_0.0.2.tar.gz.
+The source-packages are found in this directory.
+
 To run a job on the cluster with <n> cpus execute the following commands:
 
 export OMP_NUM_THREADS=<n>
