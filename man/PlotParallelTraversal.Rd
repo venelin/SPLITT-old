@@ -4,8 +4,8 @@
 \alias{PlotParallelTraversal}
 \title{Global definitions needed for the R-check to pass}
 \usage{
-PlotParallelTraversal(tree, x.lim = c(-2, max(node.depth.edgelength(tree)) +
-  1), draw_prune_ranges = TRUE)
+PlotParallelTraversal(tree, x.lim = c(-2,
+  max(node.depth.edgelength(tree)) + 1), draw_prune_ranges = TRUE)
 }
 \arguments{
 \item{tree}{a phylo object}

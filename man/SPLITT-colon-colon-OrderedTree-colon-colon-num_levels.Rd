@@ -30,3 +30,4 @@ Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\lin
   \code{\link{SPLITT::OrderedTree::ranges_id_prune}},
   \code{\link{SPLITT::OrderedTree::ranges_id_visit}}
 }
+\concept{\code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods}

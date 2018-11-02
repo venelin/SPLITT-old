@@ -13,3 +13,4 @@ Currently defined as
 Other global constants: \code{\link{SPLITT::G_NA_UINT}},
   \code{\link{SPLITT::G_PI}}
 }
+\concept{global constants}

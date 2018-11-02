@@ -13,3 +13,4 @@ Currently defined as
 Other global constants: \code{\link{SPLITT::G_EMPTY_UVEC}},
   \code{\link{SPLITT::G_NA_UINT}}
 }
+\concept{global constants}

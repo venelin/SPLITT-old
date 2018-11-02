@@ -1,3 +1,5 @@
+^Meta$
+^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^docs
@@ -8,3 +10,4 @@
 ^SPLITT.Rproj
 ^_pkgdown.yml
 ^console-app
+^ARTICLE

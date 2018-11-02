@@ -12,3 +12,4 @@
 Other basic types: \code{\link{SPLITT::bvec}},
   \code{\link{SPLITT::uint}}, \code{\link{SPLITT::uvec}}
 }
+\concept{basic types}

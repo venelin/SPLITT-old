@@ -38,3 +38,4 @@ Other global functions: \code{\link{SPLITT::IsNA}},
   \code{\link{SPLITT::NotIsNA}}, \code{\link{SPLITT::Seq}},
   \code{\link{SPLITT::SortIndices}}
 }
+\concept{global functions}

@@ -25,3 +25,4 @@ Other global functions: \code{\link{SPLITT::At}},
   \code{\link{SPLITT::IsNA}}, \code{\link{SPLITT::Match}},
   \code{\link{SPLITT::NotIsNA}}, \code{\link{SPLITT::Seq}}
 }
+\concept{global functions}

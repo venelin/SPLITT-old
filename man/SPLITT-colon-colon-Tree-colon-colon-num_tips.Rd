@@ -28,3 +28,4 @@ Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree
   \code{\link{SPLITT::Tree::Tree}},
   \code{\link{SPLITT::Tree::num_nodes}}
 }
+\concept{\code{\link[=SPLITT::Tree]{Tree}} public methods}

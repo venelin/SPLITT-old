@@ -27,7 +27,7 @@ Suggests:
     POUMM,
     knitr,
     rmarkdown
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 BuildVignettes: false
 VignetteBuilder: knitr, rmarkdown
 ByteCompile: yes

@@ -32,3 +32,4 @@ Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree
   \code{\link{SPLITT::Tree::num_nodes}},
   \code{\link{SPLITT::Tree::num_tips}}
 }
+\concept{\code{\link[=SPLITT::Tree]{Tree}} public methods}

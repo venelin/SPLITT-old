@@ -10,3 +10,4 @@
 Other basic types: \code{\link{SPLITT::bvec}},
   \code{\link{SPLITT::uint}}, \code{\link{SPLITT::vec}}
 }
+\concept{basic types}
