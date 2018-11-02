@@ -24,7 +24,6 @@ Imports:
     ape,
     data.table
 Suggests:
-    POUMM,
     knitr,
     rmarkdown
 RoxygenNote: 6.1.0
