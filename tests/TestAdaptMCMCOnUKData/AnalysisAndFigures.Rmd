@@ -80,14 +80,3 @@ cowplot::plot_grid(
   labels=c("a", "c", "b", "d"))
 ```
 
-
-```{r embed-fonts-in-figures, include=FALSE, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
-
-# Need to use the extrafont package to embed the used fonts in the figures.
-library(extrafont)
-
-embed_fonts(file = "Manuscript-fig-post-quantiles-1.pdf")
-embed_fonts(file = "Manuscript-fig-plot-times-1.pdf")
-embed_fonts(file = "Manuscript-fig-plot-parallel-speedup-1.pdf")
-embed_fonts(file = "Manuscript-fig-post-samples-hiv-1.pdf")
-```
