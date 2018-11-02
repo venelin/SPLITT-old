@@ -102,10 +102,11 @@ public:
 
 typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
 
-int main() {
+int main(int argc, char* argv[]) {
   
-  // Set this to true to see more information during execution.
-  bool verbose = false; 
+  // Will be false if the program is run without any arguments. Pass any argument
+  // after the program name and verbose will be set to true.
+  bool verbose = (argc > 1); 
   
   // will be using std::string, std::vector, std::cin and std::cout quite a lot.
   using namespace std;
@@ -144,6 +145,7 @@ int main() {
     }
   }
   
+  // create the data-object
   typename ParallelPruningAbcPMM::DataType data(tip_names, x);
   
   // Create the TraversalTask object: this will create the OrderedTree and the 

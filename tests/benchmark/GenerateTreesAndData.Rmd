@@ -1,0 +1,203 @@
+---
+title: "Generating trees and data for microbenchmark"
+author: "Venelin Mitov"
+date: "11 April 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ape)
+library(apTreeshape)
+library(data.table)
+library(POUMM)
+library(phytools)
+library(PCMBase)
+library(Rphylopars)
+
+set.seed(10)
+```
+
+
+```{r generate-trees, eval=FALSE}
+trees <- data.table(N=c(100, 1000, 10000, 100000))[
+  , rbindlist(lapply(N, function(N) {
+    p.c99 <- 0.01/N
+    data.table(N=N, p = c(p.c99 = p.c99,
+                          p0.5 = 0.5,
+                          p0.1 = 0.1,
+                          p0.01 = 0.01),
+               pSymb = c(
+                 "p.c99", "p0.5", "p0.1", "p0.01")
+    )
+  }))]
+
+trees[, id:=1:.N]
+trees[, treeshape:=lapply(1:.N, function(i) {
+  cat("Generating treeshape for N=", N[i], " and p=", p[i], ".\n")
+  rtreeshape(1, tip.number=N[i], model="biased", p=p[i])[[1]]
+})]
+
+save(trees, file = "./Trees.RData")
+```
+
+```{r, eval=FALSE}
+load("./Trees.RData")
+
+cat("Converting to phylo...\n")
+
+trees[, tree:=lapply(treeshape, as.phylo)]
+
+save(trees, file='Trees.RData')
+```
+
+
+```{r, eval=FALSE}
+load("./Trees.RData")
+
+trees[, treeshape:=lapply(tree, as.treeshape)]
+trees[, colless:=sapply(treeshape, function(.) {
+  res <- try(colless(.), silent=TRUE)
+  if(class(res)!='try-error') {
+    res
+  } else {
+    NA
+  }
+})]
+trees[, collessNorm:=colless/((N-1)*(N-2)/2)]
+save(trees, file="Trees.RData")
+```
+
+```{r random-lengths}
+set.seed(10)
+load("./Trees.RData")
+
+trees[, X:=NULL]
+trees[, model:=NULL]
+
+# set random branch lengths
+trees[, tree:=lapply(1:.N, function(i) {
+  
+  tr <- tree[[i]]
+  if(!is.null(tr)) {
+    N <- length(tr$tip.label)
+    tr$edge.length <- rexp(length(tr$edge.length), rate=1000)
+    tr_len <- PCMTreeNodeTimes(tr, tipsOnly = TRUE)
+    eTips <- which(tr$edge[,2]<=N)
+    eTips <- eTips[order(tr$edge[,2][eTips])]
+    # extend branches pointing to tips to make the tree ultrametric 
+    # (needed to include Rphylopars in the test, since it doesn't support OU on non-ultrametric trees)
+    tr$edge.length[eTips] <-  tr$edge.length[eTips] + max(tr_len) - tr_len
+    tr$edge.length <- tr$edge.length / 10
+  }
+  tr
+})]
+
+# trees[, tree:=lapply(1:.N, function(i) {
+#   
+#   tr <- tree[[i]]
+#   tr$edge.length <- tr$edge.length * 10
+# })]
+
+save(trees, file="Trees.RData")
+```
+
+
+```{r load-trees, eval=FALSE}
+load("./Trees.RData")
+trees <- trees[, list(N, p, pSymb, id, treeshape, tree, colless, collessNorm)][1:16]
+#save(trees, file = "./Trees.RData")
+```
+
+```{r measure-depth, eval=FALSE}
+trees[, num.prunes:=sapply(tree, function(.) {
+  ppt <- SPLITT:::OrderedTree1$new(.)
+  ppt$num_parallel_ranges_prune
+})]
+trees[, num.levels:=sapply(tree, function(.) {
+  ppt <- SPLITT:::OrderedTree1$new(.)
+  ppt$num_levels
+})]
+trees[, num.nodes:=sapply(tree, function(.) {
+  ppt <- SPLITT:::OrderedTree1$new(.)
+  ppt$num_nodes
+})]
+```
+
+```{r randomModel}
+randomOUModel <- function(k, tree) {
+  model <- PCM("OU__posdiagH__posdiagSigmae_x", k = k)
+  metaI <- PCMInfo(NULL, tree = tree, model = model)
+      
+  while(TRUE) {
+    par <- PCMRandomVecParams(model, 
+                              argsPCMLowerBound = list(lowerBoundValue = 0, lowerBoundValuePositiveDiag = 0),
+                              argsPCMUpperBound = list(upperBoundValue = 0.1, upperBoundValuePositiveDiag = 1))
+    PCMSetOrGetVecParams(model, par)
+    
+    
+    cond <- PCMCond(tree = tree, model = model, metaI = metaI)
+    Vtmin <- cond$V(min(tree$edge.length), which.min(tree$edge.length), metaI)
+    eigtmin <- eigen(Vtmin)
+    eigtmin <- Re(eigtmin$values)
+    Vtmax <- cond$V(max(tree$edge.length), which.max(tree$edge.length), metaI)
+    eigtmax <- eigen(Vtmax)
+    eigtmax <- Re(eigtmax$values)
+    if(all(eigtmin > 0) && all(eigtmax > 0) && 
+       min(eigtmin)/max(eigtmin) > 1e-2 && 
+       min(eigtmax)/max(eigtmax) > 1e-2) {
+      break
+    } else {
+      cat(":", round(det(Vtmin), 2), ", ", round(det(Vtmax), 2), ":")
+    }
+  }
+  model
+}
+```
+
+
+```{r generate-models}
+set.seed(10)
+
+cat("Generating models...\n")
+
+
+trees2 <- rbindlist(
+  lapply(c(1,4,8,16), function(k) {
+    
+    data <- copy(trees)
+    data[, num_traits:=k]
+    
+    data[, model:=lapply(1:.N, function(i) {
+      if(!is.null(tree[[i]])) {
+        cat("Generating model for N=", N[i], ", k=",k,"; p=",p[i], "\n")
+        model <- randomOUModel(k, tree[[i]])
+        print(model)
+        model
+      } else {
+        NULL
+      }
+    })]
+   data
+  })
+) 
+
+trees <- copy(trees2)
+```
+
+```{r generate-traits}
+trees[, X:=lapply(1:.N, function(i) {
+  if(!is.null(tree[[i]])) {
+    k <- num_traits[i]
+    model <- model[[i]]
+    
+    cat("Generating data for N=", N[i], ", k=",k,"; p=",p[i], "\n")
+    PCMSim(tree[[i]], model, model$X0)  
+  } else {
+    NULL
+  }
+})]
+    
+save(trees, file="./Trees.RData")
+```
+
