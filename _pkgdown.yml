@@ -28,6 +28,7 @@ articles:
 - title: All vignettes
   desc: ~
   contents:
+  - '`SPLITT`'
   - '`SPLITTTraversalSpecification`'
   - '`SPLITTRunTraversal`'
   - '`SPLITTOverview`'

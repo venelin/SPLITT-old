@@ -14,11 +14,11 @@
 
 \link{SPLITT}
 
-Other \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods: \code{\link{SPLITT::OrderedTree::OrderedTree}},
+Other public methods in SPLITT::OrderedTree: \code{\link{SPLITT::OrderedTree::OrderedTree}},
   \code{\link{SPLITT::OrderedTree::RangeIdPruneNode}},
   \code{\link{SPLITT::OrderedTree::num_levels}},
   \code{\link{SPLITT::OrderedTree::num_parallel_ranges_prune}},
   \code{\link{SPLITT::OrderedTree::ranges_id_prune}},
   \code{\link{SPLITT::OrderedTree::ranges_id_visit}}
 }
-\concept{\code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods}
+\concept{public methods in SPLITT::OrderedTree}

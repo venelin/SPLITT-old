@@ -15,7 +15,7 @@
 
 \link{SPLITT}
 
-Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree::FindChildren}},
+Other public methods in SPLITT::Tree: \code{\link{SPLITT::Tree::FindChildren}},
   \code{\link{SPLITT::Tree::FindIdOfNode}},
   \code{\link{SPLITT::Tree::FindIdOfParent}},
   \code{\link{SPLITT::Tree::FindNodeWithId}},
@@ -29,4 +29,4 @@ Other \code{\link[=SPLITT::Tree]{Tree}} public methods: \code{\link{SPLITT::Tree
   \code{\link{SPLITT::Tree::num_nodes}},
   \code{\link{SPLITT::Tree::num_tips}}
 }
-\concept{\code{\link[=SPLITT::Tree]{Tree}} public methods}
+\concept{public methods in SPLITT::Tree}

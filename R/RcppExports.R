@@ -19,8 +19,8 @@
 #'
 #' @section Global constants:
 #' \describe{
-#' \item{\link[=SPLITT::G_PI]{G_NA_UINT}}{}
-#' \item{\link[=SPLITT::G_PI]{G_EMPTY_UVEC}}{}
+#' \item{\link[=SPLITT::G_NA_UINT]{G_NA_UINT}}{}
+#' \item{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}}{}
 #' \item{\link[=SPLITT::G_PI]{G_PI}}{}
 #' }
 #' @section Global functions:
@@ -433,7 +433,7 @@ NULL
 #' lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 #' for a tree without branch lengths (i.e. only a topology).
 #'
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -447,7 +447,7 @@ NULL
 #' @return a \code{\link[=SPLITT::uint]{uint}}: the numbef of nodes in the tree, 
 #' including tips, internal nodes and the root.
 #' 
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -459,7 +459,7 @@ NULL
 #' \code{\link[=SPLITT::uint]{uint} \link[=SPLITT::Tree]{Tree}::num_nodes() const;}
 #' 
 #' @return \code{\link[=SPLITT::uint]{uint}}, the number of tips in the tree.
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -471,7 +471,7 @@ NULL
 #' \code{bool HasBranchLengths() const;}
 #' 
 #' @return \code{bool}, \code{true} if the tree has branch lengths.
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -486,7 +486,7 @@ NULL
 #' 
 #' @return \code{\link[=SPLITT::Tree::LengthType]{LengthType}}; the length associated with the branch ending at node \code{i}.
 #'
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -498,7 +498,7 @@ NULL
 #' \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const& BranchLengths() const;}
 #' @return \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}; 
 #'   a const reference to the internally stored vector of branch lengths, in the order of the end-node ids.
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -511,7 +511,7 @@ NULL
 #' @param i \code{\link[=SPLITT::uint]{uint}}; the id of the end-node of the branch;
 #' @param value \code{\link[=SPLITT::Tree::LengthType]{LengthType} const&}; the new value to set.
 #' @return \code{void}
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -550,7 +550,7 @@ NULL
 #' length M-1, where M is the number of nodes in the tree.}
 #' }
 #' @return \code{void}
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -564,7 +564,7 @@ NULL
 #' @param id \code{\link[=SPLITT::uint]{uint}} the id of the node (should be 
 #' between 0 and M-1, where M is the number of nodes in hte tree).
 #' 
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -579,7 +579,7 @@ NULL
 #' 
 #' @return an \code{\link[=SPLITT::uint]{uint}} from 0 to M-1, where M is the 
 #' number of nodes in the tree.
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -594,7 +594,7 @@ NULL
 #' @return an \code{\link[=SPLITT::uint]{uint}} from 0 to M-1, where M is the 
 #' number of nodes in the tree.
 #'   
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -611,7 +611,7 @@ NULL
 #'   \code{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}} is returned. The returned 
 #'   vector reference is valid as long as the tree object is not destroyed.
 #'   
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -627,7 +627,7 @@ NULL
 #' @return \code{\link[=SPLITT::uvec]{uvec}}; a vector of positions in \code{nodes} in the order of 
 #'   their internally stored ids.
 #'   
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -652,7 +652,7 @@ NULL
 #' the element-type of the returned vector can be specified as a template argument 
 #' or dedcued from the type of \code{NA}.
 #' 
-#' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+#' @family public methods in SPLITT::Tree 
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -749,7 +749,7 @@ NULL
 #' lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 #' for a tree without branch lengths (i.e. only a topology).
 #'
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -771,7 +771,7 @@ NULL
 #' and the parallelization of the \code{VisitNode} operation cannot improve the 
 #' speed. 
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}} 
 #'  \code{\link[=SPLITT::OrderedTree]{OrderedTree}}
 #'  \code{\link[=SPLITT::OrderedTree::num_parallel_ranges_prune]{num_parallel_ranges_prune}}
@@ -798,7 +798,7 @@ NULL
 #' order of O(N), and the parallelization of the \code{VisitNode} operation
 #' cannot improve the speed. 
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 #' @seealso \link{SPLITT} 
 NULL
@@ -811,7 +811,7 @@ NULL
 #' \code{
 #' \link[=SPLITT::uvec]{uvec} const& ranges_id_visit() const;}
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 #' @seealso \link{SPLITT} 
 NULL
@@ -825,7 +825,7 @@ NULL
 #' @description 
 #' \href{http://en.cppreference.com/w/cpp/container/array}{\code{std::array}}\code{<\link[=SPLITT::uint]{uint}, 2>}\code{ RangeIdVisitNode(\link[=SPLITT::uint]{uint} i_level) const;}
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 #' @seealso \link{SPLITT} 
 NULL
@@ -838,7 +838,7 @@ NULL
 #' \code{
 #' \link[=SPLITT::uvec]{uvec} const& ranges_id_prune() const;}
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 #' @seealso \link{SPLITT} 
 NULL
@@ -852,7 +852,7 @@ NULL
 #' @description 
 #' \href{http://en.cppreference.com/w/cpp/container/array}{\code{std::array}}\code{<\link[=SPLITT::uint]{uint}, 2>}\code{ RangeIdPruneNode(\link[=SPLITT::uint]{uint} i_step) const;}
 #' 
-#' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+#' @family public methods in SPLITT::OrderedTree
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 #' @seealso \link{SPLITT} 
 NULL

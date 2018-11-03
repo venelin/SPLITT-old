@@ -15,7 +15,7 @@ sigmae2 <- 1
 
 tree <- rtree(N)
 
-g <- rTraitCont(tree, model = "OU", root.value = x0, 
+g <- rTraitCont(tree, model = "OU", root.value = x0,
                 alpha = alpha, sigma = sqrt(sigma2),
                 ancestor = FALSE)
 
@@ -23,9 +23,6 @@ x <- g + rnorm(n = N, mean = 0, sd = sqrt(sigmae2))
 
 test_that(
   "PMMLogLik == PMMLogLikCpp",
-  expect_equal(PMMLogLik(x, tree, x0, sigma2, sigmae2), 
+  expect_equal(PMMLogLik(x, tree, x0, sigma2, sigmae2),
                PMMLogLikCpp(x, tree, x0, sigma2, sigmae2))
 )
-
-
-

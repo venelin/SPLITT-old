@@ -22,8 +22,8 @@ All basic types, functions and classes defined in SPLITT.
 \section{Global constants}{
 
 \describe{
-\item{\link[=SPLITT::G_PI]{G_NA_UINT}}{}
-\item{\link[=SPLITT::G_PI]{G_EMPTY_UVEC}}{}
+\item{\link[=SPLITT::G_NA_UINT]{G_NA_UINT}}{}
+\item{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}}{}
 \item{\link[=SPLITT::G_PI]{G_PI}}{}
 }
 }
