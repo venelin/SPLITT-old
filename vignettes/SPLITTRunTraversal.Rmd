@@ -21,15 +21,205 @@ bibliography: REFERENCES.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 # The `TraversalTask` template class
+Once defined, the `TraversalSpecification`-class is passed as a template argument to a `TraversalTask`. This is a template class, which is already written, so the only thing we do is to specify it for *our* `TraversalTask` using a `typedef` like the following one:
 
 
 ```{Rcpp, eval=FALSE}
 typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
 ```
 
+The above code demonstrates one of the powers of C++ templates, namely to define complex types with a single line of code. To understand it, we could write an equivalent but more explicit code:
+
+```{Rcpp, eval=FALSE}
+// use OrderedTree with string-nodes and double branch lengths
+typedef OrderedTree<std::string, double> MyTreeType;
+
+// concretise our TraversalSpecification-class
+typedef AbcPMM<MyTreeType> MyTraversalSpecificationType;
+
+// and the TraversalTask is:
+typedef TraversalTask< MyTraversalSpecificationType > ParallelPruningAbcPMM;
+```
+
 
 # An example console application
+
+The next step is to write a program that executes our `TraversalTask`. For the `PMM`-example, we will write a program that reads a tree and trait-data from the standard input, than executes a loop reading model parameters from the standard input and calculating log-likelihood of the PMM for these parameters and the input tree and data. Let's go steb by step through the code for this program.
+
+## Reading the input tree
+
+We specify the input tree with the following format: 
+
+* The first line of input contains two integers: the number of nodes, $M$, and the number of tips, $N$;
+* Each one of the next $M-1$ lines specifies one branch in the form of two words and a real number separated by spaces. The first word is the name of a daughter node, the second word is the name of its parent node, and the real number is the branch length. 
+
+Here is an example of an input:
+
+```{bash, eval=FALSE}
+9 5
+bonobo ancestor2 4.1
+coalla ancestor3 5
+gorilla ancestor1 2.8
+dolfin ancestor1 3
+human ancestor3 4
+ancestor1 ancestor2 4.2
+ancestor3 root 6
+ancestor2 root 4.5
+```
+
+Here is the C++ code for reading the above format:
+```{Rcpp, eval=FALSE}
+using namespace std;
+
+int main(int argc, char* argv[]) {
+
+  cout<<"Hello from the SPLITT PMM example!"<<endl;
+  cout<<"Reading the input tree..."<<endl;
+  
+  // Read the number of nodes and tips
+  uint M, N;
+  cin>>M>>N;
+  
+  // read the tree
+  vector<string> daughters(M-1);
+  vector<string> parents(M-1);
+  vec t(M-1);
+  
+  
+  for(int i=0; i < M-1; i++) {
+    cin>>daughters[i]>>parents[i]>>t[i];
+  }
+  
+  // Other code discussed later on...
+  return 0
+}
+
+```
+
+### A note on other tree formats
+
+At present SPLITT does not provide functions for parsing different tree formats. I did not need this functionality, because I was using another software to read my input trees and it was very easy to use that software to convert these trees to a list of branches as above. In particular, I've used the R-package ape, which can parse many tree-formats. For example, here is how one can specify the above example tree in newick format and parse it using ape:
+
+
+```{R}
+library(ape)
+newick_text <- "((bonobo:4.1,(gorilla:5,dolfin:3)ancestor1:4.2)ancestor2:4.5,(human:4,coalla:5)ancestor3:6)root;"
+tree <- read.tree(text = newick_text)
+```
+
+Then, one can write the following R-function to print the branches of the tree as above:
+```{R}
+PrintBranches <- function(phy) {
+  M <- length(phy$edge.length) + 1
+  N <- length(phy$tip.label)
+  cat(M, " ", N, "\n")
+  if(!is.null(phy$node.label)) {
+    labs <- c(phy$tip.label, phy$node.label)
+  } else {
+    labs <- c(phy$tip.label, "root", paste0("ancestor", 1:(M - N - 1)))
+  }
+  for(i in 1:(M - 1)) {
+    cat(labs[phy$edge[i, 2]], " ", labs[phy$edge[i, 1]], " ", phy$edge.length[i], "\n")
+  }
+}
+
+PrintBranches(tree)
+```
+
+Great that you are still reading! As a visual reward, here is how the example tree looks like (note that this tree does not reflect the true ancestral relationship between the mentioned species):
+
+```{R, fig.width=6, fig.height=5.5}
+plot(tree)
+edgelabels(text = tree$edge.length)
+nodelabels(text=tree$node.label)
+```
+
+## Reading the trait data
+```{Rcpp, eval=FALSE}
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  // previously discussed code
+  
+  cout<<"Reading the trait data..."<<endl;
+  vector<string> tip_names(N);
+  vec x(N);
+  
+  for(int i = 0; i < N; i++) {
+    cin>>tip_names[i]>>x[i];
+  }
+  // other code discussed later
+  return 0;
+}
+```
+
+Creating the trait-data object:
+```{Rcpp, eval=FALSE}
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  // previously discussed code
+  
+  // create the data-object
+  typename ParallelPruningAbcPMM::DataType data(tip_names, x);
+  
+  // other code discussed later
+  return 0;
+}
+```
+
+## Creating the `TraversalTask` object
+
+```{Rcpp, eval=FALSE}
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  // previously discussed code
+  
+  // Create the TraversalTask object: this will create the OrderedTree and the 
+  // AbcPMM objects in the memory.
+  ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
+  // other code discussed later
+  return 0;
+}
+```
+
+## The main loop
+```{Rcpp, eval=FALSE}
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  // previously discussed code
+    
+  // model parameters
+  double gM, sigma, sigmae;
+  vec param(2); 
+  
+  cout<<"Main loop..."<<endl;
+  // run this loop as long as parameters can be read from the standard input
+  while( cin>>gM>>sigma>>sigmae ) {
+    param[0] = sigma*sigma;
+    param[1] = sigmae*sigmae;
+  
+    cout<<"  Calculating a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+    vec abc = pruningTask.TraverseTree(param, 0);
+    cout<<"  a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
+    
+    double LL = abc[0]*gM*gM + abc[1]*gM + abc[2];
+    cout<<"  LL(gM="<<gM<<", sigma="<<sigma<<", sigmae="<<sigmae<<"): "<<LL<<endl;
+  } 
+  cout<<"Main loop done."<<endl;
+
+  std::cout<<"Good bye!"<<std::endl;
+  return 0;
+}
+```
+
+## The entire code
+
+
 ```{Rcpp, eval=FALSE}
 // will be using std::string, std::vector, std::cin and std::cout quite a lot.
 using namespace std;
@@ -55,9 +245,6 @@ int main(int argc, char* argv[]) {
   
   for(int i=0; i < M-1; i++) {
     cin>>daughters[i]>>parents[i]>>t[i];
-    if(verbose) {
-      cout<<daughters[i]<<" "<<parents[i]<<" "<<t[i]<<endl;
-    }
   }
   
   cout<<"Reading the trait data..."<<endl;
@@ -66,9 +253,6 @@ int main(int argc, char* argv[]) {
   
   for(int i = 0; i < N; i++) {
     cin>>tip_names[i]>>x[i];
-    if(verbose) {
-      cout<<tip_names[i]<<" "<<x[i]<<endl;
-    }
   }
   
   // create the data-object
@@ -77,18 +261,6 @@ int main(int argc, char* argv[]) {
   // Create the TraversalTask object: this will create the OrderedTree and the 
   // AbcPMM objects in the memory.
   ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-  
-  // The tree objects reorders the nodes, so that the tips are indexed from
-  // 0 to N-1, the internal nodes are from N to M-2, and the root is M-1.
-  if(verbose) {
-    cout<<"Node-name order in the OrderedTree:"<<endl;
-    for(int i = 0; i < pruningTask.tree().num_nodes(); i++) {
-      cout<<i<<". "<<pruningTask.tree().FindNodeWithId(i)<<endl;
-    } 
-  }
-  
-  // Check if OPENMP is enabled:
-  std::cout<<"OpenMP-version: "<<pruningTask.algorithm().VersionOPENMP()<<std::endl;
   
   // model parameters
   double gM, sigma, sigmae;
@@ -108,8 +280,8 @@ int main(int argc, char* argv[]) {
     cout<<"  LL(gM="<<gM<<", sigma="<<sigma<<", sigmae="<<sigmae<<"): "<<LL<<endl;
   } 
   cout<<"Main loop done."<<endl;
-  // Exit politely
-  std::cout<<"Good bye!"<<std::endl;
+
+    std::cout<<"Good bye!"<<std::endl;
   return 0;
 }
 ```

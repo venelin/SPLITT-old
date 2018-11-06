@@ -24,7 +24,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # A note on generic programming
 
-SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as "generic programming". Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading [this tutorial](http://www.cplusplus.com/doc/oldtutorial/templates/) in case you are not familiar with the topic. 
+SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as "generic programming". Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading [this tutorial](http://www.cplusplus.com/doc/oldtutorial/templates/) in case you are not familiar with templates in C++. 
+
+# Traversal specifications
+
+To use SPLITT, we write a `TraversalSpecification`-class. Briefly, this is a C++ class implementing several members, such as typedefs and methods with fixed names and argument types (more details to come later on). Once defined this class is passed as a template argument to a `TraversalTask` class and a `TraversalAlgorithm` class. In this way, the C++ compiler is told to generate binary code for the methods of the `TraversalTask` and `TraversalAlgorithm` classes that is specific for *our* `TraversalSpecification`. 
 
 # The PMM log-likelihood example 
 
@@ -34,7 +38,7 @@ This document is a step-by-step guide based on the example of the PMM log-likeli
 
 We apply post-order traversal to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$. This procedure is illustrated on Fig. 1 in [the article](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
-# What is a TraversalSpecification class?
+# What is inside a TraversalSpecification class?
 
 A `TraversalSpecification` class is a C++ class that must have a number of members (i.e. `typedefs` and methods), in order to be applicable by SPLITT during a tree traversal procedure. Optionally, the class can inherit from the class `SPLITT::TraversalSpecification`. This, however is not required and not checked during compilation. The following C++ code shows how the class is defined for the PMM-example:
 
@@ -416,6 +420,12 @@ public:
   };
 };
 ```
-    
+  
+# A note on virtual methods
+
+*Why doesn't SPLITT use virtual methods for the node-traversal operations?*
+
+I have been asked this question mostly by programmers in Java or other languages who are not familiar with C++. In one word, the answer is *performance*. The power of virtual methods is that, at runtime, the correct method definition is called even if the exact class containing this definition was not known during the compilation. This can be very useful, e.g. in cases where the logical workflow of the program depends on the user input during the execution. Technically, this is accomplished through *runtime dynamic binding* as opposed to the *compile-time static binding* used in templates. The drawback of *dynamic binding* is that it disables some tricks done by the compiler to make our code faster. Among these tricks are *method inlining* and *vectorized operations* (if the methods is called within a loop). This is why, in designing SPLITT, I preferred using static binding whenever possible and restricting/delay the use of virtual methods only for the situations where this is really needed. Still, it is always possible to have the node-traversal operations call other *virtual* methods to achieve this form of polymorphism. 
+  
 # Next steps
 With that, we finished the definition of the `AbcPMM` `TraversalSpecification`-class. The next step is to see how this specification can be applied during a traversal on some example input data. This is described in the  [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.

@@ -104,7 +104,12 @@ bibliography: REFERENCES.bib
 <div id="a-note-on-generic-programming" class="section level1">
 <h1 class="hasAnchor">
 <a href="#a-note-on-generic-programming" class="anchor"></a>A note on generic programming</h1>
-<p>SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as “generic programming”. Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading <a href="http://www.cplusplus.com/doc/oldtutorial/templates/">this tutorial</a> in case you are not familiar with the topic.</p>
+<p>SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as “generic programming”. Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading <a href="http://www.cplusplus.com/doc/oldtutorial/templates/">this tutorial</a> in case you are not familiar with templates in C++.</p>
+</div>
+<div id="traversal-specifications" class="section level1">
+<h1 class="hasAnchor">
+<a href="#traversal-specifications" class="anchor"></a>Traversal specifications</h1>
+<p>To use SPLITT, we write a <code>TraversalSpecification</code>-class. Briefly, this is a C++ class implementing several members, such as typedefs and methods with fixed names and argument types (more details to come later on). Once defined this class is passed as a template argument to a <code>TraversalTask</code> class and a <code>TraversalAlgorithm</code> class. In this way, the C++ compiler is told to generate binary code for the methods of the <code>TraversalTask</code> and <code>TraversalAlgorithm</code> classes that is specific for <em>our</em> <code>TraversalSpecification</code>.</p>
 </div>
 <div id="the-pmm-log-likelihood-example" class="section level1">
 <h1 class="hasAnchor">
@@ -113,9 +118,9 @@ bibliography: REFERENCES.bib
 <p><span class="math display">\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]</span></p>
 <p>We apply post-order traversal to calculate the coefficients <span class="math inline">\(a_{M}\)</span>, <span class="math inline">\(b_{M}\)</span> and <span class="math inline">\(c_{M}\)</span>. This procedure is illustrated on Fig. 1 in <a href="https://www.biorxiv.org/content/early/2018/10/29/235739">the article</a>.</p>
 </div>
-<div id="what-is-a-traversalspecification-class" class="section level1">
+<div id="what-is-inside-a-traversalspecification-class" class="section level1">
 <h1 class="hasAnchor">
-<a href="#what-is-a-traversalspecification-class" class="anchor"></a>What is a TraversalSpecification class?</h1>
+<a href="#what-is-inside-a-traversalspecification-class" class="anchor"></a>What is inside a TraversalSpecification class?</h1>
 <p>A <code>TraversalSpecification</code> class is a C++ class that must have a number of members (i.e. <code>typedefs</code> and methods), in order to be applicable by SPLITT during a tree traversal procedure. Optionally, the class can inherit from the class <code>SPLITT::TraversalSpecification</code>. This, however is not required and not checked during compilation. The following C++ code shows how the class is defined for the PMM-example:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.</span>
 <span class="kw">template</span>&lt;<span class="kw">class</span> Tree&gt;
@@ -475,6 +480,12 @@ bibliography: REFERENCES.bib
 </div>
 </div>
 </div>
+<div id="a-note-on-virtual-methods" class="section level1">
+<h1 class="hasAnchor">
+<a href="#a-note-on-virtual-methods" class="anchor"></a>A note on virtual methods</h1>
+<p><em>Why doesn’t SPLITT use virtual methods for the node-traversal operations?</em></p>
+<p>I have been asked this question mostly by programmers in Java or other languages who are not familiar with C++. In one word, the answer is <em>performance</em>. The power of virtual methods is that, at runtime, the correct method definition is called even if the exact class containing this definition was not known during the compilation. This can be very useful, e.g. in cases where the logical workflow of the program depends on the user input during the execution. Technically, this is accomplished through <em>runtime dynamic binding</em> as opposed to the <em>compile-time static binding</em> used in templates. The drawback of <em>dynamic binding</em> is that it disables some tricks done by the compiler to make our code faster. Among these tricks are <em>method inlining</em> and <em>vectorized operations</em> (if the methods is called within a loop). This is why, in designing SPLITT, I preferred using static binding whenever possible and restricting/delay the use of virtual methods only for the situations where this is really needed. Still, it is always possible to have the node-traversal operations call other <em>virtual</em> methods to achieve this form of polymorphism.</p>
+</div>
 <div id="next-steps" class="section level1">
 <h1 class="hasAnchor">
 <a href="#next-steps" class="anchor"></a>Next steps</h1>
@@ -488,13 +499,15 @@ bibliography: REFERENCES.bib
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#a-note-on-generic-programming">A note on generic programming</a></li>
+      <li><a href="#traversal-specifications">Traversal specifications</a></li>
       <li><a href="#the-pmm-log-likelihood-example">The PMM log-likelihood example</a></li>
       <li>
-<a href="#what-is-a-traversalspecification-class">What is a TraversalSpecification class?</a><ul class="nav nav-pills nav-stacked">
+<a href="#what-is-inside-a-traversalspecification-class">What is inside a TraversalSpecification class?</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#members-inherited-from-the-base-class-splitttraversalspecification">Members inherited from the base-class (<code>SPLITT::TraversalSpecification</code>)</a></li>
       <li><a href="#members-defined-in-the-traversalspecification-class">Members defined in the <code>TraversalSpecification</code>-class</a></li>
       </ul>
 </li>
+      <li><a href="#a-note-on-virtual-methods">A note on virtual methods</a></li>
       <li><a href="#next-steps">Next steps</a></li>
       </ul>
 </div>

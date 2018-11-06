@@ -104,11 +104,184 @@ bibliography: REFERENCES.bib
 <div id="the-traversaltask-template-class" class="section level1">
 <h1 class="hasAnchor">
 <a href="#the-traversaltask-template-class" class="anchor"></a>The <code>TraversalTask</code> template class</h1>
+<p>Once defined, the <code>TraversalSpecification</code>-class is passed as a template argument to a <code>TraversalTask</code>. This is a template class, which is already written, so the only thing we do is to specify it for <em>our</em> <code>TraversalTask</code> using a <code>typedef</code> like the following one:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typedef</span> TraversalTask&lt; AbcPMM&lt;OrderedTree&lt;<span class="bu">std::</span>string, <span class="dt">double</span>&gt;&gt; &gt; ParallelPruningAbcPMM;</code></pre></div>
+<p>The above code demonstrates one of the powers of C++ templates, namely to define complex types with a single line of code. To understand it, we could write an equivalent but more explicit code:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// use OrderedTree with string-nodes and double branch lengths</span>
+<span class="kw">typedef</span> OrderedTree&lt;<span class="bu">std::</span>string, <span class="dt">double</span>&gt; MyTreeType;
+
+<span class="co">// concretise our TraversalSpecification-class</span>
+<span class="kw">typedef</span> AbcPMM&lt;MyTreeType&gt; MyTraversalSpecificationType;
+
+<span class="co">// and the TraversalTask is:</span>
+<span class="kw">typedef</span> TraversalTask&lt; MyTraversalSpecificationType &gt; ParallelPruningAbcPMM;</code></pre></div>
 </div>
 <div id="an-example-console-application" class="section level1">
 <h1 class="hasAnchor">
 <a href="#an-example-console-application" class="anchor"></a>An example console application</h1>
+<p>The next step is to write a program that executes our <code>TraversalTask</code>. For the <code>PMM</code>-example, we will write a program that reads a tree and trait-data from the standard input, than executes a loop reading model parameters from the standard input and calculating log-likelihood of the PMM for these parameters and the input tree and data. Let’s go steb by step through the code for this program.</p>
+<div id="reading-the-input-tree" class="section level2">
+<h2 class="hasAnchor">
+<a href="#reading-the-input-tree" class="anchor"></a>Reading the input tree</h2>
+<p>We specify the input tree with the following format:</p>
+<ul>
+<li>The first line of input contains two integers: the number of nodes, <span class="math inline">\(M\)</span>, and the number of tips, <span class="math inline">\(N\)</span>;</li>
+<li>Each one of the next <span class="math inline">\(M-1\)</span> lines specifies one branch in the form of two words and a real number separated by spaces. The first word is the name of a daughter node, the second word is the name of its parent node, and the real number is the branch length.</li>
+</ul>
+<p>Here is an example of an input:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">9</span> 5
+<span class="ex">bonobo</span> ancestor2 4.1
+<span class="ex">coalla</span> ancestor3 5
+<span class="ex">gorilla</span> ancestor1 2.8
+<span class="ex">dolfin</span> ancestor1 3
+<span class="ex">human</span> ancestor3 4
+<span class="ex">ancestor1</span> ancestor2 4.2
+<span class="ex">ancestor3</span> root 6
+<span class="ex">ancestor2</span> root 4.5</code></pre></div>
+<p>Here is the C++ code for reading the above format:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+
+<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
+
+  cout&lt;&lt;<span class="st">"Hello from the SPLITT PMM example!"</span>&lt;&lt;endl;
+  cout&lt;&lt;<span class="st">"Reading the input tree..."</span>&lt;&lt;endl;
+  
+  <span class="co">// Read the number of nodes and tips</span>
+  <span class="ex">uint</span> M, N;
+  cin&gt;&gt;M&gt;&gt;N;
+  
+  <span class="co">// read the tree</span>
+  vector&lt;string&gt; daughters(M<span class="dv">-1</span>);
+  vector&lt;string&gt; parents(M<span class="dv">-1</span>);
+  vec t(M<span class="dv">-1</span>);
+  
+  
+  <span class="cf">for</span>(<span class="dt">int</span> i=<span class="dv">0</span>; i &lt; M<span class="dv">-1</span>; i++) {
+    cin&gt;&gt;daughters[i]&gt;&gt;parents[i]&gt;&gt;t[i];
+  }
+  
+  <span class="co">// Other code discussed later on...</span>
+  <span class="cf">return</span> <span class="dv">0</span>
+}</code></pre></div>
+<div id="a-note-on-other-tree-formats" class="section level3">
+<h3 class="hasAnchor">
+<a href="#a-note-on-other-tree-formats" class="anchor"></a>A note on other tree formats</h3>
+<p>At present SPLITT does not provide functions for parsing different tree formats. I did not need this functionality, because I was using another software to read my input trees and it was very easy to use that software to convert these trees to a list of branches as above. In particular, I’ve used the R-package ape, which can parse many tree-formats. For example, here is how one can specify the above example tree in newick format and parse it using ape:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
+newick_text &lt;-<span class="st"> "((bonobo:4.1,(gorilla:5,dolfin:3)ancestor1:4.2)ancestor2:4.5,(human:4,coalla:5)ancestor3:6)root;"</span>
+tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text =</span> newick_text)</code></pre></div>
+<p>Then, one can write the following R-function to print the branches of the tree as above:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">PrintBranches &lt;-<span class="st"> </span><span class="cf">function</span>(phy) {
+  M &lt;-<span class="st"> </span><span class="kw">length</span>(phy<span class="op">$</span>edge.length) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+  N &lt;-<span class="st"> </span><span class="kw">length</span>(phy<span class="op">$</span>tip.label)
+  <span class="kw">cat</span>(M, <span class="st">" "</span>, N, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)
+  <span class="cf">if</span>(<span class="op">!</span><span class="kw">is.null</span>(phy<span class="op">$</span>node.label)) {
+    labs &lt;-<span class="st"> </span><span class="kw">c</span>(phy<span class="op">$</span>tip.label, phy<span class="op">$</span>node.label)
+  } <span class="cf">else</span> {
+    labs &lt;-<span class="st"> </span><span class="kw">c</span>(phy<span class="op">$</span>tip.label, <span class="st">"root"</span>, <span class="kw">paste0</span>(<span class="st">"ancestor"</span>, <span class="dv">1</span><span class="op">:</span>(M <span class="op">-</span><span class="st"> </span>N <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)))
+  }
+  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(M <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)) {
+    <span class="kw">cat</span>(labs[phy<span class="op">$</span>edge[i, <span class="dv">2</span>]], <span class="st">" "</span>, labs[phy<span class="op">$</span>edge[i, <span class="dv">1</span>]], <span class="st">" "</span>, phy<span class="op">$</span>edge.length[i], <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)
+  }
+}
+
+<span class="kw">PrintBranches</span>(tree)</code></pre></div>
+<pre><code>## 9   5 
+## ancestor2   root   4.5 
+## bonobo   ancestor2   4.1 
+## ancestor1   ancestor2   4.2 
+## gorilla   ancestor1   5 
+## dolfin   ancestor1   3 
+## ancestor3   root   6 
+## human   ancestor3   4 
+## coalla   ancestor3   5</code></pre>
+<p>Great that you are still reading! As a visual reward, here is how the example tree looks like (note that this tree does not reflect the true ancestral relationship between the mentioned species):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(tree)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/nodelabels">edgelabels</a></span>(<span class="dt">text =</span> tree<span class="op">$</span>edge.length)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/nodelabels">nodelabels</a></span>(<span class="dt">text=</span>tree<span class="op">$</span>node.label)</code></pre></div>
+<p><img src="SPLITTRunTraversal_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
+</div>
+</div>
+<div id="reading-the-trait-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#reading-the-trait-data" class="anchor"></a>Reading the trait data</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+
+<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
+  <span class="co">// previously discussed code</span>
+  
+  cout&lt;&lt;<span class="st">"Reading the trait data..."</span>&lt;&lt;endl;
+  vector&lt;string&gt; tip_names(N);
+  vec x(N);
+  
+  <span class="cf">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {
+    cin&gt;&gt;tip_names[i]&gt;&gt;x[i];
+  }
+  <span class="co">// other code discussed later</span>
+  <span class="cf">return</span> <span class="dv">0</span>;
+}</code></pre></div>
+<p>Creating the trait-data object:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+
+<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
+  <span class="co">// previously discussed code</span>
+  
+  <span class="co">// create the data-object</span>
+  <span class="kw">typename</span> ParallelPruningAbcPMM::DataType data(tip_names, x);
+  
+  <span class="co">// other code discussed later</span>
+  <span class="cf">return</span> <span class="dv">0</span>;
+}</code></pre></div>
+</div>
+<div id="creating-the-traversaltask-object" class="section level2">
+<h2 class="hasAnchor">
+<a href="#creating-the-traversaltask-object" class="anchor"></a>Creating the <code>TraversalTask</code> object</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+
+<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
+  <span class="co">// previously discussed code</span>
+  
+  <span class="co">// Create the TraversalTask object: this will create the OrderedTree and the </span>
+  <span class="co">// AbcPMM objects in the memory.</span>
+  ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
+  <span class="co">// other code discussed later</span>
+  <span class="cf">return</span> <span class="dv">0</span>;
+}</code></pre></div>
+</div>
+<div id="the-main-loop" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-main-loop" class="anchor"></a>The main loop</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+
+<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
+  <span class="co">// previously discussed code</span>
+    
+  <span class="co">// model parameters</span>
+  <span class="dt">double</span> gM, sigma, sigmae;
+  vec param(<span class="dv">2</span>); 
+  
+  cout&lt;&lt;<span class="st">"Main loop..."</span>&lt;&lt;endl;
+  <span class="co">// run this loop as long as parameters can be read from the standard input</span>
+  <span class="cf">while</span>( cin&gt;&gt;gM&gt;&gt;sigma&gt;&gt;sigmae ) {
+    param[<span class="dv">0</span>] = sigma*sigma;
+    param[<span class="dv">1</span>] = sigmae*sigmae;
+  
+    cout&lt;&lt;<span class="st">"  Calculating a, b, c at the root for sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">" and sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="bu">std::</span>endl;
+    vec abc = pruningTask.TraverseTree(param, <span class="dv">0</span>);
+    cout&lt;&lt;<span class="st">"  a="</span>&lt;&lt;abc[<span class="dv">0</span>]&lt;&lt;<span class="st">", b="</span>&lt;&lt;abc[<span class="dv">1</span>]&lt;&lt;<span class="st">", c="</span>&lt;&lt;abc[<span class="dv">2</span>]&lt;&lt;<span class="bu">std::</span>endl;
+    
+    <span class="dt">double</span> LL = abc[<span class="dv">0</span>]*gM*gM + abc[<span class="dv">1</span>]*gM + abc[<span class="dv">2</span>];
+    cout&lt;&lt;<span class="st">"  LL(gM="</span>&lt;&lt;gM&lt;&lt;<span class="st">", sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">", sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="st">"): "</span>&lt;&lt;LL&lt;&lt;endl;
+  } 
+  cout&lt;&lt;<span class="st">"Main loop done."</span>&lt;&lt;endl;
+
+  <span class="bu">std::</span>cout&lt;&lt;<span class="st">"Good bye!"</span>&lt;&lt;<span class="bu">std::</span>endl;
+  <span class="cf">return</span> <span class="dv">0</span>;
+}</code></pre></div>
+</div>
+<div id="the-entire-code" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-entire-code" class="anchor"></a>The entire code</h2>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// will be using std::string, std::vector, std::cin and std::cout quite a lot.</span>
 <span class="kw">using</span> <span class="kw">namespace</span> std;
 
@@ -133,9 +306,6 @@ bibliography: REFERENCES.bib
   
   <span class="cf">for</span>(<span class="dt">int</span> i=<span class="dv">0</span>; i &lt; M<span class="dv">-1</span>; i++) {
     cin&gt;&gt;daughters[i]&gt;&gt;parents[i]&gt;&gt;t[i];
-    <span class="cf">if</span>(verbose) {
-      cout&lt;&lt;daughters[i]&lt;&lt;<span class="st">" "</span>&lt;&lt;parents[i]&lt;&lt;<span class="st">" "</span>&lt;&lt;t[i]&lt;&lt;endl;
-    }
   }
   
   cout&lt;&lt;<span class="st">"Reading the trait data..."</span>&lt;&lt;endl;
@@ -144,9 +314,6 @@ bibliography: REFERENCES.bib
   
   <span class="cf">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {
     cin&gt;&gt;tip_names[i]&gt;&gt;x[i];
-    <span class="cf">if</span>(verbose) {
-      cout&lt;&lt;tip_names[i]&lt;&lt;<span class="st">" "</span>&lt;&lt;x[i]&lt;&lt;endl;
-    }
   }
   
   <span class="co">// create the data-object</span>
@@ -155,18 +322,6 @@ bibliography: REFERENCES.bib
   <span class="co">// Create the TraversalTask object: this will create the OrderedTree and the </span>
   <span class="co">// AbcPMM objects in the memory.</span>
   ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-  
-  <span class="co">// The tree objects reorders the nodes, so that the tips are indexed from</span>
-  <span class="co">// 0 to N-1, the internal nodes are from N to M-2, and the root is M-1.</span>
-  <span class="cf">if</span>(verbose) {
-    cout&lt;&lt;<span class="st">"Node-name order in the OrderedTree:"</span>&lt;&lt;endl;
-    <span class="cf">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; pruningTask.tree().num_nodes(); i++) {
-      cout&lt;&lt;i&lt;&lt;<span class="st">". "</span>&lt;&lt;pruningTask.tree().FindNodeWithId(i)&lt;&lt;endl;
-    } 
-  }
-  
-  <span class="co">// Check if OPENMP is enabled:</span>
-  <span class="bu">std::</span>cout&lt;&lt;<span class="st">"OpenMP-version: "</span>&lt;&lt;pruningTask.algorithm().VersionOPENMP()&lt;&lt;<span class="bu">std::</span>endl;
   
   <span class="co">// model parameters</span>
   <span class="dt">double</span> gM, sigma, sigmae;
@@ -186,10 +341,11 @@ bibliography: REFERENCES.bib
     cout&lt;&lt;<span class="st">"  LL(gM="</span>&lt;&lt;gM&lt;&lt;<span class="st">", sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">", sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="st">"): "</span>&lt;&lt;LL&lt;&lt;endl;
   } 
   cout&lt;&lt;<span class="st">"Main loop done."</span>&lt;&lt;endl;
-  <span class="co">// Exit politely</span>
-  <span class="bu">std::</span>cout&lt;&lt;<span class="st">"Good bye!"</span>&lt;&lt;<span class="bu">std::</span>endl;
+
+    <span class="bu">std::</span>cout&lt;&lt;<span class="st">"Good bye!"</span>&lt;&lt;<span class="bu">std::</span>endl;
   <span class="cf">return</span> <span class="dv">0</span>;
 }</code></pre></div>
+</div>
 </div>
 <div id="next-steps" class="section level1">
 <h1 class="hasAnchor">
@@ -203,7 +359,15 @@ bibliography: REFERENCES.bib
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#the-traversaltask-template-class">The <code>TraversalTask</code> template class</a></li>
-      <li><a href="#an-example-console-application">An example console application</a></li>
+      <li>
+<a href="#an-example-console-application">An example console application</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#reading-the-input-tree">Reading the input tree</a></li>
+      <li><a href="#reading-the-trait-data">Reading the trait data</a></li>
+      <li><a href="#creating-the-traversaltask-object">Creating the <code>TraversalTask</code> object</a></li>
+      <li><a href="#the-main-loop">The main loop</a></li>
+      <li><a href="#the-entire-code">The entire code</a></li>
+      </ul>
+</li>
       <li><a href="#next-steps">Next steps</a></li>
       </ul>
 </div>
