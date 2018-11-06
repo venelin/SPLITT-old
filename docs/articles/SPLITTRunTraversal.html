@@ -248,6 +248,7 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <li>
 <code>input_data</code> - this is a <code>DataType const&amp;</code> denoting the input data object for this traversal task.</li>
 </ul>
+<p>Calling the <code>ParallelPruningAbcPMM</code> constructor triggers the creation of the internal objects of the framework, i.e. an <code>OrderedTree</code> object maintaining the order in which the nodes are processed and a <code>PreOrderTraversal</code> or a <code>PostOrderTraversal</code> object implementing different parallelization modes of the two traversal types.</p>
 <p>Here is how we construct the object in the example program:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
@@ -264,9 +265,16 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="the-main-loop" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-main-loop" class="anchor"></a>The main loop</h2>
-<p>In the main loop of the program, we read PMM-parameters <span class="math inline">\(\mathbf{\Theta}=&lt;g_{M}, \sigma, \sigma_{e}&gt;\)</span> from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the <code>TraverseTree</code> method of our <code>pruningTask</code> object to calculate the coefficients <span class="math inline">\(a_{M}\)</span>, <span class="math inline">\(b_{M}\)</span> and <span class="math inline">\(c_{M}\)</span> for the parameters <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\sigma_{e}\)</span>, then we evaluate the log-likelihood value by applying the formula</p>
-<p><span class="math display">\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]</span></p>
-<p>Here is the corresponding C++ code:</p>
+<p>In the main loop of the program, we read PMM-parameters <span class="math inline">\(\mathbf{\Theta}=&lt;g_{M}, \sigma, \sigma_{e}&gt;\)</span> from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the <code>TraverseTree</code> method of our <code>pruningTask</code> object to calculate the coefficients <span class="math inline">\(a_{M}\)</span>, <span class="math inline">\(b_{M}\)</span> and <span class="math inline">\(c_{M}\)</span> for the parameters <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\sigma_{e}\)</span>, then we evaluate the log-likelihood value by applying the formula:</p>
+<p><span class="math display">\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]</span>.</p>
+<p>The <code>TraverseTree</code> method has two arguments:</p>
+<ul>
+<li>
+<code>par</code> - this is a <code>ParameterType const&amp;</code>. If you don’t remember how we defined <code>ParallelPruningAbcPMM::ParameterType</code>, just look back in the <a href="./SPLITTTraversalSpecification.html#parametertype">Writing a traversal specification</a>-manual).</li>
+<li>
+<code>mode</code> - this is an <code>uint</code> specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a <a href="./SPLITTTraversalModels.html">separate vignette</a>. For now, it is sufficient to know that specifying <code>0</code> for this value tells SPLITT to run in mode <code>AUTO</code>. In this mode, SPLITT will try several modes during the first several <code>TraverseTree</code> calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the <code>TraversalTask</code>’s <code>TraverseTree()</code> method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference.</li>
+</ul>
+<p>Here is the corresponding C++ code for reading the main loop:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -283,7 +291,9 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
     param[<span class="dv">1</span>] = sigmae*sigmae;
   
     cout&lt;&lt;<span class="st">"  Calculating a, b, c at the root for sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">" and sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="bu">std::</span>endl;
+    
     vec abc = pruningTask.TraverseTree(param, <span class="dv">0</span>);
+    
     cout&lt;&lt;<span class="st">"  a="</span>&lt;&lt;abc[<span class="dv">0</span>]&lt;&lt;<span class="st">", b="</span>&lt;&lt;abc[<span class="dv">1</span>]&lt;&lt;<span class="st">", c="</span>&lt;&lt;abc[<span class="dv">2</span>]&lt;&lt;<span class="bu">std::</span>endl;
     
     <span class="dt">double</span> LL = abc[<span class="dv">0</span>]*gM*gM + abc[<span class="dv">1</span>]*gM + abc[<span class="dv">2</span>];
@@ -298,7 +308,10 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="the-entire-code" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-entire-code" class="anchor"></a>The entire code</h2>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// will be using std::string, std::vector, std::cin and std::cout quite a lot.</span>
+<p>Here is the entire program code:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typedef</span> TraversalTask&lt; AbcPMM&lt;OrderedTree&lt;<span class="bu">std::</span>string, <span class="dt">double</span>&gt;&gt; &gt; ParallelPruningAbcPMM;
+
+<span class="co">// will be using std::string, std::vector, std::cin and std::cout quite a lot.</span>
 <span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -350,7 +363,9 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
     param[<span class="dv">1</span>] = sigmae*sigmae;
   
     cout&lt;&lt;<span class="st">"  Calculating a, b, c at the root for sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">" and sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="bu">std::</span>endl;
+    
     vec abc = pruningTask.TraverseTree(param, <span class="dv">0</span>);
+    
     cout&lt;&lt;<span class="st">"  a="</span>&lt;&lt;abc[<span class="dv">0</span>]&lt;&lt;<span class="st">", b="</span>&lt;&lt;abc[<span class="dv">1</span>]&lt;&lt;<span class="st">", c="</span>&lt;&lt;abc[<span class="dv">2</span>]&lt;&lt;<span class="bu">std::</span>endl;
     
     <span class="dt">double</span> LL = abc[<span class="dv">0</span>]*gM*gM + abc[<span class="dv">1</span>]*gM + abc[<span class="dv">2</span>];
@@ -366,6 +381,8 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="next-steps" class="section level1">
 <h1 class="hasAnchor">
 <a href="#next-steps" class="anchor"></a>Next steps</h1>
+<p>Now, it may be useful to have a look at a class diagram of the SPLITT library. This would provide an overview of all classes, methods and typedefs used by SPLITT. You can such a diagram <a href="./SPLITTOverview.html">here</a>.</p>
+<p>The next steps depend on your desired application. If your goal is to call SPLITT from an R-package, you are lucky, because I’ve already done this many times and I have described how to do this in <a href="./SPLITTRcppModules.html">this guide</a>. Otherwise, if you need help, you can ask a question in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
 </div>
   </div>
 

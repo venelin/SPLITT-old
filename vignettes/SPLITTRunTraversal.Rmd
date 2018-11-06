@@ -183,6 +183,8 @@ Now everything is set up to create a `ParallelPruningAbcPMM` object. We do this 
 * `lengths` - this is an `std::vector< LengthType > const&` denoting the length of each branch in the tree, corresponding to `branch_start_nodes` ;
 * `input_data` - this is a `DataType const&` denoting the input data object for this traversal task.
 
+Calling the `ParallelPruningAbcPMM` constructor triggers the creation of the internal objects of the framework, i.e. an `OrderedTree` object maintaining the order in which the nodes are processed and a `PreOrderTraversal` or a `PostOrderTraversal` object implementing  different parallelization modes of the two traversal types. 
+ 
 Here is how we construct the object in the example program:
 
 ```{Rcpp, eval=FALSE}
@@ -201,11 +203,16 @@ int main(int argc, char* argv[]) {
 
 ## The main loop
 
-In the main loop of the program, we read PMM-parameters $\mathbf{\Theta}=<g_{M}, \sigma, \sigma_{e}>$ from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the `TraverseTree` method of our `pruningTask` object to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$ for the parameters $\sigma$ and $\sigma_{e}$, then we evaluate the log-likelihood value by applying the formula
+In the main loop of the program, we read PMM-parameters $\mathbf{\Theta}=<g_{M}, \sigma, \sigma_{e}>$ from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the `TraverseTree` method of our `pruningTask` object to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$ for the parameters $\sigma$ and $\sigma_{e}$, then we evaluate the log-likelihood value by applying the formula:
 
-\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]
+\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\].
 
-Here is the corresponding C++ code:
+The `TraverseTree` method has two arguments:
+
+* `par` - this is a `ParameterType const&`. If you don't remember how we defined `ParallelPruningAbcPMM::ParameterType`, just look back in the [Writing a traversal specification](./SPLITTTraversalSpecification.html#parametertype)-manual).
+* `mode` - this is an `uint` specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a [separate vignette](./SPLITTTraversalModels.html). For now, it is sufficient to know that specifying `0` for this value tells SPLITT to run in mode `AUTO`. In this mode, SPLITT will try several modes during the first several `TraverseTree` calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the `TraversalTask`'s `TraverseTree()` method will be called repeatedly,  varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference. 
+
+Here is the corresponding C++ code for reading the main loop:
 
 ```{Rcpp, eval=FALSE}
 using namespace std;
@@ -224,7 +231,9 @@ int main(int argc, char* argv[]) {
     param[1] = sigmae*sigmae;
   
     cout<<"  Calculating a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+    
     vec abc = pruningTask.TraverseTree(param, 0);
+    
     cout<<"  a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
     
     double LL = abc[0]*gM*gM + abc[1]*gM + abc[2];
@@ -239,9 +248,11 @@ int main(int argc, char* argv[]) {
 
 ## The entire code
 
-
+Here is the entire program code:
 
 ```{Rcpp, eval=FALSE}
+typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
+
 // will be using std::string, std::vector, std::cin and std::cout quite a lot.
 using namespace std;
 
@@ -294,7 +305,9 @@ int main(int argc, char* argv[]) {
     param[1] = sigmae*sigmae;
   
     cout<<"  Calculating a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
+    
     vec abc = pruningTask.TraverseTree(param, 0);
+    
     cout<<"  a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
     
     double LL = abc[0]*gM*gM + abc[1]*gM + abc[2];
@@ -308,3 +321,7 @@ int main(int argc, char* argv[]) {
 ```
 
 # Next steps
+
+Now, it may be useful to have a look at a class diagram of the SPLITT library. This would provide an overview of all classes, methods and typedefs used by SPLITT. You can such a diagram [here](./SPLITTOverview.html). 
+
+The next steps depend on your desired application. If your goal is to call SPLITT from an R-package, you are lucky, because I've already done this many times and I have described how to do this in [this guide](./SPLITTRcppModules.html). Otherwise, if you need help, you can ask a question in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).

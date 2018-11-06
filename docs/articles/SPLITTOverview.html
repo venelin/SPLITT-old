@@ -109,22 +109,9 @@ bibliography: REFERENCES.bib
 <p>The library is divided in two layaers:</p>
 <ul>
 <li>a framework layer defining the main logical and data structures. These include a linear algorithm for initial reordering and splitting of the input tree into generations of nodes, which can be visited in parallel, both during post-order as well as pre-order traversal, and a growing collection of pre-order and post-order traversal algorithms, targeting different parallelization modes (e.g. queue-based versus range-based parallelization) on different computing devices (currently implemented for CPUs only).</li>
-<li>a user layer at which the user of the library must write a <code>CustomTraversalSpecification</code> class defining all typedefs and methods of the interface <code>TraversalSpecification</code>. The methods that should be defined by the user are:
-<ul>
-<li>
-<code>SetParameter(par)</code>: sets parameter values, such as model parameters, prior to tree-traversal.</li>
-<li>
-<code>InitNode(i)</code>: called for each node, <em>i</em>, at the beginning of the traversal; performs node-specific initialization, based on the parameter-values and the input data; can be executed both, sequentially or in parallel, depending on the selected parallelization mode; this function is the perfect place to define the calculation of node-specific state fields or other node-specific data, which depend on the parameters, the tree and the input data but do not depend on the state/data associated with other nodes;</li>
-<li>
-<code>VisitNode(i)</code>: called for the root (in pre-order traversals only) and for every internal and tip node, <em>i</em>, (both, pre-order and post-order traversals) after <code>InitNode(i)</code> and either after <code>VisitNode(j)</code> and <code>PruneNode(j, i)</code> has been called for each <span class="math inline">\(j\in Desc(i)\)</span> in post-order traversals, or after <code>VisitNode($Parent(i))</code> has been called in pre-order traversals. This method is suitable for implementing the logic in the the function <span class="math inline">\(R_i\)</span>, depending on the parameters, the input data, and the state of the nodes, on which <em>i</em>’s state depends.</li>
-<li>
-<code>PruneNode(i, i_parent)</code>: called solely in post-order traversals for every node, <em>i</em>, after the call to <code>VisitNode(i)</code> and before calling <code>VisitNode(Parent(i))</code>. This method is suitable for updating fields associated with <code>Parent(i)</code> before it gets visited. It is logically equivalent to leave the implementation of <code>PruneNode(i, i\_parent)</code> empty and have the implementation of <code>VisitNode(i)</code> consult the states of its daughter nodes.</li>
-<li>
-<code>StateAtRoot()</code>: returns the state associated with the root of the tree.</li>
+<li>a user layer at which the user of the library must write a <code>TraversalSpecification</code> class defining all typedefs and methods of the interface <code>TraversalSpecification</code>.</li>
 </ul>
-</li>
-</ul>
-<p>The bridge between the two layers is provided by an object of the <code>TraversalTask</code> template class. Once the <code>TraversalSpecification</code> implementation has been written, the user instantiates a <code>TraversalTask</code> object passing the tree and the input data as arguments. This triggers the creation of the internal objects of the framework, i.e. an <code>OrderedTree</code> object maintaining the order in which the nodes are processed and a <code>PreOrderTraversal</code> or a <code>PostOrderTraversal</code> object implementing different parallelization modes of the two traversal types. In the ideal use-case, the <code>TraversalTask</code>’s <code>TraverseTree()</code> method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference.</p>
+<p>The bridge between the two layers is provided by an object of the <code>TraversalTask</code> template class. Once the <code>TraversalSpecification</code> implementation has been written, the user instantiates a <code>TraversalTask</code> object passing the tree and the input data as arguments.</p>
 </div>
 <div id="packages-used" class="section level1">
 <h1 class="hasAnchor">
