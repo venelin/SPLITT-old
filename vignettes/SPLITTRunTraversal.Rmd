@@ -69,7 +69,7 @@ ancestor3 root 6
 ancestor2 root 4.5
 ```
 
-Here is the C++ code for reading the above format:
+Here is the C++ code for reading the tree in the above format from the standard input stream (`std::cin`):
 ```{Rcpp, eval=FALSE}
 using namespace std;
 
@@ -137,6 +137,9 @@ nodelabels(text=tree$node.label)
 ```
 
 ## Reading the trait data
+
+After reading the tree, the next step is to read the trait-values associated with each of the $N$ tips in the tree. Each of the next $N$ lines contains a tip-name and the corresponding trait values separated by a space. Here is how we read this data in the C++ program:
+
 ```{Rcpp, eval=FALSE}
 using namespace std;
 
@@ -155,7 +158,8 @@ int main(int argc, char* argv[]) {
 }
 ```
 
-Creating the trait-data object:
+Then, we create a `ParallelPruningAbcPMM::DataType` object by calling its constructor. If you don't remember how we defined `ParallelPruningAbcPMM::DataType`, just look back in the [Writing a traversal specification](./SPLITTTraversalSpecification.html#datatype)-manual).
+
 ```{Rcpp, eval=FALSE}
 using namespace std;
 
@@ -172,6 +176,15 @@ int main(int argc, char* argv[]) {
 
 ## Creating the `TraversalTask` object
 
+Now everything is set up to create a `ParallelPruningAbcPMM` object. We do this by calling its constructor, which receives four arguments:
+
+* `branch_start_nodes` - this is an `std::vector< NodeType > const&` denoting the parent-node in each branch in the tree;
+* `branch_end_nodes` - this is an `std::vector< NodeType > const&` denoting the daughter-node in each branch in the tree, corresponding to `branch_start_nodes` ;
+* `lengths` - this is an `std::vector< LengthType > const&` denoting the length of each branch in the tree, corresponding to `branch_start_nodes` ;
+* `input_data` - this is a `DataType const&` denoting the input data object for this traversal task.
+
+Here is how we construct the object in the example program:
+
 ```{Rcpp, eval=FALSE}
 using namespace std;
 
@@ -187,6 +200,13 @@ int main(int argc, char* argv[]) {
 ```
 
 ## The main loop
+
+In the main loop of the program, we read PMM-parameters $\mathbf{\Theta}=<g_{M}, \sigma, \sigma_{e}>$ from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the `TraverseTree` method of our `pruningTask` object to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$ for the parameters $\sigma$ and $\sigma_{e}$, then we evaluate the log-likelihood value by applying the formula
+
+\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]
+
+Here is the corresponding C++ code:
+
 ```{Rcpp, eval=FALSE}
 using namespace std;
 
@@ -218,6 +238,7 @@ int main(int argc, char* argv[]) {
 ```
 
 ## The entire code
+
 
 
 ```{Rcpp, eval=FALSE}

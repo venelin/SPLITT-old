@@ -138,7 +138,7 @@ bibliography: REFERENCES.bib
 <span class="ex">ancestor1</span> ancestor2 4.2
 <span class="ex">ancestor3</span> root 6
 <span class="ex">ancestor2</span> root 4.5</code></pre></div>
-<p>Here is the C++ code for reading the above format:</p>
+<p>Here is the C++ code for reading the tree in the above format from the standard input stream (<code>std::cin</code>):</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -205,6 +205,7 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="reading-the-trait-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#reading-the-trait-data" class="anchor"></a>Reading the trait data</h2>
+<p>After reading the tree, the next step is to read the trait-values associated with each of the <span class="math inline">\(N\)</span> tips in the tree. Each of the next <span class="math inline">\(N\)</span> lines contains a tip-name and the corresponding trait values separated by a space. Here is how we read this data in the C++ program:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -220,7 +221,7 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
   <span class="co">// other code discussed later</span>
   <span class="cf">return</span> <span class="dv">0</span>;
 }</code></pre></div>
-<p>Creating the trait-data object:</p>
+<p>Then, we create a <code>ParallelPruningAbcPMM::DataType</code> object by calling its constructor. If you don’t remember how we defined <code>ParallelPruningAbcPMM::DataType</code>, just look back in the <a href="./SPLITTTraversalSpecification.html#datatype">Writing a traversal specification</a>-manual).</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -236,6 +237,18 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="creating-the-traversaltask-object" class="section level2">
 <h2 class="hasAnchor">
 <a href="#creating-the-traversaltask-object" class="anchor"></a>Creating the <code>TraversalTask</code> object</h2>
+<p>Now everything is set up to create a <code>ParallelPruningAbcPMM</code> object. We do this by calling its constructor, which receives four arguments:</p>
+<ul>
+<li>
+<code>branch_start_nodes</code> - this is an <code>std::vector&lt; NodeType &gt; const&amp;</code> denoting the parent-node in each branch in the tree;</li>
+<li>
+<code>branch_end_nodes</code> - this is an <code>std::vector&lt; NodeType &gt; const&amp;</code> denoting the daughter-node in each branch in the tree, corresponding to <code>branch_start_nodes</code> ;</li>
+<li>
+<code>lengths</code> - this is an <code>std::vector&lt; LengthType &gt; const&amp;</code> denoting the length of each branch in the tree, corresponding to <code>branch_start_nodes</code> ;</li>
+<li>
+<code>input_data</code> - this is a <code>DataType const&amp;</code> denoting the input data object for this traversal task.</li>
+</ul>
+<p>Here is how we construct the object in the example program:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
@@ -251,6 +264,9 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <div id="the-main-loop" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-main-loop" class="anchor"></a>The main loop</h2>
+<p>In the main loop of the program, we read PMM-parameters <span class="math inline">\(\mathbf{\Theta}=&lt;g_{M}, \sigma, \sigma_{e}&gt;\)</span> from the standard input and calculate the PMM log-likelihood for these parameters and the input tree and data. To calculate the log-likelihood, first we call the <code>TraverseTree</code> method of our <code>pruningTask</code> object to calculate the coefficients <span class="math inline">\(a_{M}\)</span>, <span class="math inline">\(b_{M}\)</span> and <span class="math inline">\(c_{M}\)</span> for the parameters <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\sigma_{e}\)</span>, then we evaluate the log-likelihood value by applying the formula</p>
+<p><span class="math display">\[\ell\ell(\mathbf{\Theta})=a_{M}g_{M}^2+b_{M}g_{M}+c_{M}\]</span></p>
+<p>Here is the corresponding C++ code:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
