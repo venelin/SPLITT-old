@@ -20,7 +20,7 @@ User guides and resources
 
 The [Get started guide](https://venelin.github.io/SPLITT/articles/SPLITT.html) provides a general introduction to the library and a roadmap throughout the documentation.
 
-The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
+The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" introduces the library and reports a large-scale performance benchmark. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
 The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT).
 
