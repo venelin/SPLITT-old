@@ -28,11 +28,13 @@ The R-package called with the same name (SPLITT) bundles the SPLITT.h header tog
 
 ## User guides and resources
 
-The user guides and the technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
+The [Get started guide](https://venelin.github.io/SPLITT/articles/SPLITT.html) provides a general introduction to the library and a roadmap throughout the documentation.
 
 The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
 The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT). 
+
+The classes of the SPLITT API are documented in the [SPLITT Reference page](https://venelin.github.io/SPLITT/reference/SPLITT.html). 
 
 Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 
