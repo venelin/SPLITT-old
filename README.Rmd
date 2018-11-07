@@ -28,13 +28,7 @@ The R-package called with the same name (SPLITT) bundles the SPLITT.h header tog
 
 ## User guides and resources
 
-The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
-
-* The [Getting started](https://venelin.github.io/SPLITT/articles/SPLITT.html) guide shows how to compile and run a console application using SPLITT. 
-* The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations. 
-* The [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide shows how to create and run a traversal task.
-* The [View from above](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
-* The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
+The user guides and the technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
 
 The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
@@ -51,12 +45,11 @@ Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogeneti
 ## Used R-packages
 ```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
 treeProcessing <- c("ape")
-data <- c("data.table")
 testing <- c("testthat")
 Rcpp <- c("Rcpp")
 RcppArmadillo <- c("RcppArmadillo")
 
-packagesUsed <- c(treeProcessing, data, testing)
+packagesUsed <- c(treeProcessing, Rcpp, RcppArmadillo, testing)
 
 printPackages <- function(packs) {
   res <- ""
@@ -70,14 +63,13 @@ printPackages <- function(packs) {
 }
 
 # Write bib information (this line is executed manually and the bib-file is edited manually after that)
-# knitr::write_bib(packagesUsed, file = "./REFERENCES-R.bib")
+knitr::write_bib(packagesUsed, file = "./vignettes/REFERENCES-R.bib")
 ```
 
 The SPLITT R-package uses the following 3rd party R-packages:
 
 * For calling C++ from R: `r printPackages(c(Rcpp, RcppArmadillo))`
 * For tree processing in R: `r printPackages(treeProcessing)`;
-* For reporting the test-benchmark: `r printPackages(data)`;
 * For unit-testing: `r printPackages(testing)`.
 
 ## References

@@ -17,6 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+In this tutorial I show step by step how to build a simple console appication (reading from the standard input `std::cin` and writing to the stadard output `std::cout`) that is using the `AbcPMM` `TraversalSpecificaton`-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the [SPLITT github repository](https://github.com/venelin/SPLITT): 
+
+[PMMUsingSPLITT-console-app](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app) 
+
+
 # The `TraversalTask` template class
 Once defined, the `TraversalSpecification`-class is passed as a template argument to a `TraversalTask`. This is a template class, which is already written, so the only thing we do is to specify it for *our* `TraversalTask` using a `typedef` like the following one:
 
@@ -66,6 +71,8 @@ ancestor2 root 4.5
 
 Here is the C++ code for reading the tree in the above format from the standard input stream (`std::cin`):
 ```{Rcpp, eval=FALSE}
+using namespace PMMUsingSPLITT;
+using namespace SPLITT;
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -205,7 +212,7 @@ In the main loop of the program, we read PMM-parameters $\mathbf{\Theta}=<g_{M},
 The `TraverseTree` method has two arguments:
 
 * `par` - this is a `ParameterType const&`. If you don't remember how we defined `ParallelPruningAbcPMM::ParameterType`, just look back in the [Writing a traversal specification](./SPLITTTraversalSpecification.html#parametertype)-manual).
-* `mode` - this is an `uint` specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a [separate vignette](./SPLITTTraversalModels.html). For now, it is sufficient to know that specifying `0` for this value tells SPLITT to run in mode `AUTO`. In this mode, SPLITT will try several modes during the first several `TraverseTree` calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the `TraversalTask`'s `TraverseTree()` method will be called repeatedly,  varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference. 
+* `mode` - this is an `uint` specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a [separate guide](./SPLITTTraversalModes.html). For now, it is sufficient to know that specifying `0` for this value tells SPLITT to run in mode `AUTO`. In this mode, SPLITT will try several modes during the first several `TraverseTree` calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the `TraversalTask`'s `TraverseTree()` method will be called repeatedly,  varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference. 
 
 Here is the corresponding C++ code for reading the main loop:
 
@@ -241,82 +248,45 @@ int main(int argc, char* argv[]) {
 }
 ```
 
-## The entire code
+## Compiling the program
 
-Here is the entire program code:
+To compile the program we execute the following command from the directory PMMUsingSPLITT-console-app:
 
-```{Rcpp, eval=FALSE}
-typedef TraversalTask< AbcPMM<OrderedTree<std::string, double>> > ParallelPruningAbcPMM;
-
-// will be using std::string, std::vector, std::cin and std::cout quite a lot.
-using namespace std;
-
-int main(int argc, char* argv[]) {
-  
-  // Will be false if the program is run without any arguments. Pass any argument
-  // after the program name and verbose will be set to true.
-  bool verbose = (argc > 1); 
-  
-  cout<<"Hello from the SPLITT PMM example!"<<endl;
-  cout<<"Reading the input tree..."<<endl;
-  
-  // Read the number of nodes and tips
-  uint M, N;
-  cin>>M>>N;
-  
-  // read the tree
-  vector<string> daughters(M-1);
-  vector<string> parents(M-1);
-  vec t(M-1);
-  
-  
-  for(int i=0; i < M-1; i++) {
-    cin>>daughters[i]>>parents[i]>>t[i];
-  }
-  
-  cout<<"Reading the trait data..."<<endl;
-  vector<string> tip_names(N);
-  vec x(N);
-  
-  for(int i = 0; i < N; i++) {
-    cin>>tip_names[i]>>x[i];
-  }
-  
-  // create the data-object
-  typename ParallelPruningAbcPMM::DataType data(tip_names, x);
-  
-  // Create the TraversalTask object: this will create the OrderedTree and the 
-  // AbcPMM objects in the memory.
-  ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-  
-  // model parameters
-  double gM, sigma, sigmae;
-  vec param(2); 
-  
-  cout<<"Main loop..."<<endl;
-  // run this loop as long as parameters can be read from the standard input
-  while( cin>>gM>>sigma>>sigmae ) {
-    param[0] = sigma*sigma;
-    param[1] = sigmae*sigmae;
-  
-    cout<<"  Calculating a, b, c at the root for sigma="<<sigma<<" and sigmae="<<sigmae<<std::endl;
-    
-    vec abc = pruningTask.TraverseTree(param, 0);
-    
-    cout<<"  a="<<abc[0]<<", b="<<abc[1]<<", c="<<abc[2]<<std::endl;
-    
-    double LL = abc[0]*gM*gM + abc[1]*gM + abc[2];
-    cout<<"  LL(gM="<<gM<<", sigma="<<sigma<<", sigmae="<<sigmae<<"): "<<LL<<endl;
-  } 
-  cout<<"Main loop done."<<endl;
-
-    std::cout<<"Good bye!"<<std::endl;
-  return 0;
-}
+```{bash, eval=FALSE}
+# Feel free to replace the name of the executable with your C++ compiler
+clang++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp
 ```
 
-# Next steps
+This will compile and link the file PMMLogLikelihood.cpp into an executable file called "PMMLogLikelihood". If the compilation runs fine you should see no error messages.
 
-Now, it may be useful to have a look at a class diagram of the SPLITT library. This would provide an overview of all classes, methods and typedefs used by SPLITT. You can such a diagram [here](./SPLITTOverview.html). 
+## Testing the program
+
+If the compilation was successful, type the following command.
+
+```{bash, eval=FALSE}
+./PMMLogLikelihood <input.txt
+```
+
+With the exceptino of the line starting with `"OpenMP-version:"`, the above command should produce the following output:
+
+```{bash, eval=FALSE}
+Hello from the SPLITT PMM example!
+Reading the input tree...
+Reading the trait data...
+OpenMP-version: 201107
+Main loop...
+  Calculating a, b, c at the root for sigma=0.5 and sigmae=1
+  a=-0.432535, b=0.630659, c=-8.21595
+  LL(gM=0.1, sigma=0.5, sigmae=1): -8.15721
+  Calculating a, b, c at the root for sigma=0.8 and sigmae=0.4
+  a=-0.205491, b=0.285864, c=-9.09873
+  LL(gM=1.5, sigma=0.8, sigmae=0.4): -9.13229
+Main loop done.
+Good bye!
+```
+
+If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header "omp.h" was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
+
+# Next steps
 
 The next steps depend on your desired application. If your goal is to call SPLITT from an R-package, you are lucky, because I've already done this many times and I have described how to do this in [this guide](./SPLITTRcppModules.html). Otherwise, if you need help, you can ask a question in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).

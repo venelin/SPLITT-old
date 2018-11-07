@@ -17,10 +17,26 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# A note on generic programming
+In this tutorial, I show step by step how to write a `TraversalSpecification`-class for calculating the log-likelihood of the *PMM* model for a given phylogenetic tree, trait data, and model parameters. This model is a popular tool to study the evolution of quantitative traits in the field of comparative biology. You don't need to understand this model in details, but if you are interested you can read more about it in [this article](https://www.biorxiv.org/content/early/2018/10/29/235739). The example C++ code discussed in this tutorial is contained in two C++ header files:
+
+* [SPLITT.h](https://raw.githubusercontent.com/venelin/SPLITT/master/PMMUsingSPLITT-console-app/SPLITT.h) - this the SPLITT library header file;
+* [NumericTrait.h](https://raw.githubusercontent.com/venelin/SPLITT/master/PMMUsingSPLITT-console-app/NumericTraitData.h) - this file defines the application-specific data-type for the example;
+* [AbcPMM.h](https://raw.githubusercontent.com/venelin/SPLITT/master/PMMUsingSPLITT-console-app/AbcPMM.h) - this header file includes the above two ones and defines the `AbcPMM` `TraversalSpecification`-class.
+
+# Two preliminary notes
+
+For the critical minds among you, I'd like to make two notes regarding the design of SPLITT.
+
+## A note on generic programming
 
 SPLITT was designed with abstraction in mind. Application-specific data-types and node-traversal operations are treated as abstract entities by the SPLITT code. This is achieved by coding in a style known as "generic programming". Generic programming makes it possible to apply the same code to different types of data, without the need to write code for detecting the type of an object. A common way to do generic programming in C++ is to use template classes and functions. I recommend reading [this tutorial](http://www.cplusplus.com/doc/oldtutorial/templates/) in case you are not familiar with templates in C++. 
 
+## A note on virtual methods
+
+*Why doesn't SPLITT use virtual methods for the node-traversal operations?*
+
+I have been asked this question mostly by programmers in Java or other languages who are not familiar with C++ templates. In one word, the answer is *performance*. The power of virtual methods is that, at runtime, the correct method definition is called even if the exact class containing this definition was not known during the compilation. This can be very useful, e.g. in cases where the logical workflow of the program depends on the user input during the execution. Technically, this is accomplished through *runtime dynamic binding* as opposed to the *compile-time static binding* used in templates. The drawback of *dynamic binding* is that it disables some tricks done by the compiler to make our code faster. Among these tricks are *method inlining* and *vectorized operations* (if the methods is called within a loop). This is why, in designing SPLITT, I preferred using static binding whenever possible and restricting/delay the use of virtual methods only for the situations where this is really needed. Still, it is always possible to have the node-traversal operations call other *virtual* methods to achieve this form of polymorphism. 
+  
 # Traversal specifications
 
 To use SPLITT, we write a `TraversalSpecification`-class. Briefly, this is a C++ class implementing several members, such as typedefs and methods with fixed names and argument types (more details to come later on). Once defined this class is passed as a template argument to a `TraversalTask` class and a `TraversalAlgorithm` class. In this way, the C++ compiler is told to generate binary code for the methods of the `TraversalTask` and `TraversalAlgorithm` classes that is specific for *our* `TraversalSpecification`. 
@@ -38,16 +54,18 @@ We apply post-order traversal to calculate the coefficients $a_{M}$, $b_{M}$ and
 A `TraversalSpecification` class is a C++ class that must have a number of members (i.e. `typedefs` and methods), in order to be applicable by SPLITT during a tree traversal procedure. Optionally, the class can inherit from the class `SPLITT::TraversalSpecification`. This, however is not required and not checked during compilation. The following C++ code shows how the class is defined for the PMM-example:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-
-// Typedefs
-// Internal data-fields
-// Constructor
-// Methods
-
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  
+  // Typedefs
+  // Internal data-fields
+  // Constructor
+  // Methods
+  
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 The template-parameter `<class Tree>` allows to define `AbcPMM` classes for different `Tree`-types, e.g. for `Tree`s with nodes of type `int` as well as for `Tree`s with nodes of type `std::string`. SPLITT expects to find a number of members (`typedefs` and methods) in a `TraversalSpecification` class. We call the set of these members "the  `TraversalSpecification`-*interface*". In an object-oriented jargon, it would be more precise to call the class `AbcPMM` an *implementation* of the `TraversalSpecification`-*interface* or a `TraversalSpecification`-*implementation*. Because this is too long, below I use the term "the `TraversalSpecification`-*class*" whenever I mean `TraversalSpecification`-*implementation*, and I use `SPLITT::TraversalSpecification` whenever I mean the base-class.
@@ -61,7 +79,7 @@ The base-class `SPLITT::TraversalSpecification<Tree>` defines the following enti
 - empty definitions of the three node-traversal operations (we will come to these later). 
 
 ```{Rcpp, eval=FALSE}
-namespace SPLITT {
+namespace PMMUsingSPLITT {
 
   // A recommended base-class for traversal-specifications
   template<class Tree> class TraversalSpecification {
@@ -77,7 +95,7 @@ namespace SPLITT {
     void VisitNode(uint i) {}
     void PruneNode(uint i, uint i_parent) {}
   };
-}
+} // END namespace PMMUsingSPLITT
 ```
 
 ## Members defined in the `TraversalSpecification`-class 
@@ -90,44 +108,50 @@ The `TraversalSpecification`-class has to define the following application-speci
 This is a synonym for the `TraversalSpecification`-class's own type. Defining this is optional but saves some typing of long class names later on.
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  typedef AbcPMM<Tree> MyType;
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    typedef AbcPMM<Tree> MyType;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `BaseType` 
 
 This is a synonym for the `TraversalSpecification`-class's base-type. Also optional.
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef TraversalSpecification<Tree> BaseType;
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef TraversalSpecification<Tree> BaseType;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `TreeType`
 Usually, this should be the class `SPLITT::OrderedTree` with specified template parameters for the type of node and branch-length in the tree. Because we want `AbcPMM` to be generic with respect to the node-type (i.e. `int` or `std::string` are possible such types), we postpone the specification, leaving `Tree` as a template parameter:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
 template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef Tree TreeType;
-  //...
-};
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef Tree TreeType;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 
@@ -136,15 +160,17 @@ public:
 This is the type of parameter passed before each traversal. In the case of `AbcPMM`, these are the PMM parameters $\sigma^2$ and $\sigma_{e}^2$. Since both of these parameters are real numbers, we specify that they are passed as a `std::vector<double>`. Below, `vec` is an alias for this type available in the SPLITT namespace:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef vec ParameterType; 
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef vec ParameterType; 
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `DataType`
@@ -152,32 +178,36 @@ public:
 This is the type of data associated with the tree object. While the parameters can be updated before each run of a tree traversal, the data is specified once at the time of constructing the `TraversalSpecification` object. In the case of the `AbcPMM` class the data represents a numeric trait measurement for each tip in the tree. Hence, it is an association map between tip-names and double values. We define this relationship in a separate class:
 
 ```{Rcpp, eval=FALSE}
-// A global class describing a collection of single-trait measurements associated with the tips in a tree.
-template<class NameType>
-struct NumericTraitData {
-  // use const references to avoid copying of long vectors
-  
-  // The template parameter NameType should match the NodeType in the tree.
-  std::vector<NameType> const& names_;
-  vec const& x_;
-  NumericTraitData(
-    std::vector<NameType> const& names,
-    vec const& x): names_(names), x_(x) {}
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class NameType>
+  struct NumericTraitData {
+    // use const references to avoid copying of long vectors
+    
+    // The template parameter NameType should match the NodeType in the tree.
+    std::vector<NameType> const& names_;
+    vec const& x_;
+    NumericTraitData(
+      std::vector<NameType> const& names,
+      vec const& x): names_(names), x_(x) {}
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 Then, we define this class as the DataType in `AbcPMM` as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef NumericTraitData<typename TreeType::NodeType> DataType;
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef NumericTraitData<typename TreeType::NodeType> DataType;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `StateType`
@@ -185,15 +215,17 @@ public:
 This is the type of the state calculated for each node during the traversal. In the case of `AbcPMM`, these are the polynomial coefficients $a_{i}$, $b_{i}$ and $c_{i}$ for a node $i$ in the tree. SPLITT uses this type as a return type for the `TraverseTree()` method in `TraversalAlgorithm` classes. Again we use `SPLITT::vec`. Note though, that for the implementation of the node-traversal operations in the `AbcPMM`-class it will be more convenient to store the states in separate vectors `a`, `b` and `c` (more on that later).
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef vec StateType; 
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef vec StateType; 
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `AlgorithmType`
@@ -201,15 +233,17 @@ public:
 This is the type of the travefsal algorithm we want - either `PostOrderTraversal` or `PreOrderTraversal`:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  //...
-  typedef PostOrderTraversal<MyType> AlgorithmType;
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    //...
+    typedef PostOrderTraversal<MyType> AlgorithmType;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 ### Internal data fields
@@ -217,24 +251,26 @@ public:
 SPLITT does not impose any requirement on the internal data fields in the `TraversalSpecification`-class. These are all application-specific variables needed for the execution of the node-traversal operations. In the case of `AbcPMM`, these internal fields are defined as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  
-  // Model parameters set before each traversal
-  double sigmae2, sigma2;
-  
-  // Trait data copied from the input_data object during construction
-  vec x;
-  
-  // Internal vectors used for storing the node-states, i.e. the coefficients 
-  // a[i], b[i], c[i] for each node in the tree:
-  vec a, b, c;
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    
+    // Model parameters set before each traversal
+    double sigmae2, sigma2;
+    
+    // Trait data copied from the input_data object during construction
+    vec x;
+    
+    // Internal vectors used for storing the node-states, i.e. the coefficients 
+    // a[i], b[i], c[i] for each node in the tree:
+    vec a, b, c;
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
     
 ### Constructor
@@ -247,36 +283,38 @@ SPLITT requires the `TraversalSpecification`-class to have a constructor taking 
 Here is how the constructor is defined for the `AbcPMM` class:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  AbcPMM(TreeType const& tree, DataType const& input_data):
-    BaseType(tree) {
-    
-    // Check that the number of data-points matches the number of tips in the tree.
-    if(input_data.x_.size() != this->ref_tree_.num_tips()) {
-      std::ostringstream oss;
-      oss<<"The vector x must be the same length as the number of tips ("<<
-        this->ref_tree_.num_tips()<<"), but were"<<input_data.x_.size()<<".";
-      throw std::invalid_argument(oss.str());
-    } else {
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    AbcPMM(TreeType const& tree, DataType const& input_data):
+      BaseType(tree) {
       
-      // IMPORTANT: reorder the data points according to the order in the tree object. 
-      uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
-      this->x = At(input_data.x_, ordNodes);
-      
-      // a[i] corresponds to the
-      this->a = vec(this->ref_tree_.num_nodes());
-      this->b = vec(this->ref_tree_.num_nodes());
-      this->c = vec(this->ref_tree_.num_nodes());
+      // Check that the number of data-points matches the number of tips in the tree.
+      if(input_data.x_.size() != this->ref_tree_.num_tips()) {
+        std::ostringstream oss;
+        oss<<"The vector x must be the same length as the number of tips ("<<
+          this->ref_tree_.num_tips()<<"), but were"<<input_data.x_.size()<<".";
+        throw std::invalid_argument(oss.str());
+      } else {
+        
+        // IMPORTANT: reorder the data points according to the order in the tree object. 
+        uvec ordNodes = this->ref_tree_.OrderNodes(input_data.names_);
+        this->x = At(input_data.x_, ordNodes);
+        
+        // a[i] corresponds to the
+        this->a = vec(this->ref_tree_.num_nodes());
+        this->b = vec(this->ref_tree_.num_nodes());
+        this->c = vec(this->ref_tree_.num_nodes());
+      }
     }
-  }
-  //...
-};
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 ### Methods
@@ -288,28 +326,30 @@ SPLITT expect the following methods to be defined in a `TraversalSpecification`-
 This method is called before each traversal to set the values of the parameters. For the `AbcPMM` class, only $\sigma^2$ and $\sigma_{e}^2$ are needed to calculate the coefficients $a_{M}$, $b_{M}$ and $c_{M}$. Hence we define the method as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  // Methods
-  void SetParameter(ParameterType const& par) {
-    if(par.size() != 2) {
-      throw std::invalid_argument(
-          "The par vector should be of length 2 with \
-      elements corresponding to sigma2 and sigmae2.");
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    // Methods
+    void SetParameter(ParameterType const& par) {
+      if(par.size() != 2) {
+        throw std::invalid_argument(
+            "The par vector should be of length 2 with \
+        elements corresponding to sigma2 and sigmae2.");
+      }
+      if(par[0] <= 0 || par[1] <= 0) {
+        throw std::logic_error("The parameters sigma2 and sigmae2 should be positive.");
+      }
+      this->sigma2 = par[0];
+      this->sigmae2 = par[1];
     }
-    if(par[0] <= 0 || par[1] <= 0) {
-      throw std::logic_error("The parameters sigma2 and sigmae2 should be positive.");
-    }
-    this->sigma2 = par[0];
-    this->sigmae2 = par[1];
-  }
-  //...
-};
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `void InitNode(uint i)` 
@@ -317,27 +357,29 @@ public:
 This method is called on each node in the tree right after SetParameter and before any of the `VisitNode` and `PruneNode` methods has been called. There is no predefined order of the calls to InitNode and they may be executed in parallel for all nodes in the tree. Therefore, only node-specific data initialization, including the length of the branch leading to node i, can take place in this method. For the `AbcPMM` class, this is defined as follows (see also Fig. 1c in [the article](https://www.biorxiv.org/content/early/2018/10/29/235739)):
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  // Methods
-  //...
-  inline void InitNode(uint i) {
-    
-    if(i < this->ref_tree_.num_tips()) {
-      a[i] = -0.5 / sigmae2;  
-      b[i] = x[i] / sigmae2;
-      c[i] = -0.5 * (x[i]*b[i] + log(2*G_PI*sigmae2));
-    } else {
-      a[i] = b[i] = c[i] = 0;
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    // Methods
+    //...
+    inline void InitNode(uint i) {
+      
+      if(i < this->ref_tree_.num_tips()) {
+        a[i] = -0.5 / sigmae2;  
+        b[i] = x[i] / sigmae2;
+        c[i] = -0.5 * (x[i]*b[i] + log(2*G_PI*sigmae2));
+      } else {
+        a[i] = b[i] = c[i] = 0;
+      }
     }
-  }
-  //...
-};
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `void VisitNode(uint i)` 
@@ -345,27 +387,29 @@ public:
 This method is called on each tip or internal node (EXCLUDING THE ROOT) in the tree after `PruneNode` has been called on each descendant of i (if in a post-order traversal) or after `VisitNode` has been called on the parent of i (if in a pre-order traversal). In a post-order traversal, the method is the perfect place to calculate the state of node i using the previously calculated states of its descendants. This method SHOULD NOT BE USED FOR ALTERING THE STATE of i's parent, because this could enter in conflict with a concurrent execution of VisitNode on a sibling of i (see also `PruneNode` below). For the `AbcPMM` class, this is defined as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  // Methods
-  //...
-  inline void VisitNode(uint i) {
-    double t = this->ref_tree_.LengthOfBranch(i);
-    double d = 1 - 2*a[i]*sigma2*t;
-    
-    // the order is important here because for c[i] we use the previous values 
-    // of a[i] and b[i].
-    c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
-    a[i] /= d;
-    b[i] /= d;
-  }
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    // Methods
+    //...
+    inline void VisitNode(uint i) {
+      double t = this->ref_tree_.LengthOfBranch(i);
+      double d = 1 - 2*a[i]*sigma2*t;
+      
+      // the order is important here because for c[i] we use the previous values 
+      // of a[i] and b[i].
+      c[i] = c[i] - 0.5*log(d) + 0.5*b[i]*b[i]*sigma2*t/d;
+      a[i] /= d;
+      b[i] /= d;
+    }
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 
@@ -374,22 +418,24 @@ public:
 This method is called on each tip or internal node (EXCLUDING THE ROOT) after `VisitNode(i)` and in sync with `PruneNode(k, i_parent)`, for any sibling k of i.  Thus, it is safe to use `PruneNode` to update the state of i_parent.  For the `AbcPMM` class, this is defined as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  // Methods
-  //...
-  inline void PruneNode(uint i, uint j) {
-    a[j] = a[j] + a[i];
-    b[j] = b[j] + b[i];
-    c[j] = c[j] + c[i];
-  }
-  //...
-};
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    // Methods
+    //...
+    inline void PruneNode(uint i, uint j) {
+      a[j] = a[j] + a[i];
+      b[j] = b[j] + b[i];
+      c[j] = c[j] + c[i];
+    }
+    //...
+  };
+} // END namespace PMMUsingSPLITT
 ```
 
 #### `StateType StateAtRoot() const` (post-order traversal only)
@@ -397,30 +443,29 @@ public:
 This method is called after `PruneNode` has been called on each direct descendant of the root node, that is after the post-order traversal has been finished. If necessary, `VisitNode(i_root)` can be called here. For the `AbcPMM` class, this is defined as follows:
 
 ```{Rcpp, eval=FALSE}
-// Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
-template<class Tree>
-class AbcPMM: public TraversalSpecification<Tree> {
-public:
-  // Typedefs
-  // Internal data-fields
-  // Constructor
-  // Methods
-  //...
-  StateType StateAtRoot() const {
-    vec res(3);
-    res[0] = a[this->ref_tree_.num_nodes() - 1];
-    res[1] = b[this->ref_tree_.num_nodes() - 1];
-    res[2] = c[this->ref_tree_.num_nodes() - 1];
-    return res;
+namespace PMMUsingSPLITT {
+  // Calculates the quadratic polynomial coefficients a, b, c for the PMM log-likelihood.
+  template<class Tree>
+  class AbcPMM: public TraversalSpecification<Tree> {
+  public:
+    // Typedefs
+    // Internal data-fields
+    // Constructor
+    // Methods
+    //...
+    StateType StateAtRoot() const {
+      vec res(3);
+      res[0] = a[this->ref_tree_.num_nodes() - 1];
+      res[1] = b[this->ref_tree_.num_nodes() - 1];
+      res[2] = c[this->ref_tree_.num_nodes() - 1];
+      return res;
+    };
   };
-};
+} // END namespace PMMUsingSPLITT
 ```
   
-# A note on virtual methods
-
-*Why doesn't SPLITT use virtual methods for the node-traversal operations?*
-
-I have been asked this question mostly by programmers in Java or other languages who are not familiar with C++. In one word, the answer is *performance*. The power of virtual methods is that, at runtime, the correct method definition is called even if the exact class containing this definition was not known during the compilation. This can be very useful, e.g. in cases where the logical workflow of the program depends on the user input during the execution. Technically, this is accomplished through *runtime dynamic binding* as opposed to the *compile-time static binding* used in templates. The drawback of *dynamic binding* is that it disables some tricks done by the compiler to make our code faster. Among these tricks are *method inlining* and *vectorized operations* (if the methods is called within a loop). This is why, in designing SPLITT, I preferred using static binding whenever possible and restricting/delay the use of virtual methods only for the situations where this is really needed. Still, it is always possible to have the node-traversal operations call other *virtual* methods to achieve this form of polymorphism. 
-  
 # Next steps
-With that, we finished the definition of the `AbcPMM` `TraversalSpecification`-class. The next step is to see how this specification can be applied during a traversal on some example input data. This is described in the  [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.
+
+Now, it may be useful to have a look at a class diagram of the SPLITT library. This would provide an overview of all classes, methods and typedefs used by SPLITT. You can such a diagram [here](./SPLITTOverview.html). 
+
+Once having enjoyed this birth's view on the library, the next step would be to see how the `TraversalSpecification` specification can be applied during a traversal on some example input data. This is described in [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html).

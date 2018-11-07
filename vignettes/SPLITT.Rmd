@@ -56,60 +56,22 @@ Here is what you need before you can start working with SPLITT:
     
 * Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package of your own.
 
-# Compiling and running the PMM example
-Being a software library SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your code where SPLITT would expect it to be. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Below I will show one such example. 
+# The SPLITT API
 
-## Downloading the example files from github
+Being a software library, SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your program where SPLITT would expect it to find it. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. 
 
-In a local directory save the following links with the same file-names:
+# What is in the SPLITT online documetation
 
-* [SPLITT.h](https://raw.githubusercontent.com/venelin/SPLITT/master/src/SPLITT.h)
-* [PMMLogLikelihood.cpp](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/PMMLogLikelihood.cpp) 
-* [input.txt](https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/input.txt)
+The goal of this web-site is to provide examples and a technical reference for SPLITT. This inormation is organized in the following pages:
 
-## Compiling your code
+* The [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide shows how to define the application specific data-type and node-traversal operations for a simple mathematical model of trait evolution called "PMM". You will not need to understand the biological interpretation of the model. Rahter, this tutorial will teach you what are the data types and methods that need to be defined in a `TraversalSpecification`-class. I think that this is the ideal place to start. 
+* The [View from above](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the classes in the SPLITT API using a UML class diagram. If you are familiar with UML class diagrams, and/or prefer a top-down approach to understanding a given software, you can read this guide first, then, read the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html).
+* The [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide shows how to create and run a SPLITT traversal task. This tutorial uses `TraversalSpecification`-class defined in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) to build a simple console appication reading from the standard input `std::cin` and writing to the stadard output `std::cout`. 
+* The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package. This tutorial uses the `TraversalSpecification`-class defined in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) to build an Rcpp-module. 
 
-Go to the directory with the downloaded files and execute the following command:
+All examples discussed in the user guides can be found in the following two sub-directories in the [SPLITT github repository](https://github.com/venelin/SPLITT):
 
-```{bash, eval=FALSE}
-# Feel free to replace the name of the executable with your C++ compiler
-clang++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp
-```
+* [PMMUsingSPLITT-console-app](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app) is the console application described in [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html). 
+* [PMMUsingSPLITT-R-package](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package) is the R-package described in [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html).
 
-This will compile and link the file main.cpp into an executable file called "main". If the compilation runs fine you should see no error messages.
-
-## Testing the program
-
-If the compilation was successful, type the following command.
-
-```{bash, eval=FALSE}
-./PMMLogLikelihood <input.txt
-```
-
-With the exceptino of the line starting with `"OpenMP-version:"`, the above command should produce the following output:
-
-```{bash, eval=FALSE}
-Hello from the SPLITT PMM example!
-Reading the input tree...
-Reading the trait data...
-OpenMP-version: 201107
-Main loop...
-  Calculating a, b, c at the root for sigma=0.5 and sigmae=1
-  a=-0.432535, b=0.630659, c=-8.21595
-  LL(gM=0.1, sigma=0.5, sigmae=1): -8.15721
-  Calculating a, b, c at the root for sigma=0.8 and sigmae=0.4
-  a=-0.205491, b=0.285864, c=-9.09873
-  LL(gM=1.5, sigma=0.8, sigmae=0.4): -9.13229
-Main loop done.
-Good bye!
-```
-
-If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header "omp.h" was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
-
-# Next steps
-
-The next goal is to understand what the PMMLogLikelihood program actually does. We will do this in two steps:
-
-- First, we will learn how to define a `TraversalSpecification` class in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide.
-- Then, we will see how the `TraversalSpecification` class is used to create and execute a `TraversalTask` in the [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.
 
