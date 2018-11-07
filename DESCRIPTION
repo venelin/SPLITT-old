@@ -25,7 +25,8 @@ Imports:
     data.table
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    devtools
 RoxygenNote: 6.1.0
 BuildVignettes: false
 VignetteBuilder: knitr, rmarkdown
