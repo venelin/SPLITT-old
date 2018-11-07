@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-In this tutorial I show step by step how to build a simple console appication (reading from the standard input `std::cin` and writing to the stadard output `std::cout`) that is using the `AbcPMM` `TraversalSpecificaton`-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the [SPLITT github repository](https://github.com/venelin/SPLITT): 
+In this tutorial, I show step by step how to build a simple console appication (reading from the standard input `std::cin` and writing to the stadard output `std::cout`) that is using the `AbcPMM` `TraversalSpecificaton`-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the [SPLITT github repository](https://github.com/venelin/SPLITT): 
 
 [PMMUsingSPLITT-console-app](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app) 
 

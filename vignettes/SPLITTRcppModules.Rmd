@@ -12,26 +12,80 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-<!-- TODO Add the following to the header:
 
-bibliography: REFERENCES.bib
--->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The R-package Rcpp provides a nice way to expose the functionality of a C++ class 
-to an R script or a package. The SPLITT R-package provides an example of how to 
-create a `TraversalTask` object and to call its method `TraverseTree`. This is 
-based on Rcpp modules described in Chapter 7 of the following book:
+
+In this tutorial, I show step by step how to build an R-package that is using the `AbcPMM` `TraversalSpecificaton`-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the [SPLITT github repository](https://github.com/venelin/SPLITT): 
+
+[PMMUsingSPLITT-R-package](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package) 
+
+This example is based on the R-package Rcpp, which provides a nice way to expose the functionality of a C++ class to an R script or an R-package. The PMMUsingSPLITT package provides an example of how to create a `TraversalTask` object and to invoke  its method `TraverseTree` from R. Specifically, this is based on Rcpp modules as described in Chapter 7 of the following book:
 
 Eddelbuettel, D. (2013). Seamless R and C++ Integration with Rcpp. New York, NY: Springer Science & Business Media. http://doi.org/10.1007/978-1-4614-6868-4 
 
-The sections below describe the steps of exposing the log-likelihood calculation of the PMM implemented in the class `AbcPMM` to the an R-package (see the [Writing a SPLITT traversal specification guide](./SPLITTTraversalSpecification.html) for details on the `AbcPMM`-class).
 
-## Creating the package project
+# What is in the PMMUsingSPLITT R-package?
 
-The first step is to create the project for our package. 
+The PMMUsingSPLITT R-package follows the directory structure of a typical R-package including C++ code. The package has been initialized using a call to the function `Rcpp::Rcpp.package.skeleton`:
+
+```{r, eval=FALSE}
+Rcpp::Rcpp.package.skeleton("PMMUsingSPLITT")
+```
+
+Then, the created directory PMMUsingSPLITT has been manually renamed to PMMUsingSPLITT-R-package and the default example R and C++ files have been replaced by the code files specific for the PMM log-likelihood calculation. Here are the final  directories and files found in the package:
+
+```{bash, eval=FALSE, echo=TRUE}
+ls -Rlt PMMUsingSPLITT-R-package
+```
+
+```{bash, eval=FALSE, echo=TRUE}
+total 24
+drwxr-xr-x  8 vmitov  1029  272 Nov  7 22:54 src
+drwxr-xr-x  5 vmitov  1029  170 Nov  7 22:53 R
+drwxr-xr-x  7 vmitov  1029  238 Nov  7 22:53 man
+drwxr-xr-x  3 vmitov  1029  102 Nov  7 22:53 tests
+-rw-r--r--  1 vmitov  1029  643 Nov  7 14:45 DESCRIPTION
+-rw-r--r--  1 vmitov  1029  235 Nov  7 14:45 NAMESPACE
+-rw-r--r--  1 vmitov  1029  420 Nov  7 11:27 Read-and-delete-me
+
+./src:
+total 224
+-rw-r--r--  1 vmitov  1029   2658 Nov  7 16:11 RCPP__AbcPMM.cpp
+-rw-r--r--  1 vmitov  1029   3462 Nov  7 16:10 AbcPMM.h
+-rw-r--r--  1 vmitov  1029    590 Nov  7 14:47 RcppExports.cpp
+-rw-r--r--  1 vmitov  1029   1318 Nov  7 11:54 NumericTraitData.h
+-rw-r--r--  1 vmitov  1029  93322 Nov  7 11:47 SPLITT.h
+-rw-r--r--  1 vmitov  1029   3048 Nov  7 11:35 Makevars
+
+./R:
+total 32
+-rw-r--r--  1 vmitov  1029  5347 Nov  7 14:52 MiniBenchmark.R
+-rw-r--r--  1 vmitov  1029  3713 Nov  7 14:40 PMM.R
+-rw-r--r--  1 vmitov  1029  1135 Nov  7 11:43 zzz.R
+
+./man:
+total 40
+-rw-r--r--  1 vmitov  1029   712 Nov  7 11:58 MiniBenchmark.Rd
+-rw-r--r--  1 vmitov  1029   573 Nov  7 11:58 NewPMMCppObject.Rd
+-rw-r--r--  1 vmitov  1029   757 Nov  7 11:58 PMMLogLik.Rd
+-rw-r--r--  1 vmitov  1029  1549 Nov  7 11:58 PMMLogLikCpp.Rd
+-rw-r--r--  1 vmitov  1029   842 Nov  7 11:27 PMMUsingSPLITT-package.Rd
+
+./tests:
+total 0
+drwxr-xr-x  4 vmitov  1029  136 Nov  7 14:12 testthat
+
+./tests/testthat:
+total 16
+-rw-r--r--  1 vmitov  1029  317 Nov  7 14:56 test-PMMLogLikelihoodSpeed.R
+-rw-r--r--  1 vmitov  1029  582 Nov  7 14:13 test-PMMLogLikelihoodValue.R
+```
+
+
+
 
 
 ## Writing a factory function for the `ParallelPruningAbcPMM` traversal task
@@ -121,7 +175,7 @@ devtools::install("./PMMUsingSPLITT-R-package")
 ```
 
 
-```{r, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=TRUE}
 capture <- '✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
 ─  preparing ‘PMMUsingSPLITT’:
 ✔  checking DESCRIPTION meta-information ...
@@ -129,7 +183,7 @@ capture <- '✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLIT
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
 ─  building ‘PMMUsingSPLITT_1.0.tar.gz’
-   Warning: invalid uid value replaced by that for user 'nobody'
+   Warning: invalid uid value replaced by that for user \'nobody\'
    
 Running /Library/Frameworks/R.framework/Resources/bin/R CMD INSTALL \
   /var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T//Rtmpk9L09F/PMMUsingSPLITT_1.0.tar.gz --install-tests 

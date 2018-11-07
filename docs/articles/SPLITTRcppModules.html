@@ -97,18 +97,57 @@
 
     
     
-<!-- TODO Add the following to the header:
-
-bibliography: REFERENCES.bib
--->
-<p>The R-package Rcpp provides a nice way to expose the functionality of a C++ class to an R script or a package. The SPLITT R-package provides an example of how to create a <code>TraversalTask</code> object and to call its method <code>TraverseTree</code>. This is based on Rcpp modules described in Chapter 7 of the following book:</p>
+<p>In this tutorial, I show step by step how to build an R-package that is using the <code>AbcPMM</code> <code>TraversalSpecificaton</code>-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>:</p>
+<p><a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package">PMMUsingSPLITT-R-package</a></p>
+<p>This example is based on the R-package Rcpp, which provides a nice way to expose the functionality of a C++ class to an R script or an R-package. The PMMUsingSPLITT package provides an example of how to create a <code>TraversalTask</code> object and to invoke its method <code>TraverseTree</code> from R. Specifically, this is based on Rcpp modules as described in Chapter 7 of the following book:</p>
 <p>Eddelbuettel, D. (2013). Seamless R and C++ Integration with Rcpp. New York, NY: Springer Science &amp; Business Media. <a href="http://doi.org/10.1007/978-1-4614-6868-4" class="uri">http://doi.org/10.1007/978-1-4614-6868-4</a></p>
-<p>The sections below describe the steps of exposing the log-likelihood calculation of the PMM implemented in the class <code>AbcPMM</code> to the an R-package (see the <a href="./SPLITTTraversalSpecification.html">Writing a SPLITT traversal specification guide</a> for details on the <code>AbcPMM</code>-class).</p>
-<div id="creating-the-package-project" class="section level2">
-<h2 class="hasAnchor">
-<a href="#creating-the-package-project" class="anchor"></a>Creating the package project</h2>
-<p>The first step is to create the project for our package.</p>
-</div>
+<div id="what-is-in-the-pmmusingsplitt-r-package" class="section level1">
+<h1 class="hasAnchor">
+<a href="#what-is-in-the-pmmusingsplitt-r-package" class="anchor"></a>What is in the PMMUsingSPLITT R-package?</h1>
+<p>The PMMUsingSPLITT R-package follows the directory structure of a typical R-package including C++ code. The package has been initialized using a call to the function <code><a href="http://www.rdocumentation.org/packages/Rcpp/topics/Rcpp.package.skeleton">Rcpp::Rcpp.package.skeleton</a></code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Rcpp<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/Rcpp/topics/Rcpp.package.skeleton">Rcpp.package.skeleton</a></span>(<span class="st">"PMMUsingSPLITT"</span>)</code></pre></div>
+<p>Then, the created directory PMMUsingSPLITT has been manually renamed to PMMUsingSPLITT-R-package and the default example R and C++ files have been replaced by the code files specific for the PMM log-likelihood calculation. Here are the final directories and files found in the package:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> -Rlt PMMUsingSPLITT-R-package</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">total</span> 24
+<span class="ex">drwxr-xr-x</span>  8 vmitov  1029  272 Nov  7 22:54 src
+<span class="ex">drwxr-xr-x</span>  5 vmitov  1029  170 Nov  7 22:53 R
+<span class="ex">drwxr-xr-x</span>  7 vmitov  1029  238 Nov  7 22:53 man
+<span class="ex">drwxr-xr-x</span>  3 vmitov  1029  102 Nov  7 22:53 tests
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  643 Nov  7 14:45 DESCRIPTION
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  235 Nov  7 14:45 NAMESPACE
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  420 Nov  7 11:27 Read-and-delete-me
+
+<span class="ex">.</span>/src:
+<span class="ex">total</span> 224
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   2658 Nov  7 16:11 RCPP__AbcPMM.cpp
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   3462 Nov  7 16:10 AbcPMM.h
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029    590 Nov  7 14:47 RcppExports.cpp
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   1318 Nov  7 11:54 NumericTraitData.h
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  93322 Nov  7 11:47 SPLITT.h
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   3048 Nov  7 11:35 Makevars
+
+<span class="ex">.</span>/R:
+<span class="ex">total</span> 32
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  5347 Nov  7 14:52 MiniBenchmark.R
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  3713 Nov  7 14:40 PMM.R
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  1135 Nov  7 11:43 zzz.R
+
+<span class="ex">.</span>/man:
+<span class="ex">total</span> 40
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   712 Nov  7 11:58 MiniBenchmark.Rd
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   573 Nov  7 11:58 NewPMMCppObject.Rd
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   757 Nov  7 11:58 PMMLogLik.Rd
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  1549 Nov  7 11:58 PMMLogLikCpp.Rd
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029   842 Nov  7 11:27 PMMUsingSPLITT-package.Rd
+
+<span class="ex">.</span>/tests:
+<span class="ex">total</span> 0
+<span class="ex">drwxr-xr-x</span>  4 vmitov  1029  136 Nov  7 14:12 testthat
+
+<span class="ex">./tests</span>/testthat:
+<span class="ex">total</span> 16
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  317 Nov  7 14:56 test-PMMLogLikelihoodSpeed.R
+<span class="ex">-rw-r--r--</span>  1 vmitov  1029  582 Nov  7 14:13 test-PMMLogLikelihoodValue.R</code></pre></div>
 <div id="writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task" class="section level2">
 <h2 class="hasAnchor">
 <a href="#writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task" class="anchor"></a>Writing a factory function for the <code>ParallelPruningAbcPMM</code> traversal task</h2>
@@ -189,6 +228,33 @@ RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
 <a href="#installing-the-splitt-r-package" class="anchor"></a>Installing the SPLITT R-package</h2>
 <p>I recommend installing the latest package version from github. From the R-prompt, type the following command:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install">install</a></span>(<span class="st">"./PMMUsingSPLITT-R-package"</span>)</code></pre></div>
+<pre><code>## ✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
+## ─  preparing ‘PMMUsingSPLITT’:
+## ✔  checking DESCRIPTION meta-information ...
+## ─  cleaning src
+## ─  checking for LF line-endings in source and make files and shell scripts
+## ─  checking for empty or unneeded directories
+## ─  building ‘PMMUsingSPLITT_1.0.tar.gz’
+##    Warning: invalid uid value replaced by that for user 'nobody'
+##    
+## Running /Library/Frameworks/R.framework/Resources/bin/R CMD INSTALL 
+##   /var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T//Rtmpk9L09F/PMMUsingSPLITT_1.0.tar.gz --install-tests 
+## * installing to library ‘/Users/vmitov/Library/R/3.5/library’
+## * installing *source* package ‘PMMUsingSPLITT’ ...
+## ** libs
+## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__AbcPMM.cpp -o RCPP__AbcPMM.o
+## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RcppExports.cpp -o RcppExports.o
+## /usr/local/clang6/bin/clang++ -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o PMMUsingSPLITT.so RCPP__AbcPMM.o RcppExports.o -fopenmp -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+## installing to /Users/vmitov/Library/R/3.5/library/PMMUsingSPLITT/libs
+## ** R
+## ** tests
+## ** byte-compile and prepare package for lazy loading
+## ** help
+## *** installing help indices
+## ** building package indices
+## ** testing if installed package can be loaded
+## * DONE (PMMUsingSPLITT)
+## Reloading attached PMMUsingSPLITT</code></pre>
 </div>
 <div id="see-if-it-works-on-your-computer" class="section level2">
 <h2 class="hasAnchor">
@@ -204,19 +270,20 @@ RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
 ## Number of threads: 8 
 ## Measuring calculation times...</code></pre>
 <pre><code>##    model                                            mode time.ms
-## 1    PMM                                      R (serial)   167.0
-## 2    PMM                                      C++ (AUTO)     0.4
-## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     1.1
-## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     1.2
-## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     1.2
-## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.4
+## 1    PMM                                      R (serial)   116.0
+## 2    PMM                                      C++ (AUTO)     0.6
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.7
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.7
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.9
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.9
 ## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.4
 ## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.4
-## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   154.4
-## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.5
-## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.4
-## 12   PMM                        C++ (HYBRID_LOOP_VISITS)     0.8
-## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.6</code></pre>
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   156.1
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     1.4
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.3
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)     0.3
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     1.3</code></pre>
+</div>
 </div>
   </div>
 
@@ -225,10 +292,13 @@ RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#creating-the-package-project">Creating the package project</a></li>
-      <li><a href="#writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task">Writing a factory function for the <code>ParallelPruningAbcPMM</code> traversal task</a></li>
+<li>
+<a href="#what-is-in-the-pmmusingsplitt-r-package">What is in the PMMUsingSPLITT R-package?</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task">Writing a factory function for the <code>ParallelPruningAbcPMM</code> traversal task</a></li>
       <li><a href="#installing-the-splitt-r-package">Installing the SPLITT R-package</a></li>
       <li><a href="#see-if-it-works-on-your-computer">See if it works on your computer</a></li>
+      </ul>
+</li>
       </ul>
 </div>
       </div>
