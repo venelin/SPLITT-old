@@ -36,6 +36,8 @@
 using namespace SPLITT;
 using namespace PMMUsingSPLITT;
 
+typedef TraversalTask< AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
+
 
 ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
     Rcpp::List const& tree, vec const& x) {
