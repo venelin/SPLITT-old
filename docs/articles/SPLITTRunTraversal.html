@@ -57,10 +57,10 @@
       <a href="../articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a>
     </li>
     <li>
-      <a href="../articles/SPLITTRunTraversal.html">Running a traversal</a>
+      <a href="../articles/SPLITTOverview.html">View from above</a>
     </li>
     <li>
-      <a href="../articles/SPLITTOverview.html">View from above</a>
+      <a href="../articles/SPLITTRunTraversal.html">Running a traversal</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
@@ -97,6 +97,8 @@
 
     
     
+<p>In this tutorial I show step by step how to build a simple console appication (reading from the standard input <code>std::cin</code> and writing to the stadard output <code>std::cout</code>) that is using the <code>AbcPMM</code> <code>TraversalSpecificaton</code>-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>:</p>
+<p><a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app">PMMUsingSPLITT-console-app</a></p>
 <div id="the-traversaltask-template-class" class="section level1">
 <h1 class="hasAnchor">
 <a href="#the-traversaltask-template-class" class="anchor"></a>The <code>TraversalTask</code> template class</h1>
@@ -135,7 +137,9 @@
 <span class="ex">ancestor3</span> root 6
 <span class="ex">ancestor2</span> root 4.5</code></pre></div>
 <p>Here is the C++ code for reading the tree in the above format from the standard input stream (<code>std::cin</code>):</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> PMMUsingSPLITT;
+<span class="kw">using</span> <span class="kw">namespace</span> SPLITT;
+<span class="kw">using</span> <span class="kw">namespace</span> std;
 
 <span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
 
@@ -268,7 +272,7 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
 <li>
 <code>par</code> - this is a <code>ParameterType const&amp;</code>. If you don’t remember how we defined <code>ParallelPruningAbcPMM::ParameterType</code>, just look back in the <a href="./SPLITTTraversalSpecification.html#parametertype">Writing a traversal specification</a>-manual).</li>
 <li>
-<code>mode</code> - this is an <code>uint</code> specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a <a href="./SPLITTTraversalModels.html">separate vignette</a>. For now, it is sufficient to know that specifying <code>0</code> for this value tells SPLITT to run in mode <code>AUTO</code>. In this mode, SPLITT will try several modes during the first several <code>TraverseTree</code> calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the <code>TraversalTask</code>’s <code>TraverseTree()</code> method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference.</li>
+<code>mode</code> - this is an <code>uint</code> specifying the whether SPLITT should performe the traversal using multiple cores and what parallelization order should be applied. This is a more technical topic covered in a <a href="./SPLITTTraversalModes.html">separate guide</a>. For now, it is sufficient to know that specifying <code>0</code> for this value tells SPLITT to run in mode <code>AUTO</code>. In this mode, SPLITT will try several modes during the first several <code>TraverseTree</code> calls and will stick to the one that resulted in fastest execution for the remaining executions. In the ideal use-case, the <code>TraversalTask</code>’s <code>TraverseTree()</code> method will be called repeatedly, varying the model parameters, the input data and branch lengths on a fixed tree topology. This encompasses all scenarios where a model is fitted to a fixed tree and data, e.g. ML or Bayesian PCM inference.</li>
 </ul>
 <p>Here is the corresponding C++ code for reading the main loop:</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std;
@@ -301,83 +305,39 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
   <span class="cf">return</span> <span class="dv">0</span>;
 }</code></pre></div>
 </div>
-<div id="the-entire-code" class="section level2">
+<div id="compiling-the-program" class="section level2">
 <h2 class="hasAnchor">
-<a href="#the-entire-code" class="anchor"></a>The entire code</h2>
-<p>Here is the entire program code:</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typedef</span> TraversalTask&lt; AbcPMM&lt;OrderedTree&lt;<span class="bu">std::</span>string, <span class="dt">double</span>&gt;&gt; &gt; ParallelPruningAbcPMM;
-
-<span class="co">// will be using std::string, std::vector, std::cin and std::cout quite a lot.</span>
-<span class="kw">using</span> <span class="kw">namespace</span> std;
-
-<span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]) {
-  
-  <span class="co">// Will be false if the program is run without any arguments. Pass any argument</span>
-  <span class="co">// after the program name and verbose will be set to true.</span>
-  <span class="dt">bool</span> verbose = (argc &gt; <span class="dv">1</span>); 
-  
-  cout&lt;&lt;<span class="st">"Hello from the SPLITT PMM example!"</span>&lt;&lt;endl;
-  cout&lt;&lt;<span class="st">"Reading the input tree..."</span>&lt;&lt;endl;
-  
-  <span class="co">// Read the number of nodes and tips</span>
-  <span class="ex">uint</span> M, N;
-  cin&gt;&gt;M&gt;&gt;N;
-  
-  <span class="co">// read the tree</span>
-  vector&lt;string&gt; daughters(M<span class="dv">-1</span>);
-  vector&lt;string&gt; parents(M<span class="dv">-1</span>);
-  vec t(M<span class="dv">-1</span>);
-  
-  
-  <span class="cf">for</span>(<span class="dt">int</span> i=<span class="dv">0</span>; i &lt; M<span class="dv">-1</span>; i++) {
-    cin&gt;&gt;daughters[i]&gt;&gt;parents[i]&gt;&gt;t[i];
-  }
-  
-  cout&lt;&lt;<span class="st">"Reading the trait data..."</span>&lt;&lt;endl;
-  vector&lt;string&gt; tip_names(N);
-  vec x(N);
-  
-  <span class="cf">for</span>(<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {
-    cin&gt;&gt;tip_names[i]&gt;&gt;x[i];
-  }
-  
-  <span class="co">// create the data-object</span>
-  <span class="kw">typename</span> ParallelPruningAbcPMM::DataType data(tip_names, x);
-  
-  <span class="co">// Create the TraversalTask object: this will create the OrderedTree and the </span>
-  <span class="co">// AbcPMM objects in the memory.</span>
-  ParallelPruningAbcPMM pruningTask(parents, daughters, t, data);
-  
-  <span class="co">// model parameters</span>
-  <span class="dt">double</span> gM, sigma, sigmae;
-  vec param(<span class="dv">2</span>); 
-  
-  cout&lt;&lt;<span class="st">"Main loop..."</span>&lt;&lt;endl;
-  <span class="co">// run this loop as long as parameters can be read from the standard input</span>
-  <span class="cf">while</span>( cin&gt;&gt;gM&gt;&gt;sigma&gt;&gt;sigmae ) {
-    param[<span class="dv">0</span>] = sigma*sigma;
-    param[<span class="dv">1</span>] = sigmae*sigmae;
-  
-    cout&lt;&lt;<span class="st">"  Calculating a, b, c at the root for sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">" and sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="bu">std::</span>endl;
-    
-    vec abc = pruningTask.TraverseTree(param, <span class="dv">0</span>);
-    
-    cout&lt;&lt;<span class="st">"  a="</span>&lt;&lt;abc[<span class="dv">0</span>]&lt;&lt;<span class="st">", b="</span>&lt;&lt;abc[<span class="dv">1</span>]&lt;&lt;<span class="st">", c="</span>&lt;&lt;abc[<span class="dv">2</span>]&lt;&lt;<span class="bu">std::</span>endl;
-    
-    <span class="dt">double</span> LL = abc[<span class="dv">0</span>]*gM*gM + abc[<span class="dv">1</span>]*gM + abc[<span class="dv">2</span>];
-    cout&lt;&lt;<span class="st">"  LL(gM="</span>&lt;&lt;gM&lt;&lt;<span class="st">", sigma="</span>&lt;&lt;sigma&lt;&lt;<span class="st">", sigmae="</span>&lt;&lt;sigmae&lt;&lt;<span class="st">"): "</span>&lt;&lt;LL&lt;&lt;endl;
-  } 
-  cout&lt;&lt;<span class="st">"Main loop done."</span>&lt;&lt;endl;
-
-    <span class="bu">std::</span>cout&lt;&lt;<span class="st">"Good bye!"</span>&lt;&lt;<span class="bu">std::</span>endl;
-  <span class="cf">return</span> <span class="dv">0</span>;
-}</code></pre></div>
+<a href="#compiling-the-program" class="anchor"></a>Compiling the program</h2>
+<p>To compile the program we execute the following command from the directory PMMUsingSPLITT-console-app:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Feel free to replace the name of the executable with your C++ compiler</span>
+<span class="fu">clang</span>++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp</code></pre></div>
+<p>This will compile and link the file PMMLogLikelihood.cpp into an executable file called “PMMLogLikelihood”. If the compilation runs fine you should see no error messages.</p>
+</div>
+<div id="testing-the-program" class="section level2">
+<h2 class="hasAnchor">
+<a href="#testing-the-program" class="anchor"></a>Testing the program</h2>
+<p>If the compilation was successful, type the following command.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./PMMLogLikelihood</span> <span class="op">&lt;</span>input.txt</code></pre></div>
+<p>With the exceptino of the line starting with <code>"OpenMP-version:"</code>, the above command should produce the following output:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">Hello</span> from the SPLITT PMM example!
+<span class="ex">Reading</span> the input tree...
+<span class="ex">Reading</span> the trait data...
+<span class="ex">OpenMP-version</span>: 201107
+<span class="ex">Main</span> loop...
+  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.5 and sigmae=1
+  <span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630659, <span class="va">c=</span>-8.21595
+  <span class="ex">LL</span>(gM=0.1, sigma=0.5, sigmae=1)<span class="bu">:</span> -8.15721
+  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.8 and sigmae=0.4
+  <span class="va">a=</span>-0.205491, <span class="va">b=</span>0.285864, <span class="va">c=</span>-9.09873
+  <span class="ex">LL</span>(gM=1.5, sigma=0.8, sigmae=0.4)<span class="bu">:</span> -9.13229
+<span class="ex">Main</span> loop done.
+<span class="ex">Good</span> bye!</code></pre></div>
+<p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
 </div>
 </div>
 <div id="next-steps" class="section level1">
 <h1 class="hasAnchor">
 <a href="#next-steps" class="anchor"></a>Next steps</h1>
-<p>Now, it may be useful to have a look at a class diagram of the SPLITT library. This would provide an overview of all classes, methods and typedefs used by SPLITT. You can such a diagram <a href="./SPLITTOverview.html">here</a>.</p>
 <p>The next steps depend on your desired application. If your goal is to call SPLITT from an R-package, you are lucky, because I’ve already done this many times and I have described how to do this in <a href="./SPLITTRcppModules.html">this guide</a>. Otherwise, if you need help, you can ask a question in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
 </div>
   </div>
@@ -394,7 +354,8 @@ tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumen
       <li><a href="#reading-the-trait-data">Reading the trait data</a></li>
       <li><a href="#creating-the-traversaltask-object">Creating the <code>TraversalTask</code> object</a></li>
       <li><a href="#the-main-loop">The main loop</a></li>
-      <li><a href="#the-entire-code">The entire code</a></li>
+      <li><a href="#compiling-the-program">Compiling the program</a></li>
+      <li><a href="#testing-the-program">Testing the program</a></li>
       </ul>
 </li>
       <li><a href="#next-steps">Next steps</a></li>

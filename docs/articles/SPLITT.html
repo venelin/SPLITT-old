@@ -57,10 +57,10 @@
       <a href="../articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a>
     </li>
     <li>
-      <a href="../articles/SPLITTRunTraversal.html">Running a traversal</a>
+      <a href="../articles/SPLITTOverview.html">View from above</a>
     </li>
     <li>
-      <a href="../articles/SPLITTOverview.html">View from above</a>
+      <a href="../articles/SPLITTRunTraversal.html">Running a traversal</a>
     </li>
     <li>
       <a href="../articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>
@@ -143,57 +143,27 @@ bibliography: REFERENCES.bib
 <li><p>Optional: Rcpp and RcppArmadillo packages in R. Installing these packages will be needed if you wish to use SPLITT as a back-end for an R-package of your own.</p></li>
 </ul>
 </div>
-<div id="compiling-and-running-the-pmm-example" class="section level1">
+<div id="the-splitt-api" class="section level1">
 <h1 class="hasAnchor">
-<a href="#compiling-and-running-the-pmm-example" class="anchor"></a>Compiling and running the PMM example</h1>
-<p>Being a software library SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your code where SPLITT would expect it to be. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations. Below I will show one such example.</p>
-<div id="downloading-the-example-files-from-github" class="section level2">
-<h2 class="hasAnchor">
-<a href="#downloading-the-example-files-from-github" class="anchor"></a>Downloading the example files from github</h2>
-<p>In a local directory save the following links with the same file-names:</p>
+<a href="#the-splitt-api" class="anchor"></a>The SPLITT API</h1>
+<p>Being a software library, SPLITT does not provide a high-level end-user interface. Rather, SPLITT is used via its application programming interface (API). In other words, you use the library by putting your application specific code at several locations in your program where SPLITT would expect it to find it. The easiest way to do this is to start from an example and use it as a skeleton for your own code, i.e. replace the code in the example with your application specific data-types, and traversal operations.</p>
+</div>
+<div id="what-is-in-the-splitt-online-documetation" class="section level1">
+<h1 class="hasAnchor">
+<a href="#what-is-in-the-splitt-online-documetation" class="anchor"></a>What is in the SPLITT online documetation</h1>
+<p>The goal of this web-site is to provide examples and a technical reference for SPLITT. This inormation is organized in the following pages:</p>
 <ul>
-<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/src/SPLITT.h">SPLITT.h</a></li>
-<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/PMMLogLikelihood.cpp">PMMLogLikelihood.cpp</a></li>
-<li><a href="https://raw.githubusercontent.com/venelin/SPLITT/master/console-app/input.txt">input.txt</a></li>
+<li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> guide shows how to define the application specific data-type and node-traversal operations for a simple mathematical model of trait evolution called “PMM”. You will not need to understand the biological interpretation of the model. Rahter, this tutorial will teach you what are the data types and methods that need to be defined in a <code>TraversalSpecification</code>-class. I think that this is the ideal place to start.</li>
+<li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTClasses.html">View from above</a> guide overviews the classes in the SPLITT API using a UML class diagram. If you are familiar with UML class diagrams, and/or prefer a top-down approach to understanding a given software, you can read this guide first, then, read the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a>.</li>
+<li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a> guide shows how to create and run a SPLITT traversal task. This tutorial uses <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build a simple console appication reading from the standard input <code>std::cin</code> and writing to the stadard output <code>std::cout</code>.</li>
+<li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a> guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package. This tutorial uses the <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build an Rcpp-module.</li>
 </ul>
-</div>
-<div id="compiling-your-code" class="section level2">
-<h2 class="hasAnchor">
-<a href="#compiling-your-code" class="anchor"></a>Compiling your code</h2>
-<p>Go to the directory with the downloaded files and execute the following command:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Feel free to replace the name of the executable with your C++ compiler</span>
-<span class="fu">clang</span>++ -Wall -O2 -fopenmp -stdlib=libc++ -L/usr/local/lib -L/Library/Frameworks/R.framework/Resources/lib -o PMMLogLikelihood PMMLogLikelihood.cpp</code></pre></div>
-<p>This will compile and link the file main.cpp into an executable file called “main”. If the compilation runs fine you should see no error messages.</p>
-</div>
-<div id="testing-the-program" class="section level2">
-<h2 class="hasAnchor">
-<a href="#testing-the-program" class="anchor"></a>Testing the program</h2>
-<p>If the compilation was successful, type the following command.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./PMMLogLikelihood</span> <span class="op">&lt;</span>input.txt</code></pre></div>
-<p>With the exceptino of the line starting with <code>"OpenMP-version:"</code>, the above command should produce the following output:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">Hello</span> from the SPLITT PMM example!
-<span class="ex">Reading</span> the input tree...
-<span class="ex">Reading</span> the trait data...
-<span class="ex">OpenMP-version</span>: 201107
-<span class="ex">Main</span> loop...
-  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.5 and sigmae=1
-  <span class="va">a=</span>-0.432535, <span class="va">b=</span>0.630659, <span class="va">c=</span>-8.21595
-  <span class="ex">LL</span>(gM=0.1, sigma=0.5, sigmae=1)<span class="bu">:</span> -8.15721
-  <span class="ex">Calculating</span> a, b, c at the root for sigma=0.8 and sigmae=0.4
-  <span class="va">a=</span>-0.205491, <span class="va">b=</span>0.285864, <span class="va">c=</span>-9.09873
-  <span class="ex">LL</span>(gM=1.5, sigma=0.8, sigmae=0.4)<span class="bu">:</span> -9.13229
-<span class="ex">Main</span> loop done.
-<span class="ex">Good</span> bye!</code></pre></div>
-<p>If the OpenMP-version is equal to 0, then, most likely your compiler does not support OpenMP and the header “omp.h” was not available during compilation. If the OpenMP-version was a different number, then your compiler has an other Open MP version in it. If there have been other differences, e.g. the reported values for a, b and c are different, then there could be a problem, which I am not aware of. Please, report this in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
-</div>
-</div>
-<div id="next-steps" class="section level1">
-<h1 class="hasAnchor">
-<a href="#next-steps" class="anchor"></a>Next steps</h1>
-<p>The next goal is to understand what the PMMLogLikelihood program actually does. We will do this in two steps:</p>
+<p>All examples discussed in the user guides can be found in the following two sub-directories in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>:</p>
 <ul>
-<li>First, we will learn how to define a <code>TraversalSpecification</code> class in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> guide.</li>
-<li>Then, we will see how the <code>TraversalSpecification</code> class is used to create and execute a <code>TraversalTask</code> in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a> guide.</li>
+<li>
+<a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app">PMMUsingSPLITT-console-app</a> is the console application described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a>.</li>
+<li>
+<a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package">PMMUsingSPLITT-R-package</a> is the R-package described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>.</li>
 </ul>
 </div>
   </div>
@@ -205,14 +175,8 @@ bibliography: REFERENCES.bib
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#before-you-start">Before you start</a></li>
       <li><a href="#prerequisites">Prerequisites</a></li>
-      <li>
-<a href="#compiling-and-running-the-pmm-example">Compiling and running the PMM example</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#downloading-the-example-files-from-github">Downloading the example files from github</a></li>
-      <li><a href="#compiling-your-code">Compiling your code</a></li>
-      <li><a href="#testing-the-program">Testing the program</a></li>
-      </ul>
-</li>
-      <li><a href="#next-steps">Next steps</a></li>
+      <li><a href="#the-splitt-api">The SPLITT API</a></li>
+      <li><a href="#what-is-in-the-splitt-online-documetation">What is in the SPLITT online documetation</a></li>
       </ul>
 </div>
       </div>
