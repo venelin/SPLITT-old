@@ -31,7 +31,9 @@
 #include <iostream>
 #include <cmath>
 
-namespace SPLITT {
+namespace PMMUsingSPLITT {
+
+using namespace SPLITT;
 
 template<class Tree>
 class AbcPMM: public TraversalSpecification<Tree> {

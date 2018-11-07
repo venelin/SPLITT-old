@@ -15,8 +15,8 @@ The SPLITT R-package
 
 The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don't need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. Nevertheless, if your final goal is to write a C++ extension that uses SPLITT as a fast back-end for an R-package of your own, the SPLITT package provides an example how you can do that.
 
-Resources
----------
+User guides and resources
+-------------------------
 
 The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html).
 
@@ -26,8 +26,38 @@ The user guides and technical reference for the library are available from the [
 -   The [View from above](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes.
 -   The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
-The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is in this article is used as a coding example in the SPLITT online documentation. The article is currently undergoing peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
+The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
 The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT).
 
 Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
+
+Citing SPLITT in publications
+-----------------------------
+
+To give credit to the SPLITT library in a publication, please cite the following article:
+
+Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library. bioRxiv, 235739. <http://doi.org/10.1101/235739>
+
+Used R-packages
+---------------
+
+Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
+
+-   For calling C++ from R: Rcpp v0.12.19 (Eddelbuettel et al. 2017), RcppArmadillo v0.9.100.5.0 (Eddelbuettel, Francois, and Bates 2016)
+-   For tree processing in R: ape v5.2 (Paradis et al. 2016);
+-   For reporting the test-benchmark: data.table v1.11.8 (Dowle and Srinivasan 2016);
+-   For unit-testing: testthat v2.0.1 (Wickham 2016).
+
+References
+----------
+
+Dowle, Matt, and Arun Srinivasan. 2016. *Data.table: Extension of ‘Data.frame‘*. <https://CRAN.R-project.org/package=data.table>.
+
+Eddelbuettel, Dirk, Romain Francois, JJ Allaire, Kevin Ushey, Qiang Kou, Nathan Russell, Douglas Bates, and John Chambers. 2017. *Rcpp: Seamless R and C++ Integration*. <https://CRAN.R-project.org/package=Rcpp>.
+
+Eddelbuettel, Dirk, Romain Francois, and Doug Bates. 2016. *RcppArmadillo: ’Rcpp’ Integration for the ’Armadillo’ Templated Linear Algebra Library*. <https://CRAN.R-project.org/package=RcppArmadillo>.
+
+Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. *Ape: Analyses of Phylogenetics and Evolution*. <https://CRAN.R-project.org/package=ape>.
+
+Wickham, Hadley. 2016. *Testthat: Unit Testing for R*. <https://CRAN.R-project.org/package=testthat>.

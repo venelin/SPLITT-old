@@ -29,7 +29,10 @@
 #include "./SPLITT.h"
 #include <iostream>
 
-namespace SPLITT {
+namespace PMMUsingSPLITT {
+
+using namespace SPLITT;
+
 template<class NameType>
 struct NumericTraitData {
   // use const references to avoid copying of long vectors

@@ -15,10 +15,9 @@
  parallel pre-order and post-order traversal of trees. The library implements
  several algorithms for parallel lineage traversal and is capable to choose 
  automatically the fastest implementation for a particular visit-node operation
- and data. To use the library, the user writes an implementation of the implicit
- interface class TraversalSpecification defining the types of the input data, 
- node state, and traversal type and the operation to be performed on each node 
- during the traversal. ">
+ and data. To use the library, the user writes TraversalSpecification-class 
+ defining the types of the input data, node state, and traversal type and the
+ operation to be performed on each node during the traversal. ">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -111,9 +110,9 @@
 <a href="#the-splitt-r-package" class="anchor"></a>The SPLITT R-package</h2>
 <p>The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don’t need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. Nevertheless, if your final goal is to write a C++ extension that uses SPLITT as a fast back-end for an R-package of your own, the SPLITT package provides an example how you can do that.</p>
 </div>
-<div id="resources" class="section level2">
+<div id="user-guides-and-resources" class="section level2">
 <h2 class="hasAnchor">
-<a href="#resources" class="anchor"></a>Resources</h2>
+<a href="#user-guides-and-resources" class="anchor"></a>User guides and resources</h2>
 <p>The user guides and technical reference for the library are available from the <a href="https://venelin.github.io/SPLITT/index.html">SPLITT web-page</a>.</p>
 <ul>
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITT.html">Getting started</a> guide shows how to compile and run a console application using SPLITT.</li>
@@ -122,9 +121,48 @@
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTClasses.html">View from above</a> guide overviews the SPLITT classes.</li>
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a> guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.</li>
 </ul>
-<p>The research article “Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library” provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is in this article is used as a coding example in the SPLITT online documentation. The article is currently undergoing peer review for a publication and is available as a preprint from <a href="https://www.biorxiv.org/content/early/2018/10/29/235739">BioRxiv</a>.</p>
+<p>The research article “Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library” provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from <a href="https://www.biorxiv.org/content/early/2018/10/29/235739">BioRxiv</a>.</p>
 <p>The SPLITT source code is located in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>.</p>
 <p>Feature requests, bugs, etc can be reported in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
+</div>
+<div id="citing-splitt" class="section level2">
+<h2 class="hasAnchor">
+<a href="#citing-splitt" class="anchor"></a>Citing SPLITT</h2>
+<p>To give credit to the SPLITT library in a publication, please cite the following article:</p>
+<p>Mitov, V., &amp; Stadler, T. (2018). Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library. bioRxiv, 235739. <a href="http://doi.org/10.1101/235739" class="uri">http://doi.org/10.1101/235739</a></p>
+</div>
+<div id="used-r-packages" class="section level2">
+<h2 class="hasAnchor">
+<a href="#used-r-packages" class="anchor"></a>Used R-packages</h2>
+<p>The SPLITT R-package uses the following 3rd party R-packages:</p>
+<ul>
+<li>For calling C++ from R: Rcpp v0.12.19 <span class="citation">(Eddelbuettel et al. 2017)</span>, RcppArmadillo v0.9.100.5.0 <span class="citation">(Eddelbuettel, Francois, and Bates 2016)</span>
+</li>
+<li>For tree processing in R: ape v5.2 <span class="citation">(Paradis et al. 2016)</span>;</li>
+<li>For reporting the test-benchmark: data.table v1.11.8 <span class="citation">(Dowle and Srinivasan 2016)</span>;</li>
+<li>For unit-testing: testthat v2.0.1 <span class="citation">(Wickham 2016)</span>.</li>
+</ul>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
+<div id="refs" class="references">
+<div id="ref-R-data-table">
+<p>Dowle, Matt, and Arun Srinivasan. 2016. <em>Data.table: Extension of ‘Data.frame‘</em>. <a href="https://CRAN.R-project.org/package=data.table" class="uri">https://CRAN.R-project.org/package=data.table</a>.</p>
+</div>
+<div id="ref-R-Rcpp">
+<p>Eddelbuettel, Dirk, Romain Francois, JJ Allaire, Kevin Ushey, Qiang Kou, Nathan Russell, Douglas Bates, and John Chambers. 2017. <em>Rcpp: Seamless R and C++ Integration</em>. <a href="https://CRAN.R-project.org/package=Rcpp" class="uri">https://CRAN.R-project.org/package=Rcpp</a>.</p>
+</div>
+<div id="ref-R-RcppArmadillo">
+<p>Eddelbuettel, Dirk, Romain Francois, and Doug Bates. 2016. <em>RcppArmadillo: ’Rcpp’ Integration for the ’Armadillo’ Templated Linear Algebra Library</em>. <a href="https://CRAN.R-project.org/package=RcppArmadillo" class="uri">https://CRAN.R-project.org/package=RcppArmadillo</a>.</p>
+</div>
+<div id="ref-R-ape">
+<p>Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. <em>Ape: Analyses of Phylogenetics and Evolution</em>. <a href="https://CRAN.R-project.org/package=ape" class="uri">https://CRAN.R-project.org/package=ape</a>.</p>
+</div>
+<div id="ref-R-testthat">
+<p>Wickham, Hadley. 2016. <em>Testthat: Unit Testing for R</em>. <a href="https://CRAN.R-project.org/package=testthat" class="uri">https://CRAN.R-project.org/package=testthat</a>.</p>
+</div>
+</div>
 </div>
 </div>
   </div>

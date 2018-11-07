@@ -1,5 +1,6 @@
 ---
 output: github_document
+bibliography: vignettes/REFERENCES.bib
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -11,6 +12,7 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/"
 )
 ```
+
 
 # SPLITT: Serial and Parallel LIneage Traversal of Trees
 
@@ -24,7 +26,7 @@ The SPLITT library represents a C++ header file called "SPLITT.h". Technically, 
 
 The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don't need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. Nevertheless, if your final goal is to write a C++ extension that uses SPLITT as a fast back-end for an R-package of your own, the SPLITT package provides an example how you can do that. 
 
-## Resources
+## User guides and resources
 
 The user guides and technical reference for the library are available from the [SPLITT web-page](https://venelin.github.io/SPLITT/index.html). 
 
@@ -34,9 +36,49 @@ The user guides and technical reference for the library are available from the [
 * The [View from above](https://venelin.github.io/SPLITT/articles/SPLITTClasses.html) guide overviews the SPLITT classes. 
 * The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package.
 
-The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 is in this article is used as a coding example in the SPLITT online documentation. The article is currently undergoing peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
+The research article "Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library" provides a general overview of SPLITT. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from [BioRxiv](https://www.biorxiv.org/content/early/2018/10/29/235739).
 
 The SPLITT source code is located in the [SPLITT github repository](https://github.com/venelin/SPLITT). 
 
 Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
+
+## Citing SPLITT
+
+To give credit to the SPLITT library in a publication, please cite the following article:
+
+Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library. bioRxiv, 235739. http://doi.org/10.1101/235739
+
+## Used R-packages
+```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
+treeProcessing <- c("ape")
+data <- c("data.table")
+testing <- c("testthat")
+Rcpp <- c("Rcpp")
+RcppArmadillo <- c("RcppArmadillo")
+
+packagesUsed <- c(treeProcessing, data, testing)
+
+printPackages <- function(packs) {
+  res <- ""
+  for(i in 1:length(packs)) {
+    res <- paste0(res, paste0(packs[i], ' v', packageVersion(packs[i]), ' [@R-', packs[i], ']'))
+    if(i < length(packs)) {
+      res <- paste0(res, ', ')
+    }
+  }
+  res
+}
+
+# Write bib information (this line is executed manually and the bib-file is edited manually after that)
+# knitr::write_bib(packagesUsed, file = "./REFERENCES-R.bib")
+```
+
+The SPLITT R-package uses the following 3rd party R-packages:
+
+* For calling C++ from R: `r printPackages(c(Rcpp, RcppArmadillo))`
+* For tree processing in R: `r printPackages(treeProcessing)`;
+* For reporting the test-benchmark: `r printPackages(data)`;
+* For unit-testing: `r printPackages(testing)`.
+
+## References
 

@@ -20,6 +20,28 @@ bibliography: REFERENCES.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+The R-package Rcpp provides a nice way to expose the functionality of a C++ class 
+to an R script or a package. The SPLITT R-package provides an example of how to 
+create a `TraversalTask` object and to call its method `TraverseTree`. This is 
+based on Rcpp modules described in Chapter 7 of the following book:
+
+Eddelbuettel, D. (2013). Seamless R and C++ Integration with Rcpp. New York, NY: Springer Science & Business Media. http://doi.org/10.1007/978-1-4614-6868-4 
+
+The sections below describe the steps of exposing the log-likelihood calculation of the PMM implemented in the class `AbcPMM` to the an R-package (see the [Writing a SPLITT traversal specification guide](./SPLITTTraversalSpecification.html) for details on the `AbcPMM`-class).
+
+## Creating the package project
+
+The first step is to create the project for our package. 
+
+```{r, eval=TRUE}
+Rcpp::Rcpp.package.skeleton(name="PMMUsingSPLITT", path="..")
+```
+
+
+
+## Writing a factory function for the `ParallelPruningAbcPMM` traversal task
+
+In 
 
 ```{Rcpp, eval=FALSE, echo=TRUE}
 #include <RcppArmadillo.h>

@@ -12,11 +12,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-<!-- TODO Add the following to the header:
-
-bibliography: REFERENCES.bib
--->
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

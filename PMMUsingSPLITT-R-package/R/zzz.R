@@ -1,7 +1,7 @@
 # zzz.R
 # SPLITT
 # 
-# Copyright 2017 Venelin Mitov
+# Copyright 2018 Venelin Mitov
 # 
 # This file is part of SPLITT: a generic C++ library for Serial and Parallel
 # Lineage Traversal of Trees.
@@ -31,4 +31,4 @@
 
 # loading the RCPP C++ modules
 
-loadModule("SPLITT__OrderedTreeStringNodes", TRUE)
+loadModule( "PMMUsingSPLITT__AbcPMM", TRUE )

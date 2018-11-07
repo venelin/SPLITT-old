@@ -9,12 +9,12 @@ Description: SPLITT is a one-header-only generic C++ library for serial and
  parallel pre-order and post-order traversal of trees. The library implements
  several algorithms for parallel lineage traversal and is capable to choose 
  automatically the fastest implementation for a particular visit-node operation
- and data. To use the library, the user writes an implementation of the implicit
- interface class TraversalSpecification defining the types of the input data, 
- node state, and traversal type and the operation to be performed on each node 
- during the traversal. 
+ and data. To use the library, the user writes TraversalSpecification-class 
+ defining the types of the input data, node state, and traversal type and the
+ operation to be performed on each node during the traversal. 
 License: LGPL (>= 3.0)
 LazyData: true
+Encoding: UTF-8
 Depends:
     R (>= 3.1.0),
     Rcpp,

@@ -1,7 +1,7 @@
 # PMM.R
 # SPLITT
 # 
-# Copyright 2017 Venelin Mitov
+# Copyright 2018 Venelin Mitov
 # 
 # This file is part of SPLITT: a generic C++ library for Serial and Parallel
 # Lineage Traversal of Trees.
@@ -32,8 +32,15 @@
 #' \item{sigma2}{unit-time variance increment of the heritable component;}
 #' \item{sigmae2}{variance of the non-heritable component.}
 #' }
+#' @param ord an integer vector denoting the pruning order. This should be the 
+#' result from calling `reorder(tree, order = "postorder", index.only = TRUE)`, 
+#' which is also set as a default value. Can be passed as argument to speed-up 
+#' the calculation.
 #' @return the log-likelihood value.
-PMMLogLik <- function(x, tree, x0, sigma2, sigmae2) {
+PMMLogLik <- function(
+  x, tree, x0, sigma2, sigmae2, 
+  ord = reorder(tree, order = "postorder", index.only = TRUE)) {
+  
   # number of tips in the tree
   N <- length(tree$tip.label)
   # total number of nodes in the tree (tips, internal nodes and root node)
@@ -42,7 +49,9 @@ PMMLogLik <- function(x, tree, x0, sigma2, sigmae2) {
   a <- b <- c <- rep(0.0, M)
 
   # indices of the rows in tree$edge in pruning order
-  ord <- reorder(tree, order = "postorder", index.only = TRUE)
+  if(is.null(ord)) {
+    ord <- reorder(tree, order = "postorder", index.only = TRUE)
+  }
 
   for(o in ord) {
     # daughter node
@@ -85,8 +94,7 @@ PMMLogLik <- function(x, tree, x0, sigma2, sigmae2) {
 PMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2, 
                          cppObject = NewPMMCppObject(x, tree),
                          mode = getOption("SPLITT.postorder.mode", 0)) {
-  abc <- cppObject$DoPruning(c(sigma2, sigmae2), mode)
-  # for phylo objects, N+1 denotes the root node
+  abc <- cppObject$TraverseTree(c(sigma2, sigmae2), mode)
   abc[1]*x0^2 + abc[2]*x0 + abc[3]
 }
 
@@ -97,5 +105,5 @@ PMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2,
 #' @return an object to be passed as argument of the \link{PMMLogLikCpp} function.
 #' @seealso \link{PMMLogLikCpp}
 NewPMMCppObject <- function(x, tree) {
-  SPLITT__AbcPMM$new(tree, x[1:length(tree$tip.label)])
+  PMMUsingSPLITT__AbcPMM$new(tree, x[1:length(tree$tip.label)])
 }

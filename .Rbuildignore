@@ -11,5 +11,6 @@
 ^README.Rmd
 ^SPLITT.Rproj
 ^_pkgdown.yml
-^console-app
+^PMMUsingSPLITT-console-app
+^PMMUsingSPLITT-R-package
 ^ARTICLE

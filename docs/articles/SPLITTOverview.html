@@ -109,23 +109,9 @@ bibliography: REFERENCES.bib
 <p>The library is divided in two layaers:</p>
 <ul>
 <li>a framework layer defining the main logical and data structures. These include a linear algorithm for initial reordering and splitting of the input tree into generations of nodes, which can be visited in parallel, both during post-order as well as pre-order traversal, and a growing collection of pre-order and post-order traversal algorithms, targeting different parallelization modes (e.g. queue-based versus range-based parallelization) on different computing devices (currently implemented for CPUs only).</li>
-<li>a user layer at which the user of the library must write a <code>TraversalSpecification</code> class defining all typedefs and methods of the interface <code>TraversalSpecification</code>.</li>
+<li>a user layer at which the user of the library must write a <code>TraversalSpecification</code>-class defining all typedefs and methods of the interface <code>TraversalSpecification</code>.</li>
 </ul>
 <p>The bridge between the two layers is provided by an object of the <code>TraversalTask</code> template class. Once the <code>TraversalSpecification</code> implementation has been written, the user instantiates a <code>TraversalTask</code> object passing the tree and the input data as arguments.</p>
-</div>
-<div id="packages-used" class="section level1">
-<h1 class="hasAnchor">
-<a href="#packages-used" class="anchor"></a>Packages used</h1>
-<p>Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:</p>
-<ul>
-<li>For tree processing: ape v5.2 <span class="citation">[@R-ape]</span>;</li>
-<li>For reporting: data.table v1.11.8 <span class="citation">[@R-data.table]</span>;</li>
-<li>For testing: testthat v2.0.1 <span class="citation">[@R-testthat]</span>.</li>
-</ul>
-</div>
-<div id="references" class="section level1">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
 </div>
   </div>
 
@@ -135,8 +121,6 @@ bibliography: REFERENCES.bib
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#the-splitt-class-diagram">The <strong>SPLITT</strong> class diagram</a></li>
-      <li><a href="#packages-used">Packages used</a></li>
-      <li><a href="#references">References</a></li>
       </ul>
 </div>
       </div>

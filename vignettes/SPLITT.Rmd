@@ -113,7 +113,3 @@ The next goal is to understand what the PMMLogLikelihood program actually does. 
 - First, we will learn how to define a `TraversalSpecification` class in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) guide.
 - Then, we will see how the `TraversalSpecification` class is used to create and execute a `TraversalTask` in the [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide.
 
-
-
-
-

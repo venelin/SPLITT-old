@@ -2,7 +2,7 @@ library(testthat)
 context("Test R and Cpp code calculate the same PMM log-likelihood")
 
 library(ape)
-library(SPLITT)
+library(PMMUsingSPLITT)
 
 set.seed(10)
 

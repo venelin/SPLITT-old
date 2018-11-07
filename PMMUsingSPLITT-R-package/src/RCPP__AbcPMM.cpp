@@ -34,6 +34,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace SPLITT;
+using namespace PMMUsingSPLITT;
+
 
 ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
     Rcpp::List const& tree, vec const& x) {
@@ -47,41 +49,19 @@ ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
   return new ParallelPruningAbcPMM(br_0, br_1, t, data);
 }
 
-RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::TreeType)
-RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::TraversalSpecificationType)
 RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::AlgorithmType)
   
-  
-RCPP_MODULE(SPLITT__AbcPMM) {
-  Rcpp::class_<ParallelPruningAbcPMM::TreeType::Tree> ( "SPLITT__AbcPMM__Tree" )
-  .property("num_nodes", &ParallelPruningAbcPMM::TreeType::Tree::num_nodes )
-  .property("num_tips", &ParallelPruningAbcPMM::TreeType::Tree::num_tips )
-  .method("LengthOfBranch", &ParallelPruningAbcPMM::TreeType::Tree::LengthOfBranch )
-  .method("FindNodeWithId", &ParallelPruningAbcPMM::TreeType::Tree::FindNodeWithId )
-  .method("FindIdOfNode", &ParallelPruningAbcPMM::TreeType::Tree::FindIdOfNode )
-  .method("FindIdOfParent", &ParallelPruningAbcPMM::TreeType::Tree::FindIdOfParent )
-  .method("OrderNodes", &ParallelPruningAbcPMM::TreeType::Tree::OrderNodes )
-  ;
-  Rcpp::class_<ParallelPruningAbcPMM::TreeType>( "SPLITT__AbcPMM__OrderedTree" )
-    .derives<ParallelPruningAbcPMM::TreeType::Tree> ( "SPLITT__AbcPMM__Tree" )
-    .method("RangeIdPruneNode", &ParallelPruningAbcPMM::TreeType::RangeIdPruneNode )
-    .method("RangeIdVisitNode", &ParallelPruningAbcPMM::TreeType::RangeIdVisitNode )
-    .property("num_levels", &ParallelPruningAbcPMM::TreeType::num_levels )
-    .property("ranges_id_visit", &ParallelPruningAbcPMM::TreeType::ranges_id_visit )
-    .property("ranges_id_prune", &ParallelPruningAbcPMM::TreeType::ranges_id_prune )
-  ;
-  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType::ParentType> ( "SPLITT__AbcPMM__TraversalAlgorithm" )
+RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
+  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType::ParentType> ( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
     .property( "VersionOPENMP", &ParallelPruningAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
     .property( "NumOmpThreads", &ParallelPruningAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
   ;
-  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType> ( "SPLITT__AbcPMM__AlgorithmType" )
-    .derives<ParallelPruningAbcPMM::AlgorithmType::ParentType>( "SPLITT__AbcPMM__TraversalAlgorithm" )
+  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType> ( "PMMUsingSPLITT__AbcPMM__AlgorithmType" )
+    .derives<ParallelPruningAbcPMM::AlgorithmType::ParentType>( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
   ;
-  Rcpp::class_<ParallelPruningAbcPMM>( "SPLITT__AbcPMM" )
+  Rcpp::class_<ParallelPruningAbcPMM>( "PMMUsingSPLITT__AbcPMM" )
   .factory<Rcpp::List const&, vec const&>(&CreateParallelPruningAbcPMM)
-  .method( "DoPruning", &ParallelPruningAbcPMM::TraverseTree )
-  .property( "tree", &ParallelPruningAbcPMM::tree )
-  .property( "spec", &ParallelPruningAbcPMM::spec )
+  .method( "TraverseTree", &ParallelPruningAbcPMM::TraverseTree )
   .property( "algorithm", &ParallelPruningAbcPMM::algorithm )
   ;
 }

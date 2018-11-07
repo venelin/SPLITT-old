@@ -28,13 +28,13 @@
 #' @param N number of tips in the test phylogenetic tree, default 10000
 #' @param Ntests number of calculations within a call to sys.time (the resulting
 #' times are averages Ntests calls). Default: 10.
-#' @return a data.table containing the response times for the PMM, POUMM and the
-#' BPM models and the different parallel orders.
+#' @return a data.frame containing the response times for the PMM log-likelihood
+#' calculation.
 MiniBenchmark <- function(N = 10000, Ntests = 10) {
   
   # needed to pass the check
   speedupX <- NULL
-  `time (ms)` <- NULL
+  time.ms <- NULL
   
   cat("Performing a mini-benchmark of the PMM log-likelihood calculation with 
       a tree of size N=", 
@@ -66,6 +66,8 @@ MiniBenchmark <- function(N = 10000, Ntests = 10) {
   
   cat("CPU: ", cpuInfo, "\n")
   
+  ord <- reorder(tree, order = "postorder", index.only = TRUE)
+  
   cppPMMObject <- NewPMMCppObject(x, tree)
   
   if(cppPMMObject$algorithm$VersionOPENMP == 0) {
@@ -80,62 +82,67 @@ MiniBenchmark <- function(N = 10000, Ntests = 10) {
   
   cat("Number of threads:",  cppPMMObject$algorithm$NumOmpThreads, "\n")
   
-  cat("Measuring likelihood calculation times...\n")
+  cat("Measuring calculation times...\n")
   
   # warm-up for mode AUTO
   for(t in 1:1000) PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, cppPMMObject, 0)
   
-  tR <- system.time(for(t in seq_len(Ntests/10)) PMMLogLik(x, tree, x0, sigma2, sigmae2))[3] / (Ntests/10)
+  tR <- system.time(for(t in seq_len(Ntests/10)) PMMLogLik(x, tree, x0, sigma2, sigmae2, ord = ord))[3] / (Ntests/10)
+  unname(tR)
   
   measureTimePMMCpp <- function(mode) {
-    system.time(
-      for(t in seq_len(Ntests)) 
-        PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, cppPMMObject, mode)
+    unname(
+      system.time(
+        for(t in seq_len(Ntests)) 
+          PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, cppPMMObject, mode)
       )[3] / Ntests*1000
+    )
   }
   
-  resultsPMM <- rbindlist(list(
-    data.table(model = "PMM", 
+  resultsPMM <- rbind(
+    data.frame(model = "PMM", 
                mode = "R (serial)", 
-               `time (ms)` = tR*1000),
-    data.table(model = "PMM", 
+               time.ms = tR*1000),
+    data.frame(model = "PMM", 
                mode = "C++ (AUTO)", 
-               `time (ms)` = measureTimePMMCpp(0)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(0)),
+    data.frame(model = "PMM", 
                mode = "C++ (SINGLE_THREAD_LOOP_POSTORDER)", 
-               `time (ms)` = measureTimePMMCpp(10)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(10)),
+    data.frame(model = "PMM", 
                mode = "C++ (SINGLE_THREAD_LOOP_PRUNES)", 
-               `time (ms)` = measureTimePMMCpp(11)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(11)),
+    data.frame(model = "PMM", 
                mode = "C++ (SINGLE_THREAD_LOOP_VISITS)", 
-               `time (ms)` = measureTimePMMCpp(12)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(12)),
+    data.frame(model = "PMM", 
                mode = "C++ (MULTI_THREAD_LOOP_PRUNES)", 
-               `time (ms)` = measureTimePMMCpp(21)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(21)),
+    data.frame(model = "PMM", 
                mode = "C++ (MULTI_THREAD_LOOP_VISITS)", 
-               `time (ms)` = measureTimePMMCpp(22)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(22)),
+    data.frame(model = "PMM", 
                mode = "C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)", 
-               `time (ms)` = measureTimePMMCpp(23)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(23)),
+    data.frame(model = "PMM", 
                mode = "C++ (MULTI_THREAD_VISIT_QUEUE)", 
-               `time (ms)` = measureTimePMMCpp(24)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(24)),
+    data.frame(model = "PMM", 
                mode = "C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)", 
-               `time (ms)` = measureTimePMMCpp(25)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(25)),
+    data.frame(model = "PMM", 
                mode = "C++ (HYBRID_LOOP_PRUNES)", 
-               `time (ms)` = measureTimePMMCpp(31)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(31)),
+    data.frame(model = "PMM", 
                mode = "C++ (HYBRID_LOOP_VISITS)", 
-               `time (ms)` = measureTimePMMCpp(32)),
-    data.table(model = "PMM", 
+               time.ms = measureTimePMMCpp(32)),
+    data.frame(model = "PMM", 
                mode = "C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)", 
-               `time (ms)` = measureTimePMMCpp(33))
-  ))
-  resultsPMM[, speedupX:=tR*1000 / `time (ms)`]
+               time.ms = measureTimePMMCpp(33))
+  )
   
-  print(resultsPMM)
+  rownames(resultsPMM) <- NULL
+  #resultsPMM[, speedupX:=tR*1000 / time.ms]
+  
+  resultsPMM
 }
