@@ -13,7 +13,7 @@ The SPLITT library represents a C++ header file called "SPLITT.h". Technically, 
 The SPLITT R-package
 --------------------
 
-The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don't need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. Nevertheless, if your final goal is to write a C++ extension that uses SPLITT as a fast back-end for an R-package of your own, the SPLITT package provides an example how you can do that.
+The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don't need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library.
 
 User guides and resources
 -------------------------
@@ -32,8 +32,8 @@ The SPLITT source code is located in the [SPLITT github repository](https://gith
 
 Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 
-Citing SPLITT in publications
------------------------------
+Citing SPLITT
+-------------
 
 To give credit to the SPLITT library in a publication, please cite the following article:
 
@@ -42,7 +42,7 @@ Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogeneti
 Used R-packages
 ---------------
 
-Apart from base R functionality, the patherit package uses a number of 3rd party R-packages:
+The SPLITT R-package uses the following 3rd party R-packages:
 
 -   For calling C++ from R: Rcpp v0.12.19 (Eddelbuettel et al. 2017), RcppArmadillo v0.9.100.5.0 (Eddelbuettel, Francois, and Bates 2016)
 -   For tree processing in R: ape v5.2 (Paradis et al. 2016);
