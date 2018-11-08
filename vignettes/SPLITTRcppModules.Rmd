@@ -710,3 +710,12 @@ Duration: 43.4s
 
 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 ```
+
+# Try it on your own!
+
+As a next step I wouls suggest focusing on your own application. The following workflow seems to work for me:
+
+* Decide on the type project, i.e. a console application or an R-package. Start by replacing the names in the corresponding example project with the names specific to my application. 
+* Define the `TraversalSpecification`-class. This is usually the most time consumming part. 
+* Work on the user-interface depending on the chose type of project. 
+

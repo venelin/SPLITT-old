@@ -6,6 +6,7 @@ articles:
   SPLITTOverview: SPLITTOverview.html
   SPLITTRcppModules: SPLITTRcppModules.html
   SPLITTRunTraversal: SPLITTRunTraversal.html
+  SPLITTTraversalModes: SPLITTTraversalModes.html
   SPLITTTraversalSpecification: SPLITTTraversalSpecification.html
 urls:
   reference: http://venelin.github.io/SPLITT/reference

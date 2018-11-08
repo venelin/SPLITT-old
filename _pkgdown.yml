@@ -18,6 +18,8 @@ navbar:
       href: articles/SPLITTRunTraversal.html
     - text: Calling SPLITT from an R-package
       href: articles/SPLITTRcppModules.html
+    - text: Traversal modes
+      href: articles/SPLITTTraversalModes.html
   - text: Reference
     href: reference/SPLITT.html
   - text: News
@@ -33,3 +35,4 @@ articles:
   - '`SPLITTOverview`'
   - '`SPLITTRunTraversal`'
   - '`SPLITTRcppModules`'
+  - '`SPLITTTraversalModes`'

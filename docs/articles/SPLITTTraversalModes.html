@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPLITT Classes • SPLITT</title>
+<title>SPLITT traversal modes • SPLITT</title>
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha256-hIvIxeqhGZF+VVeM55k0mJvWpQ6gTkWk3Emc+NmowYA=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="SPLITT Classes">
+<script src="../pkgdown.js"></script><meta property="og:title" content="SPLITT traversal modes">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -89,28 +89,55 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>SPLITT Classes</h1>
+      <h1>SPLITT traversal modes</h1>
                         <h4 class="author">Venelin Mitov</h4>
             
       
       
-      <div class="hidden name"><code>SPLITTOverview.Rmd</code></div>
+      <div class="hidden name"><code>SPLITTTraversalModes.Rmd</code></div>
 
     </div>
 
     
     
-<div id="the-splitt-class-diagram" class="section level1">
+<div id="prune-ranges" class="section level1">
 <h1 class="hasAnchor">
-<a href="#the-splitt-class-diagram" class="anchor"></a>The <strong>SPLITT</strong> class diagram</h1>
-<p>The figure below represents a UML class diagram of the <strong>SPLITT</strong> library:</p>
-<p><img src="figures/Uml1.png" width="792px" height="612px"></p>
-<p>The library is divided in two layaers:</p>
+<a href="#prune-ranges" class="anchor"></a>Prune ranges</h1>
+<p>To maximize the potential for parallel execution SPLITT divides the node-states during a tree traversal into a <code>InitNode</code>, a <code>VisitNode</code>, and a <code>PruneNode</code> operation (see the <a href="./SPLITTTraversalSpecification.html">Writing a travefsal specification guide</a> for a description). Further, SPLITT rearranges the node-ids (and, hence the data) associated with the nodes in the computer memory, so that the <code>InitNode</code> and the <code>VisitNode</code> operations can be performed on ranges of consecutive node-ids. Performing these operations on a range of consecutive addresses in the memory has a potential to increase the efficiency of computation, because modern CPUs provide vectorized instruction sets, i.e. low-level processor instructions, such as (addition and multiplication) that can be executed simultaneously on a group of 2, 4 or more consecutive words in the memory. Another benefit from ordering the operations over such ranges is that the data associated with these nodes will tend to be less fragmented and, therefore, it will be found more often in the processor cache.</p>
+<p>To orchstrate this process SPLITT divides the traversal in a number of phases. The diagram below is an example in which the traversal of a tree is divided into an Initialization phase and four consecutive phases called “prune-ranges”:</p>
+<p><img src="figures/PruneRanges.png"><!-- --></p>
+<p>In each phase, full nodes in green denote parallelizable executed <code>InitNode</code>-operations, full nodes in red denote parallelizable <code>VisitNode</code> operations and full nodes in blue denote parallelizable <code>PruneNode</code> operations.</p>
+<p>In general, there is no arrangement of the nodes in the memory, in which both, the <code>VisitNode</code> and the <code>PruneNode</code> operations will be executed on ranges of consecutive nodes. For example, the range of daughter-nodes 1, 2, 3 corresponds to the parent nodes 6, 8 and 7. In a bigger tree, the parents could well be nodes 6, 25, 12 or any other non-consecutive ids. Thus, the efficiency of the calculation can, in principle, be affected by the order in which the ranges of <code>VisitNode</code>- and <code>PruneNode</code>-operations are processed. SPLITT provides several possible arrangements (called “orders” or “parallel models”) of the execution cycle of these operations, which are all equivalent with respect to the result of the calculation, but may have different parallel efficiency, depending on the tree and the application-specific traversal operations.</p>
+</div>
+<div id="parallel-traversal-modes-during-post-order-tree-traversal" class="section level1">
+<h1 class="hasAnchor">
+<a href="#parallel-traversal-modes-during-post-order-tree-traversal" class="anchor"></a>Parallel traversal modes during post-order tree traversal</h1>
 <ul>
-<li>a framework layer defining the main logical and data structures. These include a linear algorithm for initial reordering and splitting of the input tree into generations of nodes, which can be visited in parallel, both during post-order as well as pre-order traversal, and a growing collection of pre-order and post-order traversal algorithms, targeting different parallelization modes (e.g. queue-based versus range-based parallelization) on different computing devices (currently implemented for CPUs only).</li>
-<li>a user layer at which the user of the library must write a <code>TraversalSpecification</code>-class defining all typedefs and methods of the interface <code>TraversalSpecification</code>.</li>
+<li>
+<code>AUTO</code> 0</li>
+<li>
+<code>SINGLE_THREAD_LOOP_POSTORDER</code> 10</li>
+<li>
+<code>SINGLE_THREAD_LOOP_PRUNES</code> 11</li>
+<li>
+<code>SINGLE_THREAD_LOOP_VISITS</code> 12</li>
+<li>
+<code>MULTI_THREAD_LOOP_PRUNES</code> 21</li>
+<li>
+<code>MULTI_THREAD_LOOP_VISITS</code> 22</li>
+<li>
+<code>MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES</code> 23</li>
+<li>
+<code>MULTI_THREAD_VISIT_QUEUE</code> 24</li>
+<li>
+<code>MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION</code> 25</li>
+<li>
+<code>HYBRID_LOOP_PRUNES</code> 31</li>
+<li>
+<code>HYBRID_LOOP_VISITS</code> 32</li>
+<li>
+<code>HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES</code> 33</li>
 </ul>
-<p>The bridge between the two layers is provided by an object of the <code>TraversalTask</code> template class. Once the <code>TraversalSpecification</code> implementation has been written, the user instantiates a <code>TraversalTask</code> object passing the tree and the input data as arguments.</p>
 </div>
   </div>
 
@@ -119,7 +146,8 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#the-splitt-class-diagram">The <strong>SPLITT</strong> class diagram</a></li>
+<li><a href="#prune-ranges">Prune ranges</a></li>
+      <li><a href="#parallel-traversal-modes-during-post-order-tree-traversal">Parallel traversal modes during post-order tree traversal</a></li>
       </ul>
 </div>
       </div>
