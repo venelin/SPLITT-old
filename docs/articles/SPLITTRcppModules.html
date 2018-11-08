@@ -108,160 +108,601 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Rcpp<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/Rcpp/topics/Rcpp.package.skeleton">Rcpp.package.skeleton</a></span>(<span class="st">"PMMUsingSPLITT"</span>)</code></pre></div>
 <p>Then, the created directory PMMUsingSPLITT has been manually renamed to PMMUsingSPLITT-R-package and the default example R and C++ files have been replaced by the code files specific for the PMM log-likelihood calculation. Here are the final directories and files found in the package:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> -Rlt PMMUsingSPLITT-R-package</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">total</span> 24
-<span class="ex">drwxr-xr-x</span>  8 vmitov  1029  272 Nov  7 22:54 src
-<span class="ex">drwxr-xr-x</span>  5 vmitov  1029  170 Nov  7 22:53 R
-<span class="ex">drwxr-xr-x</span>  7 vmitov  1029  238 Nov  7 22:53 man
-<span class="ex">drwxr-xr-x</span>  3 vmitov  1029  102 Nov  7 22:53 tests
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  643 Nov  7 14:45 DESCRIPTION
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  235 Nov  7 14:45 NAMESPACE
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  420 Nov  7 11:27 Read-and-delete-me
+<pre><code>total 24
+drwxr-xr-x  8 vmitov  1029  272 Nov  8 10:56 src
+drwxr-xr-x  9 vmitov  1029  306 Nov  8 10:48 man
+drwxr-xr-x  6 vmitov  1029  204 Nov  8 10:03 R
+-rw-r--r--  1 vmitov  1029  195 Nov  8 09:40 NAMESPACE
+-rw-r--r--  1 vmitov  1029  485 Nov  8 09:40 DESCRIPTION
+drwxr-xr-x  3 vmitov  1029  102 Nov  7 22:53 tests
+-rw-r--r--  1 vmitov  1029  420 Nov  7 11:27 Read-and-delete-me
 
-<span class="ex">.</span>/src:
-<span class="ex">total</span> 224
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   2658 Nov  7 16:11 RCPP__AbcPMM.cpp
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   3462 Nov  7 16:10 AbcPMM.h
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029    590 Nov  7 14:47 RcppExports.cpp
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   1318 Nov  7 11:54 NumericTraitData.h
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  93322 Nov  7 11:47 SPLITT.h
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   3048 Nov  7 11:35 Makevars
+./src:
+total 224
+-rw-r--r--  1 vmitov  1029    602 Nov  8 10:48 RcppExports.cpp
+-rw-r--r--  1 vmitov  1029   2677 Nov  8 10:42 RCPP__AbcPMM.cpp
+-rw-r--r--  1 vmitov  1029   3462 Nov  7 16:10 AbcPMM.h
+-rw-r--r--  1 vmitov  1029   1318 Nov  7 11:54 NumericTraitData.h
+-rw-r--r--  1 vmitov  1029  93322 Nov  7 11:47 SPLITT.h
+-rw-r--r--  1 vmitov  1029   3048 Nov  7 11:35 Makevars
 
-<span class="ex">.</span>/R:
-<span class="ex">total</span> 32
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  5347 Nov  7 14:52 MiniBenchmark.R
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  3713 Nov  7 14:40 PMM.R
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  1135 Nov  7 11:43 zzz.R
+./man:
+total 56
+-rw-r--r--  1 vmitov  1029   376 Nov  8 10:48 PMMUsingSPLITT__AbcPMM__AlgorithmType.Rd
+-rw-r--r--  1 vmitov  1029   370 Nov  8 10:48 PMMUsingSPLITT__TraversalTaskAbcPMM.Rd
+-rw-r--r--  1 vmitov  1029   474 Nov  8 10:48 PMMUsingSPLITT__AbcPMM__TraversalAlgorithm.Rd
+-rw-r--r--  1 vmitov  1029   679 Nov  8 09:37 MiniBenchmark.Rd
+-rw-r--r--  1 vmitov  1029  1071 Nov  8 09:37 PMMLogLik.Rd
+-rw-r--r--  1 vmitov  1029   573 Nov  7 11:58 NewPMMCppObject.Rd
+-rw-r--r--  1 vmitov  1029  1549 Nov  7 11:58 PMMLogLikCpp.Rd
 
-<span class="ex">.</span>/man:
-<span class="ex">total</span> 40
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   712 Nov  7 11:58 MiniBenchmark.Rd
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   573 Nov  7 11:58 NewPMMCppObject.Rd
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   757 Nov  7 11:58 PMMLogLik.Rd
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  1549 Nov  7 11:58 PMMLogLikCpp.Rd
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029   842 Nov  7 11:27 PMMUsingSPLITT-package.Rd
+./R:
+total 40
+-rw-r--r--  1 vmitov  1029   552 Nov  8 10:48 DocForRcppModules.R
+-rw-r--r--  1 vmitov  1029  3726 Nov  8 10:03 PMM.R
+-rw-r--r--  1 vmitov  1029  1148 Nov  8 10:02 zzz.R
+-rw-r--r--  1 vmitov  1029  5347 Nov  7 14:52 MiniBenchmark.R
 
-<span class="ex">.</span>/tests:
-<span class="ex">total</span> 0
-<span class="ex">drwxr-xr-x</span>  4 vmitov  1029  136 Nov  7 14:12 testthat
+./tests:
+total 0
+drwxr-xr-x  4 vmitov  1029  136 Nov  7 14:12 testthat
 
-<span class="ex">./tests</span>/testthat:
-<span class="ex">total</span> 16
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  317 Nov  7 14:56 test-PMMLogLikelihoodSpeed.R
-<span class="ex">-rw-r--r--</span>  1 vmitov  1029  582 Nov  7 14:13 test-PMMLogLikelihoodValue.R</code></pre></div>
-<div id="writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task" class="section level2">
+./tests/testthat:
+total 16
+-rw-r--r--  1 vmitov  1029  583 Nov  8 09:19 test-PMMLogLikelihoodValue.R
+-rw-r--r--  1 vmitov  1029  317 Nov  7 14:56 test-PMMLogLikelihoodSpeed.R</code></pre>
+<p>At the top-level, the directory structure is similar to the standard structure described in <a href="https://cran.r-project.org/doc/manuals/R-exts.html">Section 1.1. of the Writing R extensions manual</a>. In the following sub-sections, I’ll describe the elements that are specific for the PMMUsingSPLITT example application.</p>
+<div id="the-description-file" class="section level2">
 <h2 class="hasAnchor">
-<a href="#writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task" class="anchor"></a>Writing a factory function for the <code>ParallelPruningAbcPMM</code> traversal task</h2>
-<p>In</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">/**</span>
-<span class="co">  *  RCPP_Tree.cpp</span>
-<span class="co">  *  SPLITT</span>
-<span class="co">  *</span>
-<span class="co">  * Copyright 2017 Venelin Mitov</span>
-<span class="co">  *</span>
-<span class="co">  * This file is part of SPLITT: a generic C++ library for Serial and Parallel</span>
-<span class="co">  * Lineage Traversal of Trees.</span>
-<span class="co">  *</span>
-<span class="co">  * SPLITT is free software: you can redistribute it and/or modify</span>
-<span class="co">  * it under the terms of the GNU Lesser General Public License as</span>
-<span class="co">  * published by the Free Software Foundation, either version 3 of</span>
-<span class="co">  * the License, or (at your option) any later version.</span>
-<span class="co">  *</span>
-<span class="co">  * SPLITT is distributed in the hope that it will be useful,</span>
-<span class="co">  * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<span class="co">  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
-<span class="co">  * GNU Lesser General Public License for more details.</span>
-<span class="co">  *</span>
-<span class="co">  * You should have received a copy of the GNU Lesser General Public</span>
-<span class="co">  * License along with SPLITT.  If not, see</span>
-<span class="co">  * </span><span class="kw">&lt;http:</span><span class="ot">//www.gnu.org/licenses</span><span class="kw">/&gt;</span><span class="co">.</span>
-<span class="co">  *</span>
-<span class="co">  * </span><span class="an">@author</span><span class="co"> Venelin Mitov</span>
-<span class="co">  */</span>
+<a href="#the-description-file" class="anchor"></a>The <code>DESCRIPTION</code> file</h2>
+<p>This is the standard file that tells how to build the R-package. Here is the content of this file:</p>
+<pre><code>Package: PMMUsingSPLITT
+Type: Package
+Title: An example R-package using the SPLITT library
+Version: 1.0
+Date: 2018-11-07
+Author: Venelin Mitov
+Maintainer: Venelin Mitov &lt;vmitov@gmail.com&gt;
+Description: One paragraph description of what the package does as
+       one or more full sentences.
+License: LGPL (&gt;= 2)
+LazyData: true
+Encoding: UTF-8
+Depends:
+    R (&gt;= 3.1.0),
+    Rcpp,
+    methods
+LinkingTo: Rcpp
+Imports:
+    ape
+RoxygenNote: 6.1.0
+ByteCompile: yes
+NeedsCompilation: yes</code></pre>
+<p>Notice that the Rcpp package is listed both in <code>Depends:</code> and in <code>LinkingTo:</code>. Also, the package methods is listed in <code>Depends:</code> because we use Rcpp modules, which will be translated to S4 objects.</p>
+</div>
+<div id="the-namespace-file" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-namespace-file" class="anchor"></a>The <code>NAMESPACE</code> file</h2>
+<p>This file contains the names of the functions exported by the package as well as those imported by the package from other packages. Here is how this file looks like for our R-package:</p>
+<pre><code>useDynLib(PMMUsingSPLITT, .registration=TRUE)
+exportPattern("^[[:alpha:]]+")
+import(Rcpp)
+import(methods)
+importFrom("stats", "reorder", "rnorm", "time")
+importFrom("ape", "rTraitCont", "rtree")</code></pre>
+<p>Pay attention to the very first line <code>useDynLib(PMMUsingSPLITT, .registration=TRUE)</code>. This tells R that the package creates a dynamic shared library called <code>PMMUsingSPLITT</code>. This where R will find the compiled C++ classes and methods from our package.</p>
+</div>
+<div id="the-directory-src" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-directory-src" class="anchor"></a>The directory <code>src</code>
+</h2>
+<p>This directory contains all <code>.cpp</code> and <code>.h</code> files and a file <code>Makevars</code> specifying options appended to the C++ compiler command. We are already familiar with the three header files: <code>SPLITT.h</code> contains the SPLITT library, , <code>NumericTraitData.h</code> and <code>AbcPMM.h</code> define the input data and the <code>TraversalSpecification</code>-class for the PMM log-likelihood calculation (see the <a href="./SPLITTTraversalSpecification.html">Writing a traversal specification guide</a> if not feeling so). Now, let’s look what is defined in the file <code>RCPP__AbcPMM.cpp</code>.</p>
+<div id="included-files-and-declarations" class="section level3">
+<h3 class="hasAnchor">
+<a href="#included-files-and-declarations" class="anchor"></a>Included files and declarations</h3>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
 
-<span class="pp">#include </span><span class="im">&lt;RcppArmadillo.h&gt;</span>
-<span class="pp">#include </span><span class="im">&lt;R_ext/Rdynload.h&gt;</span>
-    
-<span class="pp">#include </span><span class="im">"./AbcPMM.h"</span>
-    
+<span class="co">// Needed to use Rcpp</span>
+<span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span>
+
+<span class="co">// This will also include the NumericTraitData.h file</span>
+<span class="pp">#include </span><span class="im">"./AbcPMM.h"</span></code></pre></div>
+</div>
+<div id="rcpp-plugins" class="section level3">
+<h3 class="hasAnchor">
+<a href="#rcpp-plugins" class="anchor"></a>Rcpp plugins</h3>
+<p>We need the following comments declaring compile attributes in the form <code>[[Rcpp::...]]</code>. Before building the R-package, these attributes will be processed by a call to <code><a href="http://www.rdocumentation.org/packages/Rcpp/topics/compileAttributes">Rcpp::compileAttributes</a></code>. The first attribute below ensures that our C++ code is compliant and should be compiled with enabled C++11 standard. The second attributes specifies that the openmp header <code>omp.h</code> should be added to the compiler include-path.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
+
+<span class="co">// ...</span>
+
 <span class="co">// [[Rcpp::plugins("cpp11")]]</span>
-<span class="co">// [[Rcpp::plugins(openmp)]]</span>
-<span class="co">// [[Rcpp::depends(RcppArmadillo)]]</span>
+<span class="co">// [[Rcpp::plugins(openmp)]]</span></code></pre></div>
+</div>
+<div id="using-namesapeces" class="section level3">
+<h3 class="hasAnchor">
+<a href="#using-namesapeces" class="anchor"></a>Using namesapeces</h3>
+<p><code>using namespace</code>-statements should be used carefully in C++. The following two lines will save us from some typing later on.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
 
+<span class="co">// ...</span>
 <span class="kw">using</span> <span class="kw">namespace</span> SPLITT;
 <span class="kw">using</span> <span class="kw">namespace</span> PMMUsingSPLITT;
 
-<span class="kw">typedef</span> TraversalTask&lt; AbcPMM&lt;OrderedTree&lt;<span class="ex">uint</span>, <span class="dt">double</span>&gt;&gt; &gt; ParallelPruningAbcPMM;
+<span class="co">// Prefer using explicit names from the Rcpp namespace.</span>
+<span class="co">// using namespace Rcpp;</span></code></pre></div>
+</div>
+<div id="specifying-the-abcpmm-traversaltask-template" class="section level3">
+<h3 class="hasAnchor">
+<a href="#specifying-the-abcpmm-traversaltask-template" class="anchor"></a>Specifying the <code>AbcPMM</code> <code>TraversalTask</code> template</h3>
+<p>Here, we will be using <code>uint</code> instead of <code>std::string</code> for the node-names in the tree.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
 
+<span class="co">// ...</span>
 
-ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
-    Rcpp::List <span class="at">const</span>&amp; tree, vec <span class="at">const</span>&amp; x) {
-  arma::umat branches = tree[<span class="st">"edge"</span>];
-  uvec br_0 = arma::conv_to&lt;uvec&gt;::from(branches.col(<span class="dv">0</span>));
-  uvec br_1 = arma::conv_to&lt;uvec&gt;::from(branches.col(<span class="dv">1</span>));
-  vec t = Rcpp::as&lt;vec&gt;(tree[<span class="st">"edge.length"</span>]);
-  <span class="ex">uint</span> num_tips = Rcpp::as&lt;Rcpp::CharacterVector&gt;(tree[<span class="st">"tip.label"</span>]).size();
-  uvec node_names = Seq(<span class="ex">uint</span>(<span class="dv">1</span>), num_tips);
-  <span class="kw">typename</span> ParallelPruningAbcPMM::DataType data(node_names, x);
-  <span class="cf">return</span> <span class="kw">new</span> ParallelPruningAbcPMM(br_0, br_1, t, data);
-}
+<span class="kw">typedef</span> TraversalTask&lt; AbcPMM&lt;OrderedTree&lt;<span class="ex">uint</span>, <span class="dt">double</span>&gt; &gt; &gt; TraversalTaskAbcPMM;</code></pre></div>
+<p>This is because in R we will be using the class <code>phylo</code> from the ape package to represent trees and in each <code>phylo</code> object the tree topology is represented by a <span class="math inline">\((M-1)\times 2\)</span> integer matrix named “edge”, where <span class="math inline">\(M-1\)</span> is the number of edges in the tree. If you are not familiar with <code>phylo</code>-objects, the following R-code explains what I mean:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ape)
 
-RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::AlgorithmType)
+<span class="co"># tree in Newick format</span>
+newick_text &lt;-<span class="st"> "((b:4.1,(g:5.1,d:3.2)a1:4.2)a2:4.5,(h:4.1,c:5.1)a3:6.2)r;"</span>
+
+<span class="co"># create an obect of class phylo </span>
+tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/read.tree">read.tree</a></span>(<span class="dt">text =</span> newick_text)
+
+<span class="co"># members of the phylo object</span>
+<span class="kw">str</span>(tree)</code></pre></div>
+<pre><code>## List of 5
+##  $ edge       : int [1:8, 1:2] 6 7 7 8 8 6 9 9 7 1 ...
+##  $ edge.length: num [1:8] 4.5 4.1 4.2 5.1 3.2 6.2 4.1 5.1
+##  $ Nnode      : int 4
+##  $ node.label : chr [1:4] "r" "a2" "a1" "a3"
+##  $ tip.label  : chr [1:5] "b" "g" "d" "h" ...
+##  - attr(*, "class")= chr "phylo"
+##  - attr(*, "order")= chr "cladewise"</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the edge matrix:</span>
+tree<span class="op">$</span>edge</code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    6    7
+## [2,]    7    1
+## [3,]    7    8
+## [4,]    8    2
+## [5,]    8    3
+## [6,]    6    9
+## [7,]    9    4
+## [8,]    9    5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">cex=</span><span class="fl">1.2</span>)
+<span class="kw">plot</span>(tree, <span class="dt">show.tip.label =</span> <span class="ot">FALSE</span>)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/nodelabels">tiplabels</a></span>(<span class="dt">text =</span> <span class="kw">paste0</span>(tree<span class="op">$</span>tip.label, <span class="st">" ("</span>, <span class="kw">seq_len</span>(<span class="kw">length</span>(tree<span class="op">$</span>tip.label)), <span class="st">")"</span>))
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/nodelabels">edgelabels</a></span>(<span class="dt">text =</span> tree<span class="op">$</span>edge.length)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/nodelabels">nodelabels</a></span>(<span class="dt">text =</span> <span class="kw">paste0</span>(tree<span class="op">$</span>node.label, <span class="st">" ("</span>, <span class="kw">length</span>(tree<span class="op">$</span>tip.label) <span class="op">+</span><span class="st"> </span><span class="kw">seq_len</span>(<span class="kw">length</span>(tree<span class="op">$</span>node.label)), <span class="st">")"</span>))</code></pre></div>
+<p><img src="SPLITTRcppModules_files/figure-html/unnamed-chunk-7-1.png" width="672"></p>
+<p>In the plot above, notice how the entries in the edge-matrix correspond to the node-ids in parentheses.</p>
+</div>
+<div id="writing-a-factory-function-for-the-traversaltaskabcpmm-class" class="section level3">
+<h3 class="hasAnchor">
+<a href="#writing-a-factory-function-for-the-traversaltaskabcpmm-class" class="anchor"></a>Writing a factory function for the <code>TraversalTaskAbcPMM</code>-class</h3>
+<p>The factory function will be called from the R-layer to create a <code>TraversalTaskAbcPMM</code> object. This function recieves two arguments:</p>
+<ul>
+<li>
+<code>Rcpp::List const&amp; tree, vec const&amp; values</code>: this is a phylo object wrapped in an <code>Rcpp::List</code>;</li>
+<li>
+<code>vec const&amp; values</code>: a numeric vector that will be automatically converted into an <code>std::vector&lt;double&gt;</code> (note that the type <code>SPLITT::vec</code> is just a synonym for <code>std::vector&lt;double&gt;</code>)</li>
+</ul>
+<p>Here is the code for the factory function:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
+
+<span class="co">// ...</span>
+TraversalTaskAbcPMM* CreateTraversalTaskAbcPMM(
+    Rcpp::List <span class="at">const</span>&amp; tree, vec <span class="at">const</span>&amp; values) {
   
-RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
-  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::AlgorithmType::ParentType&gt; ( <span class="st">"PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"</span> )
-    .property( <span class="st">"VersionOPENMP"</span>, &amp;ParallelPruningAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
-    .property( <span class="st">"NumOmpThreads"</span>, &amp;ParallelPruningAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
-  ;
-  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM::AlgorithmType&gt; ( <span class="st">"PMMUsingSPLITT__AbcPMM__AlgorithmType"</span> )
-    .derives&lt;ParallelPruningAbcPMM::AlgorithmType::ParentType&gt;( <span class="st">"PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"</span> )
-  ;
-  Rcpp::<span class="va">class_</span>&lt;ParallelPruningAbcPMM&gt;( <span class="st">"PMMUsingSPLITT__AbcPMM"</span> )
-  .factory&lt;Rcpp::List <span class="at">const</span>&amp;, vec <span class="at">const</span>&amp;&gt;(&amp;CreateParallelPruningAbcPMM)
-  .method( <span class="st">"TraverseTree"</span>, &amp;ParallelPruningAbcPMM::TraverseTree )
-  .property( <span class="st">"algorithm"</span>, &amp;ParallelPruningAbcPMM::algorithm )
+  <span class="co">// Extract the edge-matrix and store its columns into parents and daughters vectors</span>
+  Rcpp::IntegerMatrix branches = tree[<span class="st">"edge"</span>];
+  uvec parents(branches.column(<span class="dv">0</span>).begin(), branches.column(<span class="dv">0</span>).end());
+  uvec daughters(branches.column(<span class="dv">1</span>).begin(), branches.column(<span class="dv">1</span>).end());
+  
+  <span class="co">// Extract the branch lenghts</span>
+  vec t = Rcpp::as&lt;vec&gt;(tree[<span class="st">"edge.length"</span>]);
+  
+  <span class="co">// Extract the number of tips in the tree</span>
+  <span class="ex">uint</span> num_tips = Rcpp::as&lt;Rcpp::CharacterVector&gt;(tree[<span class="st">"tip.label"</span>]).size();
+  
+  <span class="co">// The tip-names are the numbers 1,...,N</span>
+  uvec tip_names = Seq(<span class="ex">uint</span>(<span class="dv">1</span>), num_tips);
+  
+  <span class="co">// Create the input-data object</span>
+  <span class="kw">typename</span> TraversalTaskAbcPMM::DataType data(tip_names, values);
+  
+  <span class="co">// Create a new TraversalTask object and return a pointer</span>
+  <span class="cf">return</span> <span class="kw">new</span> TraversalTaskAbcPMM(parents, daughters, t, data);
+}</code></pre></div>
+</div>
+<div id="the-rcpp-module" class="section level3">
+<h3 class="hasAnchor">
+<a href="#the-rcpp-module" class="anchor"></a>The Rcpp module</h3>
+<p>I recommend using the name of the package as a prefix for the name of the Rcpp module. This is to reduce the risk of a conflict with same-named modules in other R-packages (the risk is real if using simple module names like Tree). The following code defines the <code>PMMUsingSPLITT__TraversalTaskAbcPMM</code> Rcpp module.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
+
+<span class="co">// ...</span>
+
+RCPP_MODULE(PMMUsingSPLITT__TraversalTaskAbcPMM) {
+  <span class="co">// Expose the TraversalTaskAbcPMM class - this is the main class in </span>
+  <span class="co">// the module, which will be instantiated from R using the factory function</span>
+  <span class="co">// we've just written.</span>
+  Rcpp::<span class="va">class_</span>&lt;TraversalTaskAbcPMM&gt;( <span class="st">"PMMUsingSPLITT__TraversalTaskAbcPMM"</span> )
+  <span class="co">// The &lt;argument-type-list&gt; MUST MATCH the arguments of the factory function </span>
+  <span class="co">// defined above.</span>
+  .factory&lt;Rcpp::List <span class="at">const</span>&amp;, vec <span class="at">const</span>&amp;&gt;( &amp;CreateTraversalTaskAbcPMM )
+  <span class="co">// Expose the method that we will use to execute the TraversalTask</span>
+  .method( <span class="st">"TraverseTree"</span>, &amp;TraversalTaskAbcPMM::TraverseTree )
   ;
 }</code></pre></div>
-<p>Because I was using SPLITT mostly from an R-package, at present, there is only an R-package example. Even if you are not familiar with R, this guide should still help you understand how to use SPLITT from within your C++ program.</p>
+<div id="working-with-complex-parametertypes-and-statetypes" class="section level4">
+<h4 class="hasAnchor">
+<a href="#working-with-complex-parametertypes-and-statetypes" class="anchor"></a>Working with complex <code>ParameterType</code>s and <code>StateType</code>s</h4>
+<p>The above Rcpp module is fairly simple because both, the <code>ParameterType</code> and the <code>StateType</code> declared in the <code>TraversalSpecification</code>-class are <code>std::vector&lt;double&gt;</code> which is known to Rcpp. It is possible to transfer objects of user-defined classes between R and C++, but this requires a little more work when defining the Rcpp module. Here, I am giving an example, which allows to obtain information about the OpenMP version and number of traits from R. This is the complete version of the Rcpp module used in the example R-package:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// RCPP__AbcPMM.cpp</span>
+<span class="co">// Licence header and disclamer statement</span>
+
+<span class="co">// ...</span>
+
+<span class="co">// This will enable returning a copy of the `TraversalAlgorithm`-object stored in</span>
+<span class="co">// a `TraversalTaskAbcPMM` object to a R. This will be used in the MiniBenchmark</span>
+<span class="co">// R-function to check things like the OpenMP version used during compilation and</span>
+<span class="co">// the number of OpenMP threads at runtime. </span>
+RCPP_EXPOSED_CLASS_NODECL(TraversalTaskAbcPMM::AlgorithmType)
+  
+RCPP_MODULE(PMMUsingSPLITT__TraversalTaskAbcPMM) {
+  
+  <span class="co">// Expose the properties VersionOPENMP and NumOmpThreads from the base </span>
+  <span class="co">// TraversalAlgorithm class</span>
+  Rcpp::<span class="va">class_</span>&lt;TraversalTaskAbcPMM::AlgorithmType::ParentType&gt; (
+      <span class="st">"PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"</span>
+    )
+  .property( <span class="st">"VersionOPENMP"</span>,
+             &amp;TraversalTaskAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
+  .property( <span class="st">"NumOmpThreads"</span>,
+             &amp;TraversalTaskAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
+  ;
+
+  <span class="co">// Expose the TraversalTaskAbcPMM::AlgorithmType specifying that it derives </span>
+  <span class="co">// from the base TraversalAlgorithm class</span>
+  Rcpp::<span class="va">class_</span>&lt;TraversalTaskAbcPMM::AlgorithmType&gt; (
+      <span class="st">"PMMUsingSPLITT__AbcPMM__AlgorithmType"</span>
+    )
+  .derives&lt;TraversalTaskAbcPMM::AlgorithmType::ParentType&gt;(
+      <span class="st">"PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"</span>
+    )
+  ;
+  
+  <span class="co">// Finally, expose the TraversalTaskAbcPMM class - this is the main class in </span>
+  <span class="co">// the module, which will be instantiated from R using the factory function</span>
+  <span class="co">// we've just written.</span>
+  Rcpp::<span class="va">class_</span>&lt;TraversalTaskAbcPMM&gt;( <span class="st">"PMMUsingSPLITT__TraversalTaskAbcPMM"</span> )
+  <span class="co">// The &lt;argument-type-list&gt; MUST MATCH the arguments of the factory function </span>
+  <span class="co">// defined above.</span>
+  .factory&lt;Rcpp::List <span class="at">const</span>&amp;, vec <span class="at">const</span>&amp;&gt;( &amp;CreateTraversalTaskAbcPMM )
+  <span class="co">// Expose the method that we will use to execute the TraversalTask</span>
+  .method( <span class="st">"TraverseTree"</span>, &amp;TraversalTaskAbcPMM::TraverseTree )
+  <span class="co">// Expose the algorithm property</span>
+  .property( <span class="st">"algorithm"</span>, &amp;TraversalTaskAbcPMM::algorithm )
+  ;
+}</code></pre></div>
 </div>
-<div id="installing-the-splitt-r-package" class="section level2">
+</div>
+<div id="dont-touch-the-file-called-rcppexports-cpp" class="section level3">
+<h3 class="hasAnchor">
+<a href="#dont-touch-the-file-called-rcppexports-cpp" class="anchor"></a>Don’t touch the file called <code>RcppExports.cpp</code>
+</h3>
+<p>The last file in the <code>src</code> directory is <code>RcppExports.cpp</code>. This file is automatically generated by Rcpp when calling <code><a href="http://www.rdocumentation.org/packages/Rcpp/topics/compileAttributes">Rcpp::compileAttributes()</a></code>.</p>
+</div>
+</div>
+<div id="the-directory-r" class="section level2">
 <h2 class="hasAnchor">
-<a href="#installing-the-splitt-r-package" class="anchor"></a>Installing the SPLITT R-package</h2>
-<p>I recommend installing the latest package version from github. From the R-prompt, type the following command:</p>
+<a href="#the-directory-r" class="anchor"></a>The directory <code>R</code>
+</h2>
+<p>This directory contains the R files in the package. I’ll briefly describe each one.</p>
+<div id="zzz-r" class="section level3">
+<h3 class="hasAnchor">
+<a href="#zzz-r" class="anchor"></a><code>zzz.R</code>
+</h3>
+<p>This R-script is executed by R when loading the package. It contains a single line of code loading the Rcpp module we’ve just created:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># loading the RCPP C++ modules</span>
+<span class="kw">loadModule</span>( <span class="st">"PMMUsingSPLITT__TraversalTaskAbcPMM"</span>, <span class="ot">TRUE</span> )</code></pre></div>
+</div>
+<div id="pmm-r" class="section level3">
+<h3 class="hasAnchor">
+<a href="#pmm-r" class="anchor"></a><code>PMM.R</code>
+</h3>
+<p>Here, we define two ways to calculate the PMM log-likelihood:</p>
+<div id="doing-a-postorder-traversal-in-r" class="section level4">
+<h4 class="hasAnchor">
+<a href="#doing-a-postorder-traversal-in-r" class="anchor"></a>Doing a postorder traversal in R</h4>
+<p>This how simple the code looks like in R. The only problem I have with it is that it is very slow (see benchmark at the end).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># PMM.R</span>
+<span class="co"># PMMUsingSPLITT</span>
+<span class="co"># Copyright, License and disclamer statments...</span>
+
+<span class="co">#' Calculate the PMM log-likelihood for a given tree, data and model parameters</span>
+<span class="co">#' @param x a numerical vector of size N, where N is the number of tips in tree</span>
+<span class="co">#' @param tree a phylo object</span>
+<span class="co">#' @param x0,sigma2,sigmae2 parameters of the PMM:</span>
+<span class="co">#' \describe{</span>
+<span class="co">#' \item{x0}{value at the root of tree excluding whte noise;}</span>
+<span class="co">#' \item{sigma2}{unit-time variance increment of the heritable component;}</span>
+<span class="co">#' \item{sigmae2}{variance of the non-heritable component.}</span>
+<span class="co">#' }</span>
+<span class="co">#' @param ord an integer vector denoting the pruning order. This should be the </span>
+<span class="co">#' result from calling `reorder(tree, order = "postorder", index.only = TRUE)`, </span>
+<span class="co">#' which is also set as a default value. Can be passed as argument to speed-up </span>
+<span class="co">#' the calculation.</span>
+<span class="co">#' @return the log-likelihood value.</span>
+PMMLogLik &lt;-<span class="st"> </span><span class="cf">function</span>(
+  x, tree, x0, sigma2, sigmae2, 
+  <span class="dt">ord =</span> <span class="kw">reorder</span>(tree, <span class="dt">order =</span> <span class="st">"postorder"</span>, <span class="dt">index.only =</span> <span class="ot">TRUE</span>)) {
+  
+  <span class="co"># number of tips in the tree</span>
+  N &lt;-<span class="st"> </span><span class="kw">length</span>(tree<span class="op">$</span>tip.label)
+  <span class="co"># total number of nodes in the tree (tips, internal nodes and root node)</span>
+  M &lt;-<span class="st"> </span><span class="kw">nrow</span>(tree<span class="op">$</span>edge) <span class="op">+</span><span class="st"> </span>1L
+  <span class="co"># state variables for each node</span>
+  a &lt;-<span class="st"> </span>b &lt;-<span class="st"> </span>c &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="fl">0.0</span>, M)
+
+  <span class="co"># indices of the rows in tree$edge in pruning order</span>
+  <span class="cf">if</span>(<span class="kw">is.null</span>(ord)) {
+    ord &lt;-<span class="st"> </span><span class="kw">reorder</span>(tree, <span class="dt">order =</span> <span class="st">"postorder"</span>, <span class="dt">index.only =</span> <span class="ot">TRUE</span>)
+  }
+
+  <span class="cf">for</span>(o <span class="cf">in</span> ord) {
+    <span class="co"># daughter node</span>
+    i &lt;-<span class="st"> </span>tree<span class="op">$</span>edge[o, <span class="dv">2</span>]
+    <span class="co"># parent node</span>
+    j &lt;-<span class="st"> </span>tree<span class="op">$</span>edge[o, <span class="dv">1</span>]
+    <span class="co"># branch length</span>
+    t &lt;-<span class="st"> </span>tree<span class="op">$</span>edge.length[o]
+
+    <span class="cf">if</span>(i <span class="op">&lt;=</span><span class="st"> </span>N) {
+      <span class="co"># initialize a tip node</span>
+      a[i] &lt;-<span class="st"> </span><span class="op">-</span><span class="fl">0.5</span> <span class="op">/</span><span class="st"> </span>sigmae2
+      b[i] &lt;-<span class="st"> </span>x[i] <span class="op">/</span><span class="st"> </span>sigmae2
+      c[i] &lt;-<span class="st"> </span><span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span><span class="st"> </span>(x[i]<span class="op">*</span>b[i] <span class="op">+</span><span class="st"> </span><span class="kw">log</span>(<span class="dv">2</span><span class="op">*</span>pi<span class="op">*</span>sigmae2))
+    }
+
+    d =<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>a[i]<span class="op">*</span>sigma2<span class="op">*</span>t
+
+    <span class="co"># the order is important</span>
+    c[i] &lt;-<span class="st"> </span>c[i] <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span><span class="op">*</span><span class="kw">log</span>(d) <span class="op">+</span><span class="st"> </span><span class="fl">0.5</span><span class="op">*</span>b[i]<span class="op">*</span>b[i]<span class="op">*</span>sigma2<span class="op">*</span>t<span class="op">/</span>d
+    a[i] &lt;-<span class="st"> </span>a[i] <span class="op">/</span><span class="st"> </span>d
+    b[i] &lt;-<span class="st"> </span>b[i] <span class="op">/</span><span class="st"> </span>d
+    
+    
+    a[j] &lt;-<span class="st"> </span>a[j] <span class="op">+</span><span class="st"> </span>a[i]
+    b[j] &lt;-<span class="st"> </span>b[j] <span class="op">+</span><span class="st"> </span>b[i]
+    c[j] &lt;-<span class="st"> </span>c[j] <span class="op">+</span><span class="st"> </span>c[i]
+  }
+
+  <span class="co"># for phylo objects, N+1 denotes the root node</span>
+  a[N<span class="op">+</span><span class="dv">1</span>]<span class="op">*</span>x0<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>b[N<span class="op">+</span><span class="dv">1</span>]<span class="op">*</span>x0 <span class="op">+</span><span class="st"> </span>c[N<span class="op">+</span><span class="dv">1</span>]
+}</code></pre></div>
+</div>
+<div id="doing-a-postorder-tree-traversal-using-our-rcpp-module" class="section level4">
+<h4 class="hasAnchor">
+<a href="#doing-a-postorder-tree-traversal-using-our-rcpp-module" class="anchor"></a>Doing a postorder tree traversal using our Rcpp module</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#' Calculate the PMM log-likelihood for a given tree, data and model parameters using the Rcpp module</span>
+<span class="co">#' @inheritParams PMMLogLik</span>
+<span class="co">#' @param cppObject a previously created object returned by \code{\link{NewPMMCppObject}}</span>
+<span class="co">#' @param mode an integer denoting the mode for traversing the tree, i.e. serial vs paralle.</span>
+<span class="co">#' </span>
+<span class="co">#' @return the log-likelihood value.</span>
+PMMLogLikCpp &lt;-<span class="st"> </span><span class="cf">function</span>(x, tree, x0, sigma2, sigmae2, 
+                         <span class="dt">cppObject =</span> <span class="kw">NewPMMCppObject</span>(x, tree),
+                         <span class="dt">mode =</span> <span class="kw">getOption</span>(<span class="st">"SPLITT.postorder.mode"</span>, <span class="dv">0</span>)) {
+  abc &lt;-<span class="st"> </span>cppObject<span class="op">$</span><span class="kw">TraverseTree</span>(<span class="kw">c</span>(sigma2, sigmae2), mode)
+  abc[<span class="dv">1</span>]<span class="op">*</span>x0<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>abc[<span class="dv">2</span>]<span class="op">*</span>x0 <span class="op">+</span><span class="st"> </span>abc[<span class="dv">3</span>]
+}
+
+
+<span class="co">#' Create an instance of the RCPP_PMM module for a given tree and trait data</span>
+<span class="co">#'</span>
+<span class="co">#' @inheritParams PMMLogLik</span>
+<span class="co">#' @return an object to be passed as argument of the \link{PMMLogLikCpp} function.</span>
+<span class="co">#' @seealso \link{PMMLogLikCpp}</span>
+NewPMMCppObject &lt;-<span class="st"> </span><span class="cf">function</span>(x, tree) {
+  <span class="co"># this calls the CreateTraversalTaskAbcPMM function in RCPP_AbcPMM.cpp</span>
+  PMMUsingSPLITT__TraversalTaskAbcPMM<span class="op">$</span><span class="kw">new</span>(tree, x[<span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(tree<span class="op">$</span>tip.label)])
+}</code></pre></div>
+</div>
+</div>
+<div id="minibenchmark-r" class="section level3">
+<h3 class="hasAnchor">
+<a href="#minibenchmark-r" class="anchor"></a><code>MiniBenchmark.R</code>
+</h3>
+<p>In this file, I wrote a simple performance benchmark measuring the time for PMM-log-likelihood calculation by the R and C++ implementation. The file defines a function called <code>MiniBenchmark</code> with two arguments:</p>
+<ul>
+<li>N: integer size of a tree to generate, default N=1000;</li>
+<li>Ntests: integer number of times to execute a log-likelihood calculation for one time measurement (the higher this number, the more accurate will be the measure, but the longer will the benchmark run). You can read the definition of this function <a href="https://raw.githubusercontent.com/venelin/SPLITT/master/PMMUsingSPLITT-R-package/R/MiniBenchmark.R">here</a>.</li>
+</ul>
+</div>
+<div id="docforrcppmodules-r" class="section level3">
+<h3 class="hasAnchor">
+<a href="#docforrcppmodules-r" class="anchor"></a><code>DocForRcppModules.R</code>
+</h3>
+<p>In this file, I wrote Roxygen2 comment blocks for the exposed C++ classes. This was needed to avoid a warning message during the quality check for the package (<code><a href="http://www.rdocumentation.org/packages/devtools/topics/check">devtools::check</a></code>). Here is the content of this file:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#' Rcpp module for the \code{TraversalTaskAbcPMM}-class</span>
+<span class="co">#' @name PMMUsingSPLITT__TraversalTaskAbcPMM</span>
+<span class="co">#' @aliases Rcpp_PMMUsingSPLITT__TraversalTaskAbcPMM-class</span>
+<span class="ot">NULL</span>
+
+<span class="co">#' \code{TraversalAlgorithm}-type used in \code{AbcPMM}</span>
+<span class="co">#' @name PMMUsingSPLITT__AbcPMM__AlgorithmType</span>
+<span class="co">#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__AlgorithmType-class</span>
+<span class="ot">NULL</span>
+
+<span class="co">#' Base class for \code{PMMUsingSPLITT::AbcPMM::AlgorithmType}</span>
+<span class="co">#' @name PMMUsingSPLITT__AbcPMM__TraversalAlgorithm</span>
+<span class="co">#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__TraversalAlgorithm-class </span>
+<span class="co">#' @slot algorithm algorithm.</span>
+<span class="ot">NULL</span></code></pre></div>
+</div>
+</div>
+<div id="the-directory-teststestthat" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-directory-teststestthat" class="anchor"></a>The directory <code>tests/testthat</code>
+</h2>
+<p>In this directory, there are two unit-tests for the package. The first test compares the log-likelihood values calculated by the R and the C++ implementation for a given random tree, data and model parameters. Here is the code for this unit-test:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(testthat)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/context">context</a></span>(<span class="st">"Test R and Cpp code calculate the same PMM log-likelihood"</span>)
+
+<span class="kw">library</span>(ape)
+<span class="kw">library</span>(PMMUsingSPLITT)
+
+<span class="kw">set.seed</span>(<span class="dv">10</span>)
+
+N &lt;-<span class="st"> </span><span class="dv">1000</span>
+x0 &lt;-<span class="st"> </span><span class="fl">0.1</span>
+alpha &lt;-<span class="st"> </span><span class="dv">1</span>
+theta &lt;-<span class="st"> </span><span class="dv">10</span>
+sigma2 &lt;-<span class="st"> </span><span class="fl">0.25</span>
+sigmae2 &lt;-<span class="st"> </span><span class="dv">1</span>
+
+tree &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/rtree">rtree</a></span>(N)
+
+g &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ape/topics/rTraitCont">rTraitCont</a></span>(tree, <span class="dt">model =</span> <span class="st">"OU"</span>, <span class="dt">root.value =</span> x0,
+                <span class="dt">alpha =</span> alpha, <span class="dt">sigma =</span> <span class="kw">sqrt</span>(sigma2),
+                <span class="dt">ancestor =</span> <span class="ot">FALSE</span>)
+
+x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> N, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="kw">sqrt</span>(sigmae2))
+
+<span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/test_that">test_that</a></span>(
+  <span class="st">"PMMLogLik == PMMLogLikCpp"</span>,
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/equality-expectations">expect_equal</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/PMMLogLik">PMMLogLik</a></span>(x, tree, x0, sigma2, sigmae2),
+               <span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/PMMLogLikCpp">PMMLogLikCpp</a></span>(x, tree, x0, sigma2, sigmae2))
+)</code></pre></div>
+<p>The second test validates that the <code>MiniBenchmark</code> function executes without error:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(testthat)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/context">context</a></span>(<span class="st">"Test MiniBenchmark(1000, 10) passes without errors"</span>)
+
+
+<span class="kw">library</span>(PMMUsingSPLITT)
+
+<span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/test_that">test_that</a></span>(<span class="st">"MiniBenchmark runs without errors"</span>, {
+          <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/output-expectations">expect_output</a></span>(df &lt;-<span class="st"> </span>PMMUsingSPLITT<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dv">1000</span>, <span class="dv">10</span>), <span class="st">"Measuring calculation times..."</span>)
+          <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/inheritance-expectations">expect_s3_class</a></span>(df, <span class="st">"data.frame"</span>)
+          })</code></pre></div>
+</div>
+</div>
+<div id="installing-the-package" class="section level1">
+<h1 class="hasAnchor">
+<a href="#installing-the-package" class="anchor"></a>Installing the package</h1>
+<p>We install the package with the following command:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install">install</a></span>(<span class="st">"./PMMUsingSPLITT-R-package"</span>)</code></pre></div>
-<pre><code>## ✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
-## ─  preparing ‘PMMUsingSPLITT’:
-## ✔  checking DESCRIPTION meta-information ...
-## ─  cleaning src
-## ─  checking for LF line-endings in source and make files and shell scripts
-## ─  checking for empty or unneeded directories
-## ─  building ‘PMMUsingSPLITT_1.0.tar.gz’
-##    Warning: invalid uid value replaced by that for user 'nobody'
-##    
-## Running /Library/Frameworks/R.framework/Resources/bin/R CMD INSTALL 
-##   /var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T//Rtmpk9L09F/PMMUsingSPLITT_1.0.tar.gz --install-tests 
-## * installing to library ‘/Users/vmitov/Library/R/3.5/library’
-## * installing *source* package ‘PMMUsingSPLITT’ ...
-## ** libs
-## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__AbcPMM.cpp -o RCPP__AbcPMM.o
-## /usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I"/Users/vmitov/Library/R/3.5/library/RcppArmadillo/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RcppExports.cpp -o RcppExports.o
-## /usr/local/clang6/bin/clang++ -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o PMMUsingSPLITT.so RCPP__AbcPMM.o RcppExports.o -fopenmp -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
-## installing to /Users/vmitov/Library/R/3.5/library/PMMUsingSPLITT/libs
-## ** R
-## ** tests
-## ** byte-compile and prepare package for lazy loading
-## ** help
-## *** installing help indices
-## ** building package indices
-## ** testing if installed package can be loaded
-## * DONE (PMMUsingSPLITT)
-## Reloading attached PMMUsingSPLITT</code></pre>
+<p>On my computer this produces the following output:</p>
+<pre><code>✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
+─  preparing ‘PMMUsingSPLITT’:
+✔  checking DESCRIPTION meta-information ...
+─  cleaning src
+─  checking for LF line-endings in source and make files and shell scripts
+─  checking for empty or unneeded directories
+─  building ‘PMMUsingSPLITT_1.0.tar.gz’
+   Warning: invalid uid value replaced by that for user 'nobody'
+   
+Running /Library/Frameworks/R.framework/Resources/bin/R CMD INSTALL \
+  /var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T//RtmpdUvSl4/PMMUsingSPLITT_1.0.tar.gz --install-tests 
+* installing to library ‘/Users/vmitov/Library/R/3.5/library’
+* installing *source* package ‘PMMUsingSPLITT’ ...
+** libs
+/usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RCPP__AbcPMM.cpp -o RCPP__AbcPMM.o
+/usr/local/clang6/bin/clang++  -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG -fopenmp -I"/Users/vmitov/Library/R/3.5/library/Rcpp/include" -I/usr/local/include   -fPIC  -Wall -g -O2  -c RcppExports.cpp -o RcppExports.o
+/usr/local/clang6/bin/clang++ -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o PMMUsingSPLITT.so RCPP__AbcPMM.o RcppExports.o -fopenmp -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/vmitov/Library/R/3.5/library/PMMUsingSPLITT/libs
+** R
+** tests
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+* DONE (PMMUsingSPLITT)</code></pre>
 </div>
-<div id="see-if-it-works-on-your-computer" class="section level2">
-<h2 class="hasAnchor">
-<a href="#see-if-it-works-on-your-computer" class="anchor"></a>See if it works on your computer</h2>
+<div id="running-the-unit-tests" class="section level1">
+<h1 class="hasAnchor">
+<a href="#running-the-unit-tests" class="anchor"></a>Running the unit tests</h1>
+<p>We run the unit-tests the following command:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/test">test</a></span>(<span class="st">"./PMMUsingSPLITT-R-package"</span>)</code></pre></div>
+<p>On my computer this produces the following output:</p>
+<pre><code>Loading PMMUsingSPLITT
+Testing PMMUsingSPLITT
+✔ | OK F W S | Context
+✔ |  2       | Test MiniBenchmark(1000, 10) passes without errors [1.7 s]
+✔ |  1       | Test R and Cpp code calculate the same PMM log-likelihood
+
+══ Results ════════════════════════════════════════════════════════════════════════════════════════════════════════
+Duration: 1.8 s
+
+OK:       3
+Failed:   0
+Warnings: 0
+Skipped:  0</code></pre>
+</div>
+<div id="check-the-perofmance-on-your-computer" class="section level1">
+<h1 class="hasAnchor">
+<a href="#check-the-perofmance-on-your-computer" class="anchor"></a>Check the perofmance on your computer</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(PMMUsingSPLITT)</code></pre></div>
 <pre><code>## Loading required package: Rcpp</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">10000</span>, <span class="dt">Ntests =</span> <span class="dv">10</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># with a small tree</span>
+<span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">100</span>, <span class="dt">Ntests =</span> <span class="dv">1000</span>)</code></pre></div>
+<pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
+##       a tree of size N= 100 ;
+## Calling each likelihood calculation Ntests= 1000  times ...
+## CPU:  Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz 
+## OpenMP version:  201107 
+## Number of threads: 8 
+## Measuring calculation times...</code></pre>
+<pre><code>##    model                                            mode time.ms
+## 1    PMM                                      R (serial)   1.660
+## 2    PMM                                      C++ (AUTO)   0.017
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)   0.018
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)   0.019
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)   0.019
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)   0.063
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)   0.055
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)   0.105
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   1.773
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)   0.073
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)   0.049
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)   0.052
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)   0.055</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># with a bigger tree</span>
+<span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">1000</span>, <span class="dt">Ntests =</span> <span class="dv">100</span>)</code></pre></div>
+<pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
+##       a tree of size N= 1000 ;
+## Calling each likelihood calculation Ntests= 100  times ...
+## CPU:  Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz 
+## OpenMP version:  201107 
+## Number of threads: 8 
+## Measuring calculation times...</code></pre>
+<pre><code>##    model                                            mode time.ms
+## 1    PMM                                      R (serial)   17.40
+## 2    PMM                                      C++ (AUTO)    0.17
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)    0.12
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)    0.12
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)    0.08
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)    0.16
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)    0.08
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)    0.16
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   15.72
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)    0.08
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)    0.08
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)    0.09
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)    0.09</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># with a very big tree</span>
+<span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">10000</span>, <span class="dt">Ntests =</span> <span class="dv">10</span>)</code></pre></div>
 <pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
 ##       a tree of size N= 10000 ;
 ## Calling each likelihood calculation Ntests= 10  times ...
@@ -270,20 +711,114 @@ RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
 ## Number of threads: 8 
 ## Measuring calculation times...</code></pre>
 <pre><code>##    model                                            mode time.ms
-## 1    PMM                                      R (serial)   116.0
-## 2    PMM                                      C++ (AUTO)     0.6
-## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     0.7
-## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     0.7
-## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     0.9
-## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.9
-## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.4
-## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.4
-## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   156.1
-## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     1.4
-## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.3
+## 1    PMM                                      R (serial)   173.0
+## 2    PMM                                      C++ (AUTO)     0.5
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     1.1
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     1.2
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     1.2
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.2
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.8
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.5
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   154.6
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.3
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.8
 ## 12   PMM                        C++ (HYBRID_LOOP_VISITS)     0.3
-## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     1.3</code></pre>
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.4</code></pre>
 </div>
+<div id="checking-for-code-before-release-to-cran" class="section level1">
+<h1 class="hasAnchor">
+<a href="#checking-for-code-before-release-to-cran" class="anchor"></a>Checking for code before release to CRAN</h1>
+<p>The last step before releasing the R-package to CRAN is to run a code and documentation consistency check.</p>
+<p>This is done by running:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/check">check</a></span>(<span class="st">"./PMMUsingSPLITT-R-package"</span>)</code></pre></div>
+<p>On my computer this produces the following output:</p>
+<pre><code>Updating PMMUsingSPLITT documentation
+Loading PMMUsingSPLITT
+Warning: The existing 'NAMESPACE' file was not generated by roxygen2, and will not be overwritten.
+── Building ────────────────────────────────────────────────── PMMUsingSPLITT ──
+Setting env vars:
+● CFLAGS    : -Wall -pedantic -fdiagnostics-color=always
+● CXXFLAGS  : -Wall -pedantic -fdiagnostics-color=always
+● CXX11FLAGS: -Wall -pedantic -fdiagnostics-color=always
+────────────────────────────────────────────────────────────────────────────────
+✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
+─  preparing ‘PMMUsingSPLITT’:
+✔  checking DESCRIPTION meta-information ...
+─  cleaning src
+─  checking for LF line-endings in source and make files and shell scripts
+─  checking for empty or unneeded directories
+─  building ‘PMMUsingSPLITT_1.0.tar.gz’
+   Warning: invalid uid value replaced by that for user 'nobody'
+   
+── Checking ────────────────────────────────────────────────── PMMUsingSPLITT ──
+Setting env vars:
+● _R_CHECK_CRAN_INCOMING_REMOTE_: FALSE
+● _R_CHECK_CRAN_INCOMING_       : FALSE
+● _R_CHECK_FORCE_SUGGESTS_      : FALSE
+── R CMD check ─────────────────────────────────────────────────────────────────
+─  using log directory ‘/private/var/folders/nb/_b5mkf753p3c86s9nrpk33gc002289/T/RtmpdUvSl4/PMMUsingSPLITT.Rcheck’
+─  using R version 3.5.1 (2018-07-02)
+─  using platform: x86_64-apple-darwin15.6.0 (64-bit)
+─  using session charset: UTF-8
+─  using options ‘--no-manual --as-cran’
+✔  checking for file ‘PMMUsingSPLITT/DESCRIPTION’
+─  checking extension type ... Package
+─  this is package ‘PMMUsingSPLITT’ version ‘1.0’
+─  package encoding: UTF-8
+✔  checking package namespace information ...
+✔  checking package dependencies (14.3s)
+✔  checking if this is a source package
+✔  checking if there is a namespace
+✔  checking for executable files ...
+✔  checking for hidden files and directories
+✔  checking for portable file names
+✔  checking for sufficient/correct file permissions
+✔  checking serialization versions
+✔  checking whether package ‘PMMUsingSPLITT’ can be installed (16.3s)
+✔  checking installed package size ...
+✔  checking package directory ...
+✔  checking DESCRIPTION meta-information ...
+✔  checking top-level files
+✔  checking for left-over files
+✔  checking index information
+✔  checking package subdirectories ...
+✔  checking R files for non-ASCII characters ...
+✔  checking R files for syntax errors ...
+✔  checking whether the package can be loaded (488ms)
+✔  checking whether the package can be loaded with stated dependencies (458ms)
+✔  checking whether the package can be unloaded cleanly (462ms)
+✔  checking whether the namespace can be loaded with stated dependencies (460ms)
+✔  checking whether the namespace can be unloaded cleanly (482ms)
+✔  checking loading without being on the library search path (500ms)
+✔  checking dependencies in R code (517ms)
+✔  checking S3 generic/method consistency (999ms)
+✔  checking replacement functions (467ms)
+✔  checking foreign function calls (510ms)
+✔  checking R code for possible problems (2.7s)
+✔  checking Rd files ...
+✔  checking Rd metadata ...
+✔  checking Rd line widths ...
+✔  checking Rd cross-references ...
+✔  checking for missing documentation entries (511ms)
+✔  checking for code/documentation mismatches (1.4s)
+✔  checking Rd \usage sections (1.1s)
+✔  checking Rd contents ...
+✔  checking for unstated dependencies in examples ...
+✔  checking line endings in C/C++/Fortran sources/headers
+✔  checking line endings in Makefiles
+✔  checking compilation flags in Makevars ...
+✔  checking for GNU extensions in Makefiles
+✔  checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS)
+✔  checking pragmas in C/C++ headers and code ...
+✔  checking compilation flags used
+✔  checking compiled code ...
+─  checking examples ... NONE
+   
+   
+── R CMD check results ───────────────────────────────── PMMUsingSPLITT 1.0 ────
+Duration: 43.4s
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔</code></pre>
 </div>
   </div>
 
@@ -294,11 +829,17 @@ RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
       <ul class="nav nav-pills nav-stacked">
 <li>
 <a href="#what-is-in-the-pmmusingsplitt-r-package">What is in the PMMUsingSPLITT R-package?</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#writing-a-factory-function-for-the-parallelpruningabcpmm-traversal-task">Writing a factory function for the <code>ParallelPruningAbcPMM</code> traversal task</a></li>
-      <li><a href="#installing-the-splitt-r-package">Installing the SPLITT R-package</a></li>
-      <li><a href="#see-if-it-works-on-your-computer">See if it works on your computer</a></li>
+<li><a href="#the-description-file">The <code>DESCRIPTION</code> file</a></li>
+      <li><a href="#the-namespace-file">The <code>NAMESPACE</code> file</a></li>
+      <li><a href="#the-directory-src">The directory <code>src</code></a></li>
+      <li><a href="#the-directory-r">The directory <code>R</code></a></li>
+      <li><a href="#the-directory-teststestthat">The directory <code>tests/testthat</code></a></li>
       </ul>
 </li>
+      <li><a href="#installing-the-package">Installing the package</a></li>
+      <li><a href="#running-the-unit-tests">Running the unit tests</a></li>
+      <li><a href="#check-the-perofmance-on-your-computer">Check the perofmance on your computer</a></li>
+      <li><a href="#checking-for-code-before-release-to-cran">Checking for code before release to CRAN</a></li>
       </ul>
 </div>
       </div>
