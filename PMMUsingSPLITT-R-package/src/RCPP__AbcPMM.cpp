@@ -24,9 +24,7 @@
   * @author Venelin Mitov
   */
 
-#include <R_ext/Rdynload.h>
 #include <Rcpp.h>
-
 #include "./AbcPMM.h"
     
 // [[Rcpp::plugins("cpp11")]]
@@ -46,26 +44,53 @@ TraversalTaskAbcPMM* CreateTraversalTaskAbcPMM(
   uvec daughters(branches.column(1).begin(), branches.column(1).end());
   vec t = Rcpp::as<vec>(tree["edge.length"]);
   uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
-  uvec node_names = Seq(uint(1), num_tips);
+  uvec tip_names = Seq(uint(1), num_tips);
   
-  typename TraversalTaskAbcPMM::DataType data(node_names, values);
+  typename TraversalTaskAbcPMM::DataType data(tip_names, values);
   
   return new TraversalTaskAbcPMM(parents, daughters, t, data);
 }
 
+
+// This will enable returning a copy of the `TraversalAlgorithm`-object stored in
+// a `TraversalTaskAbcPMM` object to a R. This will be used in the MiniBenchmark
+// R-function to check things like the OpenMP version used during compilation and
+// the number of OpenMP threads at runtime. 
 RCPP_EXPOSED_CLASS_NODECL(TraversalTaskAbcPMM::AlgorithmType)
   
 RCPP_MODULE(PMMUsingSPLITT__TraversalTaskAbcPMM) {
-  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType::ParentType> ( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
-    .property( "VersionOPENMP", &TraversalTaskAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
-    .property( "NumOmpThreads", &TraversalTaskAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
+  
+  // Expose the properties VersionOPENMP and NumOmpThreads from the base 
+  // TraversalAlgorithm class
+  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType::ParentType> (
+      "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"
+    )
+  .property( "VersionOPENMP",
+             &TraversalTaskAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
+  .property( "NumOmpThreads",
+             &TraversalTaskAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
   ;
-  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType> ( "PMMUsingSPLITT__AbcPMM__AlgorithmType" )
-    .derives<TraversalTaskAbcPMM::AlgorithmType::ParentType>( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
+
+  // Expose the TraversalTaskAbcPMM::AlgorithmType specifying that it derives 
+  // from the base TraversalAlgorithm class
+  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType> (
+      "PMMUsingSPLITT__AbcPMM__AlgorithmType"
+    )
+  .derives<TraversalTaskAbcPMM::AlgorithmType::ParentType>(
+      "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm"
+    )
   ;
+  
+  // Finally, expose the TraversalTaskAbcPMM class - this is the main class in 
+  // the module, which will be instantiated from R using the factory function
+  // we've just written.
   Rcpp::class_<TraversalTaskAbcPMM>( "PMMUsingSPLITT__TraversalTaskAbcPMM" )
+  // The <argument-type-list> MUST MATCH the arguments of the factory function 
+  // defined above.
   .factory<Rcpp::List const&, vec const&>( &CreateTraversalTaskAbcPMM )
+  // Expose the method that we will use to execute the TraversalTask
   .method( "TraverseTree", &TraversalTaskAbcPMM::TraverseTree )
+  // Expose the algorithm property
   .property( "algorithm", &TraversalTaskAbcPMM::algorithm )
   ;
 }

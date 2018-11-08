@@ -1,5 +1,5 @@
 # PMM.R
-# SPLITT
+# PMMUsingSPLITT
 # 
 # Copyright 2018 Venelin Mitov
 # 
@@ -85,7 +85,7 @@ PMMLogLik <- function(
   a[N+1]*x0^2 + b[N+1]*x0 + c[N+1]
 }
 
-#' Calculate the PMM log-likelihood for a given tree, data and model parameters using the RCPP_PMM module
+#' Calculate the PMM log-likelihood for a given tree, data and model parameters using the Rcpp module
 #' @inheritParams PMMLogLik
 #' @param cppObject a previously created object returned by \code{\link{NewPMMCppObject}}
 #' @param mode an integer denoting the mode for traversing the tree, i.e. serial vs paralle.
@@ -99,7 +99,7 @@ PMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2,
 }
 
 
-#' Create an instance of the RCPP_PMM module for a given tree and trait data
+#' Create an instance of the Rcpp module for a given tree and trait data
 #'
 #' @inheritParams PMMLogLik
 #' @return an object to be passed as argument of the \link{PMMLogLikCpp} function.

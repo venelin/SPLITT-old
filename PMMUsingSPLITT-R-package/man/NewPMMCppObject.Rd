@@ -2,7 +2,7 @@
 % Please edit documentation in R/PMM.R
 \name{NewPMMCppObject}
 \alias{NewPMMCppObject}
-\title{Create an instance of the RCPP_PMM module for a given tree and trait data}
+\title{Create an instance of the Rcpp module for a given tree and trait data}
 \usage{
 NewPMMCppObject(x, tree)
 }
@@ -15,7 +15,7 @@ NewPMMCppObject(x, tree)
 an object to be passed as argument of the \link{PMMLogLikCpp} function.
 }
 \description{
-Create an instance of the RCPP_PMM module for a given tree and trait data
+Create an instance of the Rcpp module for a given tree and trait data
 }
 \seealso{
 \link{PMMLogLikCpp}

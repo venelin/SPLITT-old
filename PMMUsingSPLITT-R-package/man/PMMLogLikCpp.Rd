@@ -2,7 +2,7 @@
 % Please edit documentation in R/PMM.R
 \name{PMMLogLikCpp}
 \alias{PMMLogLikCpp}
-\title{Calculate the PMM log-likelihood for a given tree, data and model parameters using the RCPP_PMM module}
+\title{Calculate the PMM log-likelihood for a given tree, data and model parameters using the Rcpp module}
 \usage{
 PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, cppObject = NewPMMCppObject(x,
   tree), mode = getOption("SPLITT.postorder.mode", 0))
@@ -41,5 +41,5 @@ PMMLogLikCpp(x, tree, x0, sigma2, sigmae2, cppObject = NewPMMCppObject(x,
 the log-likelihood value.
 }
 \description{
-Calculate the PMM log-likelihood for a given tree, data and model parameters using the RCPP_PMM module
+Calculate the PMM log-likelihood for a given tree, data and model parameters using the Rcpp module
 }

@@ -1,5 +1,5 @@
 # zzz.R
-# SPLITT
+# PMMUsingSPLITT
 # 
 # Copyright 2018 Venelin Mitov
 # 

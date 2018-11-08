@@ -1,5 +1,5 @@
-# PMM.R
-# SPLITT
+# MiniBenchmark.R
+# PMMUsingSPLITT
 # 
 # Copyright 2017 Venelin Mitov
 # 
@@ -142,7 +142,6 @@ MiniBenchmark <- function(N = 10000, Ntests = 10) {
   )
   
   rownames(resultsPMM) <- NULL
-  #resultsPMM[, speedupX:=tR*1000 / time.ms]
   
   resultsPMM
 }
