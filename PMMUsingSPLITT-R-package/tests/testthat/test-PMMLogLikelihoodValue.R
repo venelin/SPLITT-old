@@ -6,7 +6,7 @@ library(PMMUsingSPLITT)
 
 set.seed(10)
 
-N <- 100
+N <- 1000
 x0 <- 0.1
 alpha <- 1
 theta <- 10

@@ -1,5 +1,5 @@
 /**
-  *  Rcpp.cpp
+  *  RCPP__AbcPMM.cpp
   *  SPLITT
   *
   * Copyright 2017 Venelin Mitov
@@ -24,47 +24,49 @@
   * @author Venelin Mitov
   */
 
-#include <RcppArmadillo.h>
 #include <R_ext/Rdynload.h>
-    
+#include <Rcpp.h>
+
 #include "./AbcPMM.h"
     
 // [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::plugins(openmp)]]
-// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace SPLITT;
 using namespace PMMUsingSPLITT;
 
-typedef TraversalTask< AbcPMM<OrderedTree<uint, double>> > ParallelPruningAbcPMM;
+typedef TraversalTask< AbcPMM<OrderedTree<uint, double>> > TraversalTaskAbcPMM;
 
 
-ParallelPruningAbcPMM* CreateParallelPruningAbcPMM(
-    Rcpp::List const& tree, vec const& x) {
-  arma::umat branches = tree["edge"];
-  uvec br_0 = arma::conv_to<uvec>::from(branches.col(0));
-  uvec br_1 = arma::conv_to<uvec>::from(branches.col(1));
+TraversalTaskAbcPMM* CreateTraversalTaskAbcPMM(
+    Rcpp::List const& tree, vec const& values) {
+  
+  Rcpp::IntegerMatrix branches = tree["edge"];
+  uvec parents(branches.column(0).begin(), branches.column(0).end());
+  uvec daughters(branches.column(1).begin(), branches.column(1).end());
   vec t = Rcpp::as<vec>(tree["edge.length"]);
   uint num_tips = Rcpp::as<Rcpp::CharacterVector>(tree["tip.label"]).size();
   uvec node_names = Seq(uint(1), num_tips);
-  typename ParallelPruningAbcPMM::DataType data(node_names, x);
-  return new ParallelPruningAbcPMM(br_0, br_1, t, data);
+  
+  typename TraversalTaskAbcPMM::DataType data(node_names, values);
+  
+  return new TraversalTaskAbcPMM(parents, daughters, t, data);
 }
 
-RCPP_EXPOSED_CLASS_NODECL(ParallelPruningAbcPMM::AlgorithmType)
+RCPP_EXPOSED_CLASS_NODECL(TraversalTaskAbcPMM::AlgorithmType)
   
-RCPP_MODULE(PMMUsingSPLITT__AbcPMM) {
-  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType::ParentType> ( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
-    .property( "VersionOPENMP", &ParallelPruningAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
-    .property( "NumOmpThreads", &ParallelPruningAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
+RCPP_MODULE(PMMUsingSPLITT__TraversalTaskAbcPMM) {
+  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType::ParentType> ( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
+    .property( "VersionOPENMP", &TraversalTaskAbcPMM::AlgorithmType::ParentType::VersionOPENMP )
+    .property( "NumOmpThreads", &TraversalTaskAbcPMM::AlgorithmType::ParentType::NumOmpThreads )
   ;
-  Rcpp::class_<ParallelPruningAbcPMM::AlgorithmType> ( "PMMUsingSPLITT__AbcPMM__AlgorithmType" )
-    .derives<ParallelPruningAbcPMM::AlgorithmType::ParentType>( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
+  Rcpp::class_<TraversalTaskAbcPMM::AlgorithmType> ( "PMMUsingSPLITT__AbcPMM__AlgorithmType" )
+    .derives<TraversalTaskAbcPMM::AlgorithmType::ParentType>( "PMMUsingSPLITT__AbcPMM__TraversalAlgorithm" )
   ;
-  Rcpp::class_<ParallelPruningAbcPMM>( "PMMUsingSPLITT__AbcPMM" )
-  .factory<Rcpp::List const&, vec const&>(&CreateParallelPruningAbcPMM)
-  .method( "TraverseTree", &ParallelPruningAbcPMM::TraverseTree )
-  .property( "algorithm", &ParallelPruningAbcPMM::algorithm )
+  Rcpp::class_<TraversalTaskAbcPMM>( "PMMUsingSPLITT__TraversalTaskAbcPMM" )
+  .factory<Rcpp::List const&, vec const&>( &CreateTraversalTaskAbcPMM )
+  .method( "TraverseTree", &TraversalTaskAbcPMM::TraverseTree )
+  .property( "algorithm", &TraversalTaskAbcPMM::algorithm )
   ;
 }
 

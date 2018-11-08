@@ -31,4 +31,4 @@
 
 # loading the RCPP C++ modules
 
-loadModule( "PMMUsingSPLITT__AbcPMM", TRUE )
+loadModule( "PMMUsingSPLITT__TraversalTaskAbcPMM", TRUE )

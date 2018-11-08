@@ -1,11 +1,10 @@
 Package: PMMUsingSPLITT
 Type: Package
-Title: An example of how to execute a tree traversal task implemented with the 
-  SPLITT library from an R-package.
+Title: An example R-package using the SPLITT library 
 Version: 1.0
 Date: 2018-11-07
-Author: Your Name
-Maintainer: Your Name <your@email.com>
+Author: Venelin Mitov
+Maintainer: Venelin Mitov <vmitov@gmail.com>
 Description: One paragraph description of what the package does as
        one or more full sentences.
 License: LGPL (>= 2)
@@ -15,15 +14,10 @@ Depends:
     R (>= 3.1.0),
     Rcpp,
     methods
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp
 Imports:
     ape
-Suggests:
-    knitr,
-    rmarkdown
 RoxygenNote: 6.1.0
-BuildVignettes: false
-VignetteBuilder: knitr, rmarkdown
 ByteCompile: yes
 NeedsCompilation: yes
 

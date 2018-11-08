@@ -4,7 +4,8 @@
 \alias{PMMLogLik}
 \title{Calculate the PMM log-likelihood for a given tree, data and model parameters}
 \usage{
-PMMLogLik(x, tree, x0, sigma2, sigmae2)
+PMMLogLik(x, tree, x0, sigma2, sigmae2, ord = reorder(tree, order =
+  "postorder", index.only = TRUE))
 }
 \arguments{
 \item{x}{a numerical vector of size N, where N is the number of tips in tree}
@@ -17,6 +18,11 @@ PMMLogLik(x, tree, x0, sigma2, sigmae2)
 \item{sigma2}{unit-time variance increment of the heritable component;}
 \item{sigmae2}{variance of the non-heritable component.}
 }}
+
+\item{ord}{an integer vector denoting the pruning order. This should be the 
+result from calling `reorder(tree, order = "postorder", index.only = TRUE)`, 
+which is also set as a default value. Can be passed as argument to speed-up 
+the calculation.}
 }
 \value{
 the log-likelihood value.

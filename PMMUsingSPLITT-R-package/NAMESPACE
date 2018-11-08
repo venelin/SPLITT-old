@@ -1,7 +1,6 @@
 useDynLib(PMMUsingSPLITT, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 import(Rcpp)
-import("methods")
-importFrom("graphics", "par", "plot")
+import(methods)
 importFrom("stats", "reorder", "rnorm", "time")
 importFrom("ape", "rTraitCont", "rtree")

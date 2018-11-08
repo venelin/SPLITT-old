@@ -13,8 +13,8 @@ MiniBenchmark(N = 10000, Ntests = 10)
 times are averages Ntests calls). Default: 10.}
 }
 \value{
-a data.table containing the response times for the PMM, POUMM and the
-BPM models and the different parallel orders.
+a data.frame containing the response times for the PMM log-likelihood
+calculation.
 }
 \description{
 This function runs a small benchmark to evaluate the SPLITT-package 

@@ -105,5 +105,5 @@ PMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2,
 #' @return an object to be passed as argument of the \link{PMMLogLikCpp} function.
 #' @seealso \link{PMMLogLikCpp}
 NewPMMCppObject <- function(x, tree) {
-  PMMUsingSPLITT__AbcPMM$new(tree, x[1:length(tree$tip.label)])
+  PMMUsingSPLITT__TraversalTaskAbcPMM$new(tree, x[1:length(tree$tip.label)])
 }
