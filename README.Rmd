@@ -49,9 +49,8 @@ Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogeneti
 treeProcessing <- c("ape")
 testing <- c("testthat")
 Rcpp <- c("Rcpp")
-RcppArmadillo <- c("RcppArmadillo")
 
-packagesUsed <- c(treeProcessing, Rcpp, RcppArmadillo, testing)
+packagesUsed <- c(treeProcessing, Rcpp, testing)
 
 printPackages <- function(packs) {
   res <- ""
@@ -70,7 +69,7 @@ knitr::write_bib(packagesUsed, file = "./vignettes/REFERENCES-R.bib")
 
 The SPLITT R-package uses the following 3rd party R-packages:
 
-* For calling C++ from R: `r printPackages(c(Rcpp, RcppArmadillo))`
+* For calling C++ from R: `r printPackages(c(Rcpp))`
 * For tree processing in R: `r printPackages(treeProcessing)`;
 * For unit-testing: `r printPackages(testing)`.
 
