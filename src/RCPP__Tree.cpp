@@ -24,27 +24,26 @@
   * @author Venelin Mitov
   */
 
-#include <RcppArmadillo.h>
 #include <R_ext/Rdynload.h>
-    
+#include <Rcpp.h>
+
 #include "./SPLITT.h"
     
 // [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::plugins(openmp)]]
-// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace SPLITT;
 
 SPLITT::Tree<uint, double>* CreateTree(Rcpp::List const& tree) {
-  arma::umat branches = tree["edge"];
-  SPLITT::uvec br_0 = arma::conv_to<SPLITT::uvec>::from(branches.col(0));
-  SPLITT::uvec br_1 = arma::conv_to<SPLITT::uvec>::from(branches.col(1));
+  Rcpp::IntegerMatrix branches = tree["edge"];
+  SPLITT::uvec br_0(branches.column(0).begin(), branches.column(0).end());
+  SPLITT::uvec br_1(branches.column(1).begin(), branches.column(1).end());
   SPLITT::vec t = Rcpp::as<SPLITT::vec>(tree["edge.length"]);
   return new SPLITT::Tree<uint, double>(br_0, br_1, t);
 }
 
 RCPP_MODULE(SPLITT__Tree) {
-  Rcpp::class_<SPLITT::Tree<uint, double>> ( "SPLITT__Tree" )
+  Rcpp::class_< SPLITT::Tree<uint, double> > ( "SPLITT__Tree" )
   .factory<Rcpp::List const&>( &CreateTree )
   .property("num_nodes", &SPLITT::Tree<uint, double>::num_nodes )
   .property("num_tips", &SPLITT::Tree<uint, double>::num_tips )
@@ -57,16 +56,16 @@ RCPP_MODULE(SPLITT__Tree) {
 }
 
 SPLITT::OrderedTree<uint, double>* CreateOrderedTree(Rcpp::List const& tree) {
-  arma::umat branches = tree["edge"];
-  SPLITT::uvec br_0 = arma::conv_to<SPLITT::uvec>::from(branches.col(0));
-  SPLITT::uvec br_1 = arma::conv_to<SPLITT::uvec>::from(branches.col(1));
+  Rcpp::IntegerMatrix branches = tree["edge"];
+  SPLITT::uvec br_0(branches.column(0).begin(), branches.column(0).end());
+  SPLITT::uvec br_1(branches.column(1).begin(), branches.column(1).end());
   SPLITT::vec t = Rcpp::as<SPLITT::vec>(tree["edge.length"]);
   return new SPLITT::OrderedTree<uint, double>(br_0, br_1, t);
 }
 
 
 RCPP_MODULE(SPLITT__OrderedTree) {
-  Rcpp::class_<SPLITT::Tree<uint, double>> ( "SPLITT__Tree" )
+  Rcpp::class_< SPLITT::Tree<uint, double> > ( "SPLITT__Tree" )
   .factory<Rcpp::List const&>( &CreateTree )
   .property("num_nodes", &SPLITT::Tree<uint, double>::num_nodes )
   .property("num_tips", &SPLITT::Tree<uint, double>::num_tips )
@@ -77,8 +76,8 @@ RCPP_MODULE(SPLITT__OrderedTree) {
   .method( "FindChildren", &SPLITT::Tree<uint, double>::FindChildren )
   .method("OrderNodes", &SPLITT::Tree<uint, double>::OrderNodes )
   ;
-  Rcpp::class_<SPLITT::OrderedTree<uint, double>>( "SPLITT__OrderedTree" )
-    .derives<SPLITT::Tree<uint, double>> ( "SPLITT__Tree" )
+  Rcpp::class_< SPLITT::OrderedTree<uint, double> >( "SPLITT__OrderedTree" )
+    .derives< SPLITT::Tree<uint, double> > ( "SPLITT__Tree" )
     .factory<Rcpp::List const&>( &CreateOrderedTree )
     .property("num_levels", &SPLITT::OrderedTree<uint, double>::num_levels )
     .property("num_parallel_ranges_prune", &SPLITT::OrderedTree<uint, double>::num_parallel_ranges_prune )
@@ -96,7 +95,7 @@ SPLITT::OrderedTree<std::string, double>* CreateOrderedTreeStringNodes(
 }
 
 RCPP_MODULE(SPLITT__OrderedTreeStringNodes) {
-  Rcpp::class_<SPLITT::Tree<std::string, double>> ( "SPLITT__TreeStringNodes" )
+  Rcpp::class_< SPLITT::Tree<std::string, double> > ( "SPLITT__TreeStringNodes" )
   .property("num_nodes", &SPLITT::Tree<std::string, double>::num_nodes )
   .property("num_tips", &SPLITT::Tree<std::string, double>::num_tips )
   .method("LengthOfBranch", &SPLITT::Tree<std::string, double>::LengthOfBranch )
@@ -106,8 +105,8 @@ RCPP_MODULE(SPLITT__OrderedTreeStringNodes) {
   .method( "FindChildren", &SPLITT::Tree<std::string, double>::FindChildren )
   .method("OrderNodes", &SPLITT::OrderedTree<std::string, double>::OrderNodes )
   ;
-  Rcpp::class_<SPLITT::OrderedTree<std::string, double>>( "SPLITT__OrderedTreeStringNodes" )
-    .derives<SPLITT::Tree<std::string, double>> ( "SPLITT__TreeStringNodes" )
+  Rcpp::class_< SPLITT::OrderedTree<std::string, double> >( "SPLITT__OrderedTreeStringNodes" )
+    .derives< SPLITT::Tree<std::string, double> > ( "SPLITT__TreeStringNodes" )
     .factory<std::vector<std::string> const&, std::vector<std::string> const&,std::vector<double> const&>( &CreateOrderedTreeStringNodes )
     .property("num_levels", &SPLITT::OrderedTree<std::string, double>::num_levels )
     .property("num_parallel_ranges_prune", &SPLITT::OrderedTree<std::string, double>::num_parallel_ranges_prune )

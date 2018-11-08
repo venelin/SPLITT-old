@@ -1,9 +1,7 @@
 useDynLib(SPLITT, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 import(Rcpp)
-import("methods")
 importFrom("graphics", "par", "plot")
 importFrom("stats", "reorder", "rnorm", "time")
 importFrom("ape", "node.depth.edgelength", "tiplabels", "edgelabels", "nodelabels", "rTraitCont", "rtree")
 
-import(data.table)

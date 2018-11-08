@@ -17,12 +17,10 @@ LazyData: true
 Encoding: UTF-8
 Depends:
     R (>= 3.1.0),
-    Rcpp,
-    methods
-LinkingTo: Rcpp, RcppArmadillo
+    Rcpp
+LinkingTo: Rcpp
 Imports:
-    ape,
-    data.table
+    ape
 Suggests:
     knitr,
     rmarkdown,
