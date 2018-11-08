@@ -40,7 +40,7 @@ Used R-packages
 
 The SPLITT R-package uses the following 3rd party R-packages:
 
--   For calling C++ from R: Rcpp v0.12.19 (Eddelbuettel et al. 2017), RcppArmadillo v0.9.100.5.0 (Eddelbuettel, Francois, and Bates 2016)
+-   For calling C++ from R: Rcpp v1.0.0 (Eddelbuettel et al. 2017)
 -   For tree processing in R: ape v5.2 (Paradis et al. 2016);
 -   For unit-testing: testthat v2.0.1 (Wickham 2016).
 
@@ -48,8 +48,6 @@ References
 ----------
 
 Eddelbuettel, Dirk, Romain Francois, JJ Allaire, Kevin Ushey, Qiang Kou, Nathan Russell, Douglas Bates, and John Chambers. 2017. *Rcpp: Seamless R and C++ Integration*. <https://CRAN.R-project.org/package=Rcpp>.
-
-Eddelbuettel, Dirk, Romain Francois, and Doug Bates. 2016. *RcppArmadillo: ’Rcpp’ Integration for the ’Armadillo’ Templated Linear Algebra Library*. <https://CRAN.R-project.org/package=RcppArmadillo>.
 
 Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. *Ape: Analyses of Phylogenetics and Evolution*. <https://CRAN.R-project.org/package=ape>.
 
