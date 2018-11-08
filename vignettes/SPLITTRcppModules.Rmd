@@ -612,7 +612,7 @@ MiniBenchmark(N=1000, Ntests = 100)
 MiniBenchmark(N=10000, Ntests = 10)
 ```
 
-# Checking for code before release to CRAN
+# Checking for code and documentation inconsistencies before release to CRAN
 The last step before releasing the R-package to CRAN is to run a code and documentation consistency check.
 
 This is done by running:
