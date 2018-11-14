@@ -26,7 +26,7 @@ The SPLITT library represents a C++ header file called "SPLITT.h". Technically, 
 
 The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don't need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library. 
 
-## User guides and resources
+# User guides and resources
 
 The [Get started guide](https://venelin.github.io/SPLITT/articles/SPLITT.html) provides a general introduction to the library and a roadmap throughout the documentation.
 
@@ -38,13 +38,13 @@ The classes of the SPLITT API are documented in the [SPLITT Reference page](http
 
 Feature requests, bugs, etc can be reported in the [SPLITT issues list](https://github.com/venelin/SPLITT/issues).
 
-## Citing SPLITT
+# Citing SPLITT
 
 To give credit to the SPLITT library in a publication, please cite the following article:
 
 Mitov, V., & Stadler, T. (2018). Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library. bioRxiv, 235739. http://doi.org/10.1101/235739
 
-## Used R-packages
+# Used R-packages
 ```{r create-references, echo=FALSE, include=FALSE, eval=TRUE}
 treeProcessing <- c("ape")
 testing <- c("testthat")
@@ -73,5 +73,5 @@ The SPLITT R-package uses the following 3rd party R-packages:
 * For tree processing in R: `r printPackages(treeProcessing)`;
 * For unit-testing: `r printPackages(testing)`.
 
-## References
+# References
 

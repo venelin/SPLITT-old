@@ -86,8 +86,8 @@
 //'
 //' @section Global constants:
 //' \describe{
-//' \item{\link[=SPLITT::G_PI]{G_NA_UINT}}{}
-//' \item{\link[=SPLITT::G_PI]{G_EMPTY_UVEC}}{}
+//' \item{\link[=SPLITT::G_NA_UINT]{G_NA_UINT}}{}
+//' \item{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}}{}
 //' \item{\link[=SPLITT::G_PI]{G_PI}}{}
 //' }
 //' @section Global functions:
@@ -788,7 +788,7 @@ public:
 //' lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 //' for a tree without branch lengths (i.e. only a topology).
 //'
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 Tree(std::vector<NodeType> const& branch_start_nodes,
@@ -987,7 +987,7 @@ Tree(std::vector<NodeType> const& branch_start_nodes,
 //' @return a \code{\link[=SPLITT::uint]{uint}}: the numbef of nodes in the tree, 
 //' including tips, internal nodes and the root.
 //' 
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uint num_nodes() const {
@@ -1001,7 +1001,7 @@ uint num_nodes() const {
 //' \code{\link[=SPLITT::uint]{uint} \link[=SPLITT::Tree]{Tree}::num_nodes() const;}
 //' 
 //' @return \code{\link[=SPLITT::uint]{uint}}, the number of tips in the tree.
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uint num_tips() const {
@@ -1015,7 +1015,7 @@ uint num_tips() const {
 //' \code{bool HasBranchLengths() const;}
 //' 
 //' @return \code{bool}, \code{true} if the tree has branch lengths.
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 bool HasBranchLengths() const {
@@ -1032,7 +1032,7 @@ bool HasBranchLengths() const {
 //' 
 //' @return \code{\link[=SPLITT::Tree::LengthType]{LengthType}}; the length associated with the branch ending at node \code{i}.
 //'
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 LengthType const& LengthOfBranch(uint i) const {
@@ -1051,7 +1051,7 @@ LengthType const& LengthOfBranch(uint i) const {
 //' \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const& BranchLengths() const;}
 //' @return \href{http://en.cppreference.com/w/cpp/container/vector}{\code{std::vector}}\code{<\link[=SPLITT::Tree::LengthType]{LengthType}> const&}; 
 //'   a const reference to the internally stored vector of branch lengths, in the order of the end-node ids.
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 std::vector<LengthType> const& BranchLengths() const {
@@ -1066,7 +1066,7 @@ std::vector<LengthType> const& BranchLengths() const {
 //' @param i \code{\link[=SPLITT::uint]{uint}}; the id of the end-node of the branch;
 //' @param value \code{\link[=SPLITT::Tree::LengthType]{LengthType} const&}; the new value to set.
 //' @return \code{void}
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 void SetLengthOfBranch(uint i, LengthType const& value) {
@@ -1118,7 +1118,7 @@ void SetLengthOfBranch(uint i, LengthType const& value) {
 //' length M-1, where M is the number of nodes in the tree.}
 //' }
 //' @return \code{void}
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
@@ -1175,7 +1175,7 @@ void SetBranchLengths(std::vector<NodeType> const& nodes_branch_ends,
 //' @param id \code{\link[=SPLITT::uint]{uint}} the id of the node (should be 
 //' between 0 and M-1, where M is the number of nodes in hte tree).
 //' 
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 NodeType const& FindNodeWithId(uint id) const {
@@ -1192,7 +1192,7 @@ NodeType const& FindNodeWithId(uint id) const {
 //' 
 //' @return an \code{\link[=SPLITT::uint]{uint}} from 0 to M-1, where M is the 
 //' number of nodes in the tree.
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uint FindIdOfNode(NodeType const& node) const {
@@ -1214,7 +1214,7 @@ uint FindIdOfNode(NodeType const& node) const {
 //' @return an \code{\link[=SPLITT::uint]{uint}} from 0 to M-1, where M is the 
 //' number of nodes in the tree.
 //'   
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uint FindIdOfParent(uint id_child) const {
@@ -1233,7 +1233,7 @@ uint FindIdOfParent(uint id_child) const {
 //'   \code{\link[=SPLITT::G_EMPTY_UVEC]{G_EMPTY_UVEC}} is returned. The returned 
 //'   vector reference is valid as long as the tree object is not destroyed.
 //'   
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uvec const& FindChildren(uint i) const {
@@ -1257,7 +1257,7 @@ uvec const& FindChildren(uint i) const {
 //' @return \code{\link[=SPLITT::uvec]{uvec}}; a vector of positions in \code{nodes} in the order of 
 //'   their internally stored ids.
 //'   
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 uvec OrderNodes(std::vector<NodeType> const& nodes) const {
@@ -1285,7 +1285,7 @@ uvec OrderNodes(std::vector<NodeType> const& nodes) const {
 //' the element-type of the returned vector can be specified as a template argument 
 //' or dedcued from the type of \code{NA}.
 //' 
-//' @family \code{\link[=SPLITT::Tree]{Tree}} public methods
+//' @family public methods in SPLITT::Tree 
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 //' @seealso \link{SPLITT} 
 template<class PosType>
@@ -1410,7 +1410,7 @@ public:
 //' lengths associated with the branches. Pass an empty vector for \code{branch_lengths} 
 //' for a tree without branch lengths (i.e. only a topology).
 //'
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 //' @seealso \link{SPLITT} 
   OrderedTree(
@@ -1526,7 +1526,7 @@ public:
 //' and the parallelization of the \code{VisitNode} operation cannot improve the 
 //' speed. 
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::Tree]{Tree}} 
 //'  \code{\link[=SPLITT::OrderedTree]{OrderedTree}}
 //'  \code{\link[=SPLITT::OrderedTree::num_parallel_ranges_prune]{num_parallel_ranges_prune}}
@@ -1555,7 +1555,7 @@ public:
 //' order of O(N), and the parallelization of the \code{VisitNode} operation
 //' cannot improve the speed. 
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} \code{\link[=SPLITT::Tree]{Tree}} \code{\link[=SPLITT::Tree::Tree]{Tree::Tree()}}
 //' @seealso \link{SPLITT} 
   uint num_parallel_ranges_prune() const {
@@ -1570,7 +1570,7 @@ public:
 //' \code{
 //' \link[=SPLITT::uvec]{uvec} const& ranges_id_visit() const;}
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 //' @seealso \link{SPLITT} 
   uvec const& ranges_id_visit() const {
@@ -1586,7 +1586,7 @@ public:
 //' @description 
 //' \href{http://en.cppreference.com/w/cpp/container/array}{\code{std::array}}\code{<\link[=SPLITT::uint]{uint}, 2>}\code{ RangeIdVisitNode(\link[=SPLITT::uint]{uint} i_level) const;}
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 //' @seealso \link{SPLITT} 
   std::array<uint, 2> RangeIdVisitNode(uint i_level) const {
@@ -1604,7 +1604,7 @@ public:
 //' \code{
 //' \link[=SPLITT::uvec]{uvec} const& ranges_id_prune() const;}
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 //' @seealso \link{SPLITT} 
   uvec const& ranges_id_prune() const {
@@ -1621,7 +1621,7 @@ public:
 //' @description 
 //' \href{http://en.cppreference.com/w/cpp/container/array}{\code{std::array}}\code{<\link[=SPLITT::uint]{uint}, 2>}\code{ RangeIdPruneNode(\link[=SPLITT::uint]{uint} i_step) const;}
 //' 
-//' @family \code{\link[=SPLITT::OrderedTree]{OrderedTree}} public methods
+//' @family public methods in SPLITT::OrderedTree
 //' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}} 
 //' @seealso \link{SPLITT} 
   std::array<uint, 2> RangeIdPruneNode(uint i_step) const {
@@ -1684,7 +1684,7 @@ public:
   }
   
   bool IsTemporarilyEmpty() const {
-    return it_queue_begin == it_queue_end & it_queue_end < queue_.end();
+    return it_queue_begin == it_queue_end && it_queue_end < queue_.end();
   }
   
   // thread-safe
@@ -1769,7 +1769,8 @@ public:
 //' @seealso \link{SPLITT} 
 template<class TraversalSpecification>
 class TraversalAlgorithm {
-protected:
+  
+public:
   typedef typename TraversalSpecification::TreeType TreeType;
 
   TreeType const& ref_tree_;

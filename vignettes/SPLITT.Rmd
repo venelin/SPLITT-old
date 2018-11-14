@@ -39,6 +39,17 @@ Before you consider using the SPLITT C++ library, try to answer the following qu
 
     When I said *big tree* I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version. 
 
+# The main steps in using SPLITT
+
+Using the SPLITT library consists in three steps:
+
+* Writing a `TraversalSpecification` class. In this C++ class, you tell SPLITT what to do with each node in the tree during a traversal. 
+* Creating a `TraversalTask` for your `TraversalSpecification`. The `TraversalTask` object lives in the computer memory during the execution of your program. It wraps three objects:
+    * Your input tree and data;
+    * An object of your `TraversalSpecification`-class;
+    * An object of a `TraversalAlgorithm` class, such as a `PreOrderTraversal` object or `PostOrderTraversal` object.
+* Executing the `TraversalTask`. Once you have created a `TraversalTask` object you call its `TraverfseTree()` method once or (preferably) multiple times, each time passing specific arguments, hereby, called parameters. The rest is to use the value produced at the end of the traversal for your specific application goal. 
+
 # Prerequisites 
 
 Here is what you need before you can start working with SPLITT:
