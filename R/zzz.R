@@ -22,13 +22,6 @@
 # 
 # @author Venelin Mitov
 
-## Up until R 2.15.0, the require("methods") is needed but (now)
-## triggers an warning from R CMD check
-#.onLoad <- function(libname, pkgname){
-#    #require("methods")  ## needed with R <= 2.15.0
-#    loadRcppModules()
-#}
-
 # loading the RCPP C++ modules
 
 loadModule("SPLITT__OrderedTreeStringNodes", TRUE)

@@ -3,11 +3,11 @@
 
 #' @name SPLITT
 #' @title SPLITT: A generic C++ library for Serial and Parallel Lineage Traversal of Trees
+#' @details This documentation of the SPLITT API is still under construction. 
+#' Not all classes and methods have yet been described. 
 #' 
-#' @description All basic types, functions and classes defined in SPLITT.
-#' 
-#' %\if{html}{\figure{UmlDiagram8.pdf}{options: width=100\%}}
-#' %\if{latex}{\figure{UmlDiagram8.pdf}{options: width=15cm}}
+#' @description SPLITT defines a set of basic types, classes, global 
+#' functions and constants:
 #' 
 #' @section Basic types:
 #' \describe{
@@ -382,10 +382,9 @@ NULL
 #'   specialization does exist. This is the application-specific node-type. 
 #'   The branches in the tree are defined as couples of nodes 
 #'   <branch_start_node, branch_end_node>.
-#' @details
-#'   During the construction of \code{\link[=SPLITT::Tree]{Tree}} object, the 
-#'   nodes are assigned \code{unsigned int} ids from 0 to M-1 (M being the 
-#'   number of nodes in the tree). 
+#' @details During the construction of \code{\link[=SPLITT::Tree]{Tree}} object, 
+#' the nodes are assigned \code{unsigned int} ids from 0 to M-1 (M being the 
+#' number of nodes in the tree). 
 #'   
 #' @seealso \code{\link[=SPLITT::Tree]{Tree}}
 #' @seealso \link{SPLITT} 
@@ -697,10 +696,10 @@ NULL
 #'   specialization does exist. This is the application-specific node-type. 
 #'   The branches in the tree are defined as couples of nodes 
 #'   <branch_start_node, branch_end_node>.
-#' @details
-#'   During the construction of \code{\link[=SPLITT::OrderedTree]{OrderedTree}} object, the 
-#'   nodes are assigned \code{unsigned int} ids from 0 to M-1 (M being the 
-#'   number of nodes in the tree). 
+#' @details During the construction of 
+#' \code{\link[=SPLITT::OrderedTree]{OrderedTree}} object, the nodes are 
+#' assigned \code{unsigned int} ids from 0 to M-1 (M being the number of nodes 
+#' in the tree). 
 #'   
 #' @seealso \code{\link[=SPLITT::OrderedTree]{OrderedTree}}
 #' @seealso \link{SPLITT} 

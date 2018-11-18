@@ -93,7 +93,7 @@
                         <h4 class="author">Venelin Mitov</h4>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/venelin/SPLITT/blob/master/vignettes/SPLITT.Rmd"><code>vignettes/SPLITT.Rmd</code></a></small>
       <div class="hidden name"><code>SPLITT.Rmd</code></div>
 
     </div>
@@ -121,6 +121,22 @@ bibliography: REFERENCES.bib
 <p>How big are your trees and how complex is your node traversal operation?</p>
 <p>When I said <em>big tree</em> I meant a tree of more than 100 tips, sometimes, more than 10000 tips. This is not a hard rule of thumb, but parallel traversal will have a performance benefit mostly on a big tree. This depends on other factors as well, such as the computational and memory complexity of the node traversal operation. If the tree is relatively small and the operation is very simple (e.g. the addition or multiplication of a few double-precision numbers), then it is very likely that using SPLITT in parallel mode would not be faster than using it in serial mode. Yet, using SPLITT might still be a good idea in this case if you currently have an implementation in a slowly interpreted language, such as R, and wish to have a faster C++ version - in this case a serial SPLITT-based implementation is probably going to be between 10 and 200 times faster than the R-version.</p>
 </li>
+</ul>
+</div>
+<div id="the-main-steps-in-using-splitt" class="section level1">
+<h1 class="hasAnchor">
+<a href="#the-main-steps-in-using-splitt" class="anchor"></a>The main steps in using SPLITT</h1>
+<p>Using the SPLITT library consists in three steps:</p>
+<ul>
+<li>Writing a <code>TraversalSpecification</code> class. In this C++ class, you tell SPLITT what to do with each node in the tree during a traversal.</li>
+<li>Creating a <code>TraversalTask</code> for your <code>TraversalSpecification</code>. The <code>TraversalTask</code> object lives in the computer memory during the execution of your program. It wraps three objects:
+<ul>
+<li>Your input tree and data;</li>
+<li>An object of your <code>TraversalSpecification</code>-class;</li>
+<li>An object of a <code>TraversalAlgorithm</code> class, such as a <code>PreOrderTraversal</code> object or <code>PostOrderTraversal</code> object.</li>
+</ul>
+</li>
+<li>Executing the <code>TraversalTask</code>. Once you have created a <code>TraversalTask</code> object you call its <code>TraverfseTree()</code> method once or (preferably) multiple times, each time passing specific arguments, hereby, called parameters. The rest is to use the value produced at the end of the traversal for your specific application goal.</li>
 </ul>
 </div>
 <div id="prerequisites" class="section level1">
@@ -161,12 +177,16 @@ bibliography: REFERENCES.bib
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a> guide shows how to create and run a SPLITT traversal task. This tutorial uses <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build a simple console appication reading from the standard input <code>std::cin</code> and writing to the stadard output <code>std::cout</code>.</li>
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a> guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package. This tutorial uses the <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build an Rcpp-module.</li>
 </ul>
-<p>All examples discussed in the user guides can be found in the following two sub-directories in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>:</p>
+<p>All examples discussed in the user guides in the following locations:</p>
 <ul>
 <li>
 <a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app">PMMUsingSPLITT-console-app</a> is the console application described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a>.</li>
 <li>
-<a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package">PMMUsingSPLITT-R-package</a> is the R-package described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>.</li>
+<a href="https://github.com/venelin/PMMUsingSPLITT">PMMUsingSPLITT</a> is the R-package described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a>.</li>
+<li>
+<a href="https://github.com/venelin/ThreePointUsingSPLITT">ThreePointUsingSPLITT-R-package</a> is an R-package implementation the 3-point structure algorithm for calculating likelihoods of Gaussian phylogenetic models. Specifically, the 3-point structure algorithm is a linear time algorithm for calculating the determinant, <span class="math inline">\(|V|\)</span>, and any quadratic product of the form <span class="math inline">\(a^{T} V^{-1} b\)</span>, where <span class="math inline">\(V\)</span> is a <span class="math inline">\(N \times N\)</span> covariance matrix satisfying a 3-point structure, and a is a column vector of size N. This algorithm has been introduced in the article “A linear-time algorithm for Gaussian and non-Gaussian trait evolution models” by Lam si Tung Ho and Cecile Ane published in Systematic Biology in 2014.</li>
+<li>
+<a href="https://github.com/venelin/BinaryPoissonUsingSPLITT">BianaryPoissonUsingSPLITT-R-package</a> is an R-package implementing a simple binary trait substitution model with constant substitution rates.</li>
 </ul>
 </div>
   </div>
@@ -177,6 +197,7 @@ bibliography: REFERENCES.bib
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#before-you-start">Before you start</a></li>
+      <li><a href="#the-main-steps-in-using-splitt">The main steps in using SPLITT</a></li>
       <li><a href="#prerequisites">Prerequisites</a></li>
       <li><a href="#the-splitt-api">The SPLITT API</a></li>
       <li><a href="#what-is-in-the-splitt-online-documetation">What is in the SPLITT online documetation</a></li>

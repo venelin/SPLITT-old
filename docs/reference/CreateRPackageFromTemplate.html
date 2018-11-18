@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get a reference to the internal vector of branch lengths. — SPLITT::Tree::BranchLengths • SPLITT</title>
+<title>Create an R-package based on a template — CreateRPackageFromTemplate • SPLITT</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 
@@ -32,9 +32,9 @@
 
 
 
-<meta property="og:title" content="Get a reference to the internal vector of branch lengths. — SPLITT::Tree::BranchLengths" />
+<meta property="og:title" content="Create an R-package based on a template — CreateRPackageFromTemplate" />
 
-<meta property="og:description" content="std::vector&amp;lt;LengthType&amp;gt; const&amp;amp; BranchLengths() const;" />
+<meta property="og:description" content="Create an R-package based on a template" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -125,50 +125,62 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get a reference to the internal vector of branch lengths.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/venelin/SPLITT/blob/master/R/RcppExports.R'><code>R/RcppExports.R</code></a></small>
-    <div class="hidden name"><code>SPLITT-colon-colon-Tree-colon-colon-BranchLengths.Rd</code></div>
+    <h1>Create an R-package based on a template</h1>
+    <small class="dont-index">Source: <a href='https://github.com/venelin/SPLITT/blob/master/R/CreateRPackageFromTemplate.R'><code>R/CreateRPackageFromTemplate.R</code></a></small>
+    <div class="hidden name"><code>CreateRPackageFromTemplate.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><a href='http://en.cppreference.com/w/cpp/container/vector'><code>std::vector</code></a><code>&lt;<a href='SPLITT-colon-colon-Tree-colon-colon-LengthType.html'>LengthType</a>&gt; const&amp; BranchLengths() const;</code></p>
+    <p>Create an R-package based on a template</p>
     
     </div>
 
-        
+    <pre class="usage"><span class='fu'>CreateRPackageFromTemplate</span>(<span class='no'>packageName</span>, <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
+  <span class='kw'>class</span> <span class='kw'>=</span> <span class='st'>"MyTraversalTask"</span>, <span class='kw'>overwrite</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>packageName</th>
+      <td><p>a character string denoting the name of the package.</p></td>
+    </tr>
+    <tr>
+      <th>path</th>
+      <td><p>a character string denoting a directory where to hold the package.</p></td>
+    </tr>
+    <tr>
+      <th>class</th>
+      <td><p>a character string denoting the name of a TraversalSpecification 
+class to be implemented in the package.</p></td>
+    </tr>
+    </table>
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><a href='http://en.cppreference.com/w/cpp/container/vector'><code>std::vector</code></a><code>&lt;<a href='SPLITT-colon-colon-Tree-colon-colon-LengthType.html'>LengthType</a>&gt; const&amp;</code>; 
-  a const reference to the internally stored vector of branch lengths, in the order of the end-node ids.</p>
+    <p>If the function runs correctly nothing. Otherwise an error is raised.</p>
     
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <div class='dont-index'><p><code><a href='SPLITT-colon-colon-Tree.html'>Tree</a></code></p>
-<p><a href='SPLITT.html'>SPLITT</a></p>
-<p>Other public methods in SPLITT::Tree: <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindChildren.html'>SPLITT::Tree::FindChildren</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindIdOfNode.html'>SPLITT::Tree::FindIdOfNode</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindIdOfParent.html'>SPLITT::Tree::FindIdOfParent</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-FindNodeWithId.html'>SPLITT::Tree::FindNodeWithId</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-HasBranchLengths.html'>SPLITT::Tree::HasBranchLengths</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-LengthOfBranch.html'>SPLITT::Tree::LengthOfBranch</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-OrderNodesPosType.html'>SPLITT::Tree::OrderNodesPosType</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-OrderNodes.html'>SPLITT::Tree::OrderNodes</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-SetBranchLengths.html'>SPLITT::Tree::SetBranchLengths</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-SetLengthOfBranch.html'>SPLITT::Tree::SetLengthOfBranch</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-Tree.html'>SPLITT::Tree::Tree</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-num_nodes.html'>SPLITT::Tree::num_nodes</a></code>,
-  <code><a href='SPLITT-colon-colon-Tree-colon-colon-num_tips.html'>SPLITT::Tree::num_tips</a></code></p></div>
+    <p>This function needs Internet connection to clone the 
+https://github.com/venelin/PMMUsingSPLITT.git repository in <code>path</code>. 
+Then, it replaces the name of the package and the the C++ namespace 
+<code>PMMUsingSPLITT</code> with <code>packageName</code> and the name of the class 
+<code>AbcPMM</code> with <code>className</code>. All these arguments must
+be valid C++ identifiers. The <code>packageName</code> parameter must be a valid 
+name for an R-package.</p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#see-also">See also</a></li>
+      <li><a href="#details">Details</a></li>
           </ul>
 
   </div>

@@ -15,9 +15,9 @@ A public typedef in class \code{\link[=SPLITT::Tree]{Tree}}. A synonym for the
   <branch_start_node, branch_end_node>.
 }
 \details{
-During the construction of \code{\link[=SPLITT::Tree]{Tree}} object, the 
-  nodes are assigned \code{unsigned int} ids from 0 to M-1 (M being the 
-  number of nodes in the tree).
+During the construction of \code{\link[=SPLITT::Tree]{Tree}} object, 
+the nodes are assigned \code{unsigned int} ids from 0 to M-1 (M being the 
+number of nodes in the tree).
 }
 \seealso{
 \code{\link[=SPLITT::Tree]{Tree}}

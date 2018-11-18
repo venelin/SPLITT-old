@@ -4,4 +4,5 @@ import(Rcpp)
 importFrom("graphics", "par", "plot")
 importFrom("stats", "reorder", "rnorm", "time")
 importFrom("ape", "node.depth.edgelength", "tiplabels", "edgelabels", "nodelabels", "rTraitCont", "rtree")
+importFrom("git2r", "clone", "init", "add", "status")
 

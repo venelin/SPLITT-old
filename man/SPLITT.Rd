@@ -4,10 +4,12 @@
 \alias{SPLITT}
 \title{SPLITT: A generic C++ library for Serial and Parallel Lineage Traversal of Trees}
 \description{
-All basic types, functions and classes defined in SPLITT.
-
-%\if{html}{\figure{UmlDiagram8.pdf}{options: width=100\%}}
-%\if{latex}{\figure{UmlDiagram8.pdf}{options: width=15cm}}
+SPLITT defines a set of basic types, classes, global 
+functions and constants:
+}
+\details{
+This documentation of the SPLITT API is still under construction. 
+Not all classes and methods have yet been described.
 }
 \section{Basic types}{
 

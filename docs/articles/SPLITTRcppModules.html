@@ -93,15 +93,14 @@
                         <h4 class="author">Venelin Mitov</h4>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/venelin/SPLITT/blob/master/vignettes/SPLITTRcppModules.Rmd"><code>vignettes/SPLITTRcppModules.Rmd</code></a></small>
       <div class="hidden name"><code>SPLITTRcppModules.Rmd</code></div>
 
     </div>
 
     
     
-<p>In this tutorial, I show step by step how to build an R-package that is using the <code>AbcPMM</code> <code>TraversalSpecificaton</code>-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the following directory in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>:</p>
-<p><a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-R-package">PMMUsingSPLITT-R-package</a></p>
+<p>In this tutorial, I show step by step how to build an R-package that is using the <code>AbcPMM</code> <code>TraversalSpecificaton</code>-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the <a href="https://github.com/venelin/PMMUsingSPLITT">PMMUsingSPLITT github repository</a>.</p>
 <p>This example is based on the R-package Rcpp, which provides a nice way to expose the functionality of a C++ class to an R script or an R-package. The PMMUsingSPLITT package provides an example of how to create a <code>TraversalTask</code> object and to invoke its method <code>TraverseTree</code> from R. Specifically, this is based on Rcpp modules as described in Chapter 7 of the following book:</p>
 <p>Eddelbuettel, D. (2013). Seamless R and C++ Integration with Rcpp. New York, NY: Springer Science &amp; Business Media. <a href="http://doi.org/10.1007/978-1-4614-6868-4" class="uri">http://doi.org/10.1007/978-1-4614-6868-4</a></p>
 <div id="what-is-in-the-pmmusingsplitt-r-package" class="section level1">
@@ -584,8 +583,8 @@ x &lt;-<span class="st"> </span>g <span class="op">+</span><span class="st"> </s
 
 <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/test_that">test_that</a></span>(
   <span class="st">"PMMLogLik == PMMLogLikCpp"</span>,
-  <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/equality-expectations">expect_equal</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/PMMLogLik">PMMLogLik</a></span>(x, tree, x0, sigma2, sigmae2),
-               <span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/PMMLogLikCpp">PMMLogLikCpp</a></span>(x, tree, x0, sigma2, sigmae2))
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/testthat/topics/equality-expectations">expect_equal</a></span>(<span class="kw">PMMLogLik</span>(x, tree, x0, sigma2, sigmae2),
+               <span class="kw">PMMLogLikCpp</span>(x, tree, x0, sigma2, sigmae2))
 )</code></pre></div>
 <p>The second test validates that the <code>MiniBenchmark</code> function executes without error:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(testthat)
@@ -668,19 +667,19 @@ Skipped:  0</code></pre>
 ## Number of threads: 8 
 ## Measuring calculation times...</code></pre>
 <pre><code>##    model                                            mode time.ms
-## 1    PMM                                      R (serial)   1.610
-## 2    PMM                                      C++ (AUTO)   0.019
-## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)   0.019
-## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)   0.019
-## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)   0.020
-## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)   0.055
-## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)   0.077
-## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)   0.204
-## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   1.726
-## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)   0.050
-## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)   0.054
-## 12   PMM                        C++ (HYBRID_LOOP_VISITS)   0.042
-## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)   0.065</code></pre>
+## 1    PMM                                      R (serial)   1.720
+## 2    PMM                                      C++ (AUTO)   0.026
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)   0.017
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)   0.024
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)   0.026
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)   0.108
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)   0.147
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)   0.336
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   1.819
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)   0.154
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)   0.136
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)   0.146
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)   0.094</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># with a bigger tree</span>
 <span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">1000</span>, <span class="dt">Ntests =</span> <span class="dv">100</span>)</code></pre></div>
 <pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
@@ -691,19 +690,19 @@ Skipped:  0</code></pre>
 ## Number of threads: 8 
 ## Measuring calculation times...</code></pre>
 <pre><code>##    model                                            mode time.ms
-## 1    PMM                                      R (serial)   17.60
-## 2    PMM                                      C++ (AUTO)    0.08
+## 1    PMM                                      R (serial)   19.80
+## 2    PMM                                      C++ (AUTO)    0.16
 ## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)    0.13
-## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)    0.13
-## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)    0.13
-## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)    0.12
-## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)    0.28
-## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)    0.14
-## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   16.11
-## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)    0.09
-## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)    0.38
-## 12   PMM                        C++ (HYBRID_LOOP_VISITS)    0.15
-## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)    0.75</code></pre>
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)    0.12
+## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)    0.09
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)    0.31
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)    0.18
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)    0.52
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   16.17
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)    0.16
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)    0.31
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)    0.38
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)    0.41</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># with a very big tree</span>
 <span class="kw"><a href="http://www.rdocumentation.org/packages/PMMUsingSPLITT/topics/MiniBenchmark">MiniBenchmark</a></span>(<span class="dt">N=</span><span class="dv">10000</span>, <span class="dt">Ntests =</span> <span class="dv">10</span>)</code></pre></div>
 <pre><code>## Performing a mini-benchmark of the PMM log-likelihood calculation with 
@@ -714,19 +713,19 @@ Skipped:  0</code></pre>
 ## Number of threads: 8 
 ## Measuring calculation times...</code></pre>
 <pre><code>##    model                                            mode time.ms
-## 1    PMM                                      R (serial)   169.0
-## 2    PMM                                      C++ (AUTO)     0.3
-## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     1.1
-## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     1.2
+## 1    PMM                                      R (serial)   176.0
+## 2    PMM                                      C++ (AUTO)     0.4
+## 3    PMM              C++ (SINGLE_THREAD_LOOP_POSTORDER)     1.2
+## 4    PMM                 C++ (SINGLE_THREAD_LOOP_PRUNES)     1.1
 ## 5    PMM                 C++ (SINGLE_THREAD_LOOP_VISITS)     1.1
-## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.4
-## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     0.3
-## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     0.4
-## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   154.0
-## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     0.4
-## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     0.3
-## 12   PMM                        C++ (HYBRID_LOOP_VISITS)     0.6
-## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.3</code></pre>
+## 6    PMM                  C++ (MULTI_THREAD_LOOP_PRUNES)     0.3
+## 7    PMM                  C++ (MULTI_THREAD_LOOP_VISITS)     1.1
+## 8    PMM C++ (MULTI_THREAD_LOOP_VISITS_THEN_LOOP_PRUNES)     2.5
+## 9    PMM                  C++ (MULTI_THREAD_VISIT_QUEUE)   153.4
+## 10   PMM     C++ (MULTI_THREAD_LOOP_PRUNES_NO_EXCEPTION)     1.0
+## 11   PMM                        C++ (HYBRID_LOOP_PRUNES)     1.0
+## 12   PMM                        C++ (HYBRID_LOOP_VISITS)     1.2
+## 13   PMM       C++ (HYBRID_LOOP_VISITS_THEN_LOOP_PRUNES)     0.7</code></pre>
 </div>
 <div id="checking-for-code-and-documentation-inconsistencies-before-release-to-cran" class="section level1">
 <h1 class="hasAnchor">
