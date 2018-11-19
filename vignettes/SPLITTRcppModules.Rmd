@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 In this tutorial, I show step by step how to build an R-package that is using the `AbcPMM` `TraversalSpecificaton`-class to calculate the log-likelihood of the PMM model on a given tree, trait-data and model parameters. The code for this example is available from the [PMMUsingSPLITT github repository](https://github.com/venelin/PMMUsingSPLITT).
 
-This example is based on the R-package Rcpp, which provides a nice way to expose the functionality of a C++ class to an R script or an R-package. The PMMUsingSPLITT package provides an example of how to create a `TraversalTask` object and to invoke  its method `TraverseTree` from R. Specifically, this is based on Rcpp modules as described in Chapter 7 of the following book:
+This example is based on the R-package Rcpp, which provides a nice way to expose the functionality of a C++ class to an R script or an R-package. The PMMUsingSPLITT package provides an example of how to create a `TraversalTask` object and to invoke  its method `TraverseTree` from R. Specifically, this is based on Rcpp modules as described in Chapter 7 of this book:
 
 Eddelbuettel, D. (2013). Seamless R and C++ Integration with Rcpp. New York, NY: Springer Science & Business Media. http://doi.org/10.1007/978-1-4614-6868-4 
 
@@ -33,30 +33,49 @@ The PMMUsingSPLITT R-package follows the directory structure of a typical R-pack
 Rcpp::Rcpp.package.skeleton("PMMUsingSPLITT")
 ```
 
-Then, the created directory PMMUsingSPLITT has been manually renamed to PMMUsingSPLITT-R-package and the default example R and C++ files have been replaced by the code files specific for the PMM log-likelihood calculation. Here are the final  directories and files found in the package:
+Then, the default example R and C++ files have been replaced by the code files specific for the PMM log-likelihood calculation. Here are the final  directories and files found in the package:
 
 ```{bash, eval=FALSE, echo=TRUE}
-ls -Rlt PMMUsingSPLITT-R-package
+ls -Rlt PMMUsingSPLITT
 ```
 
 ```
-total 24
-drwxr-xr-x  8 vmitov  1029  272 Nov  8 10:56 src
-drwxr-xr-x  9 vmitov  1029  306 Nov  8 10:48 man
-drwxr-xr-x  6 vmitov  1029  204 Nov  8 10:03 R
--rw-r--r--  1 vmitov  1029  195 Nov  8 09:40 NAMESPACE
--rw-r--r--  1 vmitov  1029  485 Nov  8 09:40 DESCRIPTION
-drwxr-xr-x  3 vmitov  1029  102 Nov  7 22:53 tests
--rw-r--r--  1 vmitov  1029  420 Nov  7 11:27 Read-and-delete-me
+total 112
+drwxr-xr-x   16 vmitov  1029   544 Nov 19 07:51 .git
+drwxr-xr-x   23 vmitov  1029   782 Nov 19 07:48 .
+-rw-r--r--    1 vmitov  1029   333 Nov 19 07:48 PMMUsingSPLITT.Rproj
+-rw-r--r--    1 vmitov  1029  1173 Nov 18 14:23 .Rhistory
+-rw-r--r--    1 vmitov  1029  7035 Nov 18 12:24 README.md
+-rw-r--r--    1 vmitov  1029  3297 Nov 18 12:21 README.Rmd
+drwxr-xr-x  145 vmitov  1029  4930 Nov 18 11:47 ..
+drwxr-xr-x   11 vmitov  1029   374 Nov 18 11:43 src
+drwxr-xr-x    9 vmitov  1029   306 Nov 18 11:39 man
+drwxr-xr-x    5 vmitov  1029   170 Nov 18 11:37 R
+drwxr-xr-x   13 vmitov  1029   442 Nov 18 09:35 docs
+-rw-r--r--    1 vmitov  1029   131 Nov 18 09:34 .Rbuildignore
+-rw-r--r--    1 vmitov  1029     0 Nov 18 09:34 _pkgdown.yml
+-rw-r--r--    1 vmitov  1029   129 Nov 15 12:12 CRAN-RELEASE
+-rw-r--r--    1 vmitov  1029  1886 Nov 15 12:10 DESCRIPTION
+-rw-r--r--    1 vmitov  1029   866 Nov 15 11:26 cran-comments.md
+-rw-r--r--    1 vmitov  1029    49 Nov 14 19:02 NEWS.md
+-rw-r--r--    1 vmitov  1029    37 Nov 14 17:39 .gitignore
+-rw-r--r--    1 vmitov  1029   223 Nov 14 17:38 .travis.yml
+-rw-r--r--    1 vmitov  1029   176 Nov 14 17:33 codecov.yml
+drwxr-xr-x    4 vmitov  1029   136 Nov 14 17:28 tests
+drwxr-xr-x    4 vmitov  1029   136 Nov 14 17:23 .Rproj.user
+-rw-r--r--    1 vmitov  1029   195 Nov 14 17:23 NAMESPACE
 
 ./src:
-total 224
--rw-r--r--  1 vmitov  1029    602 Nov  8 10:48 RcppExports.cpp
--rw-r--r--  1 vmitov  1029   2677 Nov  8 10:42 RCPP__AbcPMM.cpp
--rw-r--r--  1 vmitov  1029   3462 Nov  7 16:10 AbcPMM.h
--rw-r--r--  1 vmitov  1029   1318 Nov  7 11:54 NumericTraitData.h
--rw-r--r--  1 vmitov  1029  93322 Nov  7 11:47 SPLITT.h
--rw-r--r--  1 vmitov  1029   3048 Nov  7 11:35 Makevars
+total 10088
+-rwxr-xr-x  1 vmitov  1029   475376 Nov 18 11:43 PMMUsingSPLITT.so
+-rw-r--r--  1 vmitov  1029    98380 Nov 18 11:43 RcppExports.o
+-rw-r--r--  1 vmitov  1029  4465412 Nov 18 11:43 RCPP__AbcPMM.o
+-rw-r--r--  1 vmitov  1029      602 Nov 18 11:43 RcppExports.cpp
+-rw-r--r--  1 vmitov  1029     2583 Nov 18 11:43 Makevars
+-rw-r--r--  1 vmitov  1029    93327 Nov 14 18:01 SPLITT.h
+-rw-r--r--  1 vmitov  1029     3462 Nov 14 17:23 AbcPMM.h
+-rw-r--r--  1 vmitov  1029     1318 Nov 14 17:23 NumericTraitData.h
+-rw-r--r--  1 vmitov  1029     3608 Nov 14 17:23 RCPP__AbcPMM.cpp
 
 ./man:
 total 56
@@ -64,14 +83,13 @@ total 56
 -rw-r--r--  1 vmitov  1029   370 Nov  8 10:48 PMMUsingSPLITT__TraversalTaskAbcPMM.Rd
 -rw-r--r--  1 vmitov  1029   474 Nov  8 10:48 PMMUsingSPLITT__AbcPMM__TraversalAlgorithm.Rd
 -rw-r--r--  1 vmitov  1029   679 Nov  8 09:37 MiniBenchmark.Rd
--rw-r--r--  1 vmitov  1029  1071 Nov  8 09:37 PMMLogLik.Rd
--rw-r--r--  1 vmitov  1029   573 Nov  7 11:58 NewPMMCppObject.Rd
--rw-r--r--  1 vmitov  1029  1549 Nov  7 11:58 PMMLogLikCpp.Rd
+-rw-r--r--  1 vmitov  1029  1071 Nov  8 09:37 AbcPMMLogLik.Rd
+-rw-r--r--  1 vmitov  1029   573 Nov  7 11:58 NewAbcPMMCppObject.Rd
+-rw-r--r--  1 vmitov  1029  1549 Nov  7 11:58 AbcPMMLogLikCpp.Rd
 
 ./R:
-total 40
--rw-r--r--  1 vmitov  1029   552 Nov  8 10:48 DocForRcppModules.R
--rw-r--r--  1 vmitov  1029  3726 Nov  8 10:03 PMM.R
+total 32
+-rw-r--r--  1 vmitov  1029  3726 Nov  8 10:03 AbcPMM.R
 -rw-r--r--  1 vmitov  1029  1148 Nov  8 10:02 zzz.R
 -rw-r--r--  1 vmitov  1029  5347 Nov  7 14:52 MiniBenchmark.R
 
@@ -81,8 +99,8 @@ drwxr-xr-x  4 vmitov  1029  136 Nov  7 14:12 testthat
 
 ./tests/testthat:
 total 16
--rw-r--r--  1 vmitov  1029  583 Nov  8 09:19 test-PMMLogLikelihoodValue.R
--rw-r--r--  1 vmitov  1029  317 Nov  7 14:56 test-PMMLogLikelihoodSpeed.R
+-rw-r--r--  1 vmitov  1029  583 Nov  8 09:19 test-AbcPMMLogLikelihoodValue.R
+-rw-r--r--  1 vmitov  1029  317 Nov  7 14:56 test-AbcPMMLogLikelihoodSpeed.R
 ```
 
 At the top-level, the directory structure is similar to the standard structure described in [Section 1.1. of the Writing R extensions manual](https://cran.r-project.org/doc/manuals/R-exts.html). In the following sub-sections, I'll describe the elements that are specific for the PMMUsingSPLITT example application.
@@ -344,32 +362,48 @@ This directory contains the R files in the package. I'll briefly describe each o
 
 ### `zzz.R`
 
-This R-script is executed by R when loading the package. It contains a single line of code loading the Rcpp module we've just created:
+This R-script is executed by R when loading the package. It contains a line of code loading the Rcpp module we've just created:
 
 ```{r, eval=FALSE}
 # loading the RCPP C++ modules
 loadModule( "PMMUsingSPLITT__TraversalTaskAbcPMM", TRUE )
 ```
 
-### `PMM.R`
+I also find this R-file to be the ideal place to write documentation Roxygen2 comments about the Rcpp module. This is needed to avoid a warning message during the quality check for the package (`devtools::check`). Here is the content of this file:
 
-Here, we define two ways to calculate the PMM log-likelihood: 
+```{r, eval=FALSE}
+#' Rcpp module for the \code{TraversalTaskAbcPMM}-class
+#' @name PMMUsingSPLITT__TraversalTaskAbcPMM
+#' @aliases Rcpp_PMMUsingSPLITT__TraversalTaskAbcPMM-class
+NULL
+
+#' \code{TraversalAlgorithm}-type used in \code{AbcPMM}
+#' @name PMMUsingSPLITT__AbcPMM__AlgorithmType
+#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__AlgorithmType-class
+NULL
+
+#' Base class for \code{PMMUsingSPLITT::AbcPMM::AlgorithmType}
+#' @name PMMUsingSPLITT__AbcPMM__TraversalAlgorithm
+#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__TraversalAlgorithm-class 
+#' @slot algorithm algorithm.
+NULL
+```
+
+### `AbcPMM.R`
+
+Here, we define two implementation of the PMM log-likelihood calculation. Both of them use the quadratic polynomial representation of the log-likelihood. The first implementation is in R. The second one invokes our Rcpp module. 
 
 #### Doing a postorder traversal in R
 
 This how simple the code looks like in R. The only problem I have with it is that it is very slow (see benchmark at the end). 
 
 ```{R, eval=FALSE}
-# PMM.R
-# PMMUsingSPLITT
-# Copyright, License and disclamer statments...
-
 #' Calculate the PMM log-likelihood for a given tree, data and model parameters
 #' @param x a numerical vector of size N, where N is the number of tips in tree
 #' @param tree a phylo object
 #' @param x0,sigma2,sigmae2 parameters of the PMM:
 #' \describe{
-#' \item{x0}{value at the root of tree excluding whte noise;}
+#' \item{x0}{value at the root of tree excluding white noise;}
 #' \item{sigma2}{unit-time variance increment of the heritable component;}
 #' \item{sigmae2}{variance of the non-heritable component.}
 #' }
@@ -378,7 +412,7 @@ This how simple the code looks like in R. The only problem I have with it is tha
 #' which is also set as a default value. Can be passed as argument to speed-up 
 #' the calculation.
 #' @return the log-likelihood value.
-PMMLogLik <- function(
+AbcPMMLogLik <- function(
   x, tree, x0, sigma2, sigmae2, 
   ord = reorder(tree, order = "postorder", index.only = TRUE)) {
   
@@ -430,27 +464,26 @@ PMMLogLik <- function(
 #### Doing a postorder tree traversal using our Rcpp module
 
 ```{r, eval=FALSE}
-#' Calculate the PMM log-likelihood for a given tree, data and model parameters using the Rcpp module
-#' @inheritParams PMMLogLik
-#' @param cppObject a previously created object returned by \code{\link{NewPMMCppObject}}
-#' @param mode an integer denoting the mode for traversing the tree, i.e. serial vs paralle.
+#' Calculate the AbcPMM log-likelihood for a given tree, data and model parameters using the Rcpp module
+#' @inheritParams AbcPMMLogLik
+#' @param cppObject a previously created object returned by \code{\link{NewAbcPMMCppObject}}
+#' @param mode an integer denoting the mode for traversing the tree, i.e. serial vs parallel.
 #' 
 #' @return the log-likelihood value.
-PMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2, 
-                         cppObject = NewPMMCppObject(x, tree),
+AbcPMMLogLikCpp <- function(x, tree, x0, sigma2, sigmae2, 
+                         cppObject = NewAbcPMMCppObject(x, tree),
                          mode = getOption("SPLITT.postorder.mode", 0)) {
   abc <- cppObject$TraverseTree(c(sigma2, sigmae2), mode)
   abc[1]*x0^2 + abc[2]*x0 + abc[3]
 }
 
 
-#' Create an instance of the RCPP_PMM module for a given tree and trait data
+#' Create an instance of the Rcpp module for a given tree and trait data
 #'
-#' @inheritParams PMMLogLik
-#' @return an object to be passed as argument of the \link{PMMLogLikCpp} function.
-#' @seealso \link{PMMLogLikCpp}
-NewPMMCppObject <- function(x, tree) {
-  # this calls the CreateTraversalTaskAbcPMM function in RCPP_AbcPMM.cpp
+#' @inheritParams AbcPMMLogLik
+#' @return an object to be passed as argument of the \link{AbcPMMLogLikCpp} function.
+#' @seealso \link{AbcPMMLogLikCpp}
+NewAbcPMMCppObject <- function(x, tree) {
   PMMUsingSPLITT__TraversalTaskAbcPMM$new(tree, x[1:length(tree$tip.label)])
 }
 ```
@@ -459,28 +492,9 @@ NewPMMCppObject <- function(x, tree) {
 In this file, I wrote a simple performance benchmark measuring the time for PMM-log-likelihood calculation by the R and C++ implementation. The file defines a function called `MiniBenchmark` with two arguments:
 
 * N: integer size of a tree to generate, default N=1000;
-* Ntests: integer number of times to execute a log-likelihood calculation for one time measurement (the higher this number, the more accurate will be the measure, but the longer will the benchmark run). You can read the definition of this function  [here](https://raw.githubusercontent.com/venelin/SPLITT/master/PMMUsingSPLITT-R-package/R/MiniBenchmark.R).
+* Ntests: integer number of times to execute a log-likelihood calculation for one time measurement (the higher this number, the more accurate will be the measure, but the longer will the benchmark run). 
 
-### `DocForRcppModules.R`
-In this file, I wrote Roxygen2 comment blocks for the exposed C++ classes. This was needed to avoid a warning message during the quality check for the package (`devtools::check`). Here is the content of this file:
-
-```{r, eval=FALSE}
-#' Rcpp module for the \code{TraversalTaskAbcPMM}-class
-#' @name PMMUsingSPLITT__TraversalTaskAbcPMM
-#' @aliases Rcpp_PMMUsingSPLITT__TraversalTaskAbcPMM-class
-NULL
-
-#' \code{TraversalAlgorithm}-type used in \code{AbcPMM}
-#' @name PMMUsingSPLITT__AbcPMM__AlgorithmType
-#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__AlgorithmType-class
-NULL
-
-#' Base class for \code{PMMUsingSPLITT::AbcPMM::AlgorithmType}
-#' @name PMMUsingSPLITT__AbcPMM__TraversalAlgorithm
-#' @aliases Rcpp_PMMUsingSPLITT__AbcPMM__TraversalAlgorithm-class 
-#' @slot algorithm algorithm.
-NULL
-```
+You can read the definition of this function  [here](https://raw.githubusercontent.com/venelin/PMMUsingSPLITT/master/R/MiniBenchmark.R).
 
 ## The directory `tests/testthat`
 
@@ -512,8 +526,8 @@ x <- g + rnorm(n = N, mean = 0, sd = sqrt(sigmae2))
 
 test_that(
   "PMMLogLik == PMMLogLikCpp",
-  expect_equal(PMMLogLik(x, tree, x0, sigma2, sigmae2),
-               PMMLogLikCpp(x, tree, x0, sigma2, sigmae2))
+  expect_equal(AbcPMMLogLik(x, tree, x0, sigma2, sigmae2),
+               AbcPMMLogLikCpp(x, tree, x0, sigma2, sigmae2))
 )
 ```
 
@@ -537,12 +551,12 @@ test_that("MiniBenchmark runs without errors", {
 We install the package with the following command:
 
 ```{r, echo=TRUE, eval=FALSE}
-devtools::install("./PMMUsingSPLITT-R-package")
+devtools::install("./PMMUsingSPLITT")
 ```
 
 On my computer this produces the following output:
 ```
-✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
+✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT/DESCRIPTION’ ...
 ─  preparing ‘PMMUsingSPLITT’:
 ✔  checking DESCRIPTION meta-information ...
 ─  cleaning src
@@ -575,7 +589,7 @@ installing to /Users/vmitov/Library/R/3.5/library/PMMUsingSPLITT/libs
 We run the unit-tests the following command:
 
 ```{r, echo=TRUE, eval=FALSE}
-devtools::test("./PMMUsingSPLITT-R-package")
+devtools::test()
 ```
 
 On my computer this produces the following output:
@@ -615,7 +629,7 @@ The last step before releasing the R-package to CRAN is to run a code and docume
 
 This is done by running:
 ```{r, eval=FALSE}
-devtools::check("./PMMUsingSPLITT-R-package")
+devtools::check()
 ```
 
 On my computer this produces the following output:
@@ -629,7 +643,7 @@ Setting env vars:
 ● CXXFLAGS  : -Wall -pedantic -fdiagnostics-color=always
 ● CXX11FLAGS: -Wall -pedantic -fdiagnostics-color=always
 ────────────────────────────────────────────────────────────────────────────────
-✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT-R-package/DESCRIPTION’ ...
+✔  checking for file ‘/Users/vmitov/Documents/Bio/Projects/SPLITT/PMMUsingSPLITT/DESCRIPTION’ ...
 ─  preparing ‘PMMUsingSPLITT’:
 ✔  checking DESCRIPTION meta-information ...
 ─  cleaning src
@@ -715,5 +729,19 @@ As a next step I wouls suggest focusing on your own application. The following w
 
 * Decide on the type project, i.e. a console application or an R-package. Start by replacing the names in the corresponding example project with the names specific to my application. 
 * Define the `TraversalSpecification`-class. This is usually the most time consumming part. 
-* Work on the user-interface depending on the chose type of project. 
+* Work on the user-interface depending on the chosen type of project. 
+
+If you chose to use SPLITT from an R-package, you might find it useful to start by installing the SPLITT package and call the function `SPLITT::CreateRPackageFromTemplate`. This will create an R-project with a `TraversalSpecification`-class in it. An example of a project created in this way is [BinaryPoissonUsingSPLITT](https://github.com/venelin/BinaryPoissonUsingSPLITT). 
+
+```{r, eval=FALSE}
+devtools::install_github("venelin/SPLITT")
+library(SPLITT)
+
+# Create a project called BinaryPoissonUsingSPLITT under the current directory:
+CreateRPackageFromTemplate("BinaryPoissonUsingSPLITT", path = ".", 
+                           class = "BinaryPoissonModel", 
+                           overwrite = TRUE)
+```
+
+Further examples are listed in the [Get started guide](./SPLITT.html#what-is-in-the-splitt-online-documetation). 
 

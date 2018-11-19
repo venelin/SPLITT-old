@@ -17,7 +17,9 @@
  automatically the fastest implementation for a particular visit-node operation
  and data. To use the library, the user writes TraversalSpecification-class 
  defining the types of the input data, node state, and traversal type and the
- operation to be performed on each node during the traversal. ">
+ operation to be performed on each node during the traversal. This package provides
+ a function called 'CreateRPackageFromTemplate' allowing to quickly create a new 
+ R-package calling SPLITT via an Rcpp module. ">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -99,6 +101,7 @@
     
     
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 <div id="splitt-serial-and-parallel-lineage-traversal-of-trees" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#splitt-serial-and-parallel-lineage-traversal-of-trees" class="anchor"></a>SPLITT: Serial and Parallel LIneage Traversal of Trees</h1></div>
@@ -111,7 +114,7 @@
 <div id="the-splitt-r-package" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-splitt-r-package" class="anchor"></a>The SPLITT R-package</h2>
-<p>The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with its documentation and examples. You don’t need to install this package nor do you need to know R or to have an R environment on your system for using the SPLITT library.</p>
+<p>The R-package called with the same name (SPLITT) bundles the SPLITT.h header together with some helper functions for creating R-packages using SPLITT and this documentation. You will find it useful to install this package if you wish to create R-pacages that call SPLITT via Rcpp modules. This is explained in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package guide</a>.</p>
 </div>
 </div>
 <div id="user-guides-and-resources" class="section level1">
@@ -119,9 +122,12 @@
 <a href="#user-guides-and-resources" class="anchor"></a>User guides and resources</h1>
 <p>The <a href="https://venelin.github.io/SPLITT/articles/SPLITT.html">Get started guide</a> provides a general introduction to the library and a roadmap throughout the documentation.</p>
 <p>The research article “Parallel Likelihood Calculation for Phylogenetic Comparative Models: the SPLITT C++ Library” introduces the library and reports a large-scale performance benchmark. The example application to the PMM model depicted on Fig. 1 in this article is used as a coding example in the SPLITT online documentation. The article is currently in peer review for a publication and is available as a preprint from <a href="https://www.biorxiv.org/content/early/2018/10/29/235739">BioRxiv</a>.</p>
-<p>The SPLITT source code is located in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>.</p>
-<p>The classes of the SPLITT API are documented in the <a href="https://venelin.github.io/SPLITT/reference/SPLITT.html">SPLITT Reference page</a>.</p>
-<p>Feature requests, bugs, etc can be reported in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</p>
+<ul>
+<li>The SPLITT documentation is available from the <a href="https://venelin.github.io/SPLITT">SPLITT web page</a>.</li>
+<li>The SPLITT source code is located in the <a href="https://github.com/venelin/SPLITT">SPLITT github repository</a>.</li>
+<li>The classes of the SPLITT API are documented in the <a href="https://venelin.github.io/SPLITT/reference/SPLITT.html">SPLITT Reference page</a>.</li>
+<li>Feature requests, bugs, etc can be reported in the <a href="https://github.com/venelin/SPLITT/issues">SPLITT issues list</a>.</li>
+</ul>
 </div>
 <div id="citing-splitt" class="section level1">
 <h1 class="hasAnchor">
@@ -134,10 +140,10 @@
 <a href="#used-r-packages" class="anchor"></a>Used R-packages</h1>
 <p>The SPLITT R-package uses the following 3rd party R-packages:</p>
 <ul>
-<li>For calling C++ from R: Rcpp v1.0.0 <span class="citation">(Eddelbuettel et al. 2017)</span>
-</li>
-<li>For tree processing in R: ape v5.2 <span class="citation">(Paradis et al. 2016)</span>;</li>
-<li>For unit-testing: testthat v2.0.1 <span class="citation">(Wickham 2016)</span>.</li>
+<li>For calling C++ from R: Rcpp v1.0.0 <span class="citation">(Eddelbuettel et al. 2018)</span>;</li>
+<li>For tree processing in R: ape v5.2 <span class="citation">(Paradis et al. 2018)</span>;</li>
+<li>For unit-testing: testthat v2.0.1 <span class="citation">(Wickham 2018)</span>;</li>
+<li>For documentation and web-site generation: roxygen2 v6.1.1 <span class="citation">(Wickham, Danenberg, and Eugster 2018)</span>, pkgdown v1.1.0.9000 <span class="citation">(Wickham and Hesselberth 2018)</span>;</li>
 </ul>
 </div>
 <div id="references" class="section level1 unnumbered">
@@ -145,13 +151,19 @@
 <a href="#references" class="anchor"></a>References</h1>
 <div id="refs" class="references">
 <div id="ref-R-Rcpp">
-<p>Eddelbuettel, Dirk, Romain Francois, JJ Allaire, Kevin Ushey, Qiang Kou, Nathan Russell, Douglas Bates, and John Chambers. 2017. <em>Rcpp: Seamless R and C++ Integration</em>. <a href="https://CRAN.R-project.org/package=Rcpp" class="uri">https://CRAN.R-project.org/package=Rcpp</a>.</p>
+<p>Eddelbuettel, Dirk, Romain Francois, JJ Allaire, Kevin Ushey, Qiang Kou, Nathan Russell, Douglas Bates, and John Chambers. 2018. <em>Rcpp: Seamless R and C++ Integration</em>. <a href="https://CRAN.R-project.org/package=Rcpp" class="uri">https://CRAN.R-project.org/package=Rcpp</a>.</p>
 </div>
 <div id="ref-R-ape">
-<p>Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Julien Claude, Hoa Sien Cuong, Richard Desper, Gilles Didier, et al. 2016. <em>Ape: Analyses of Phylogenetics and Evolution</em>. <a href="https://CRAN.R-project.org/package=ape" class="uri">https://CRAN.R-project.org/package=ape</a>.</p>
+<p>Paradis, Emmanuel, Simon Blomberg, Ben Bolker, Joseph Brown, Julien Claude, Hoa Sien Cuong, Richard Desper, et al. 2018. <em>Ape: Analyses of Phylogenetics and Evolution</em>. <a href="https://CRAN.R-project.org/package=ape" class="uri">https://CRAN.R-project.org/package=ape</a>.</p>
 </div>
 <div id="ref-R-testthat">
-<p>Wickham, Hadley. 2016. <em>Testthat: Unit Testing for R</em>. <a href="https://CRAN.R-project.org/package=testthat" class="uri">https://CRAN.R-project.org/package=testthat</a>.</p>
+<p>Wickham, Hadley. 2018. <em>Testthat: Unit Testing for R</em>. <a href="https://CRAN.R-project.org/package=testthat" class="uri">https://CRAN.R-project.org/package=testthat</a>.</p>
+</div>
+<div id="ref-R-pkgdown">
+<p>Wickham, Hadley, and Jay Hesselberth. 2018. <em>Pkgdown: Make Static Html Documentation for a Package</em>.</p>
+</div>
+<div id="ref-R-roxygen2">
+<p>Wickham, Hadley, Peter Danenberg, and Manuel Eugster. 2018. <em>Roxygen2: In-Line Documentation for R</em>. <a href="https://CRAN.R-project.org/package=roxygen2" class="uri">https://CRAN.R-project.org/package=roxygen2</a>.</p>
 </div>
 </div>
 </div>
@@ -173,6 +185,12 @@
 <li>LGPL (&gt;= 3.0)</li>
 </ul>
 </div>
+<div class="citation">
+<h2>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html">Citing SPLITT</a></li>
+</ul>
+</div>
 <div class="developers">
 <h2>Developers</h2>
 <ul class="list-unstyled">
@@ -180,7 +198,16 @@
 </ul>
 </div>
 
-      </div>
+      <div class="dev-status">
+<h2>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://travis-ci.org/venelin/SPLITT"><img src="https://travis-ci.org/venelin/SPLITT.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://codecov.io/github/venelin/SPLITT?branch=master"><img src="https://codecov.io/gh/venelin/SPLITT/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
+<li><a href="http://cran.r-project.org/web/packages/SPLITT"><img src="http://www.r-pkg.org/badges/version/SPLITT?color=blue" alt="CRAN_Status_Badge"></a></li>
+<li><a href="http://cran.rstudio.com/package=SPLITT"><img src="http://cranlogs.r-pkg.org/badges/SPLITT?color=blue" alt="Downloads"></a></li>
+</ul>
+</div>
+</div>
 
 </div>
 

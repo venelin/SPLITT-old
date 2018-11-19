@@ -11,7 +11,9 @@ Description: SPLITT is a one-header-only generic C++ library for serial and
  automatically the fastest implementation for a particular visit-node operation
  and data. To use the library, the user writes TraversalSpecification-class 
  defining the types of the input data, node state, and traversal type and the
- operation to be performed on each node during the traversal. 
+ operation to be performed on each node during the traversal. This package provides
+ a function called 'CreateRPackageFromTemplate' allowing to quickly create a new 
+ R-package calling SPLITT via an Rcpp module. 
 License: LGPL (>= 3.0)
 LazyData: true
 Encoding: UTF-8
