@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 [![Travis build status](https://travis-ci.org/venelin/SPLITT.svg?branch=master)](https://travis-ci.org/venelin/SPLITT)
 [![Coverage status](https://codecov.io/gh/venelin/SPLITT/branch/master/graph/badge.svg)](https://codecov.io/github/venelin/SPLITT?branch=master)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/SPLITT?color=blue)](http://cran.r-project.org/web/packages/SPLITT)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/SPLITT?color=blue)](http://cran.rstudio.com/package=SPLITT)
 [![Downloads](http://cranlogs.r-pkg.org/badges/SPLITT?color=blue)](http://cran.rstudio.com/package=SPLITT)
 
 # SPLITT: Serial and Parallel LIneage Traversal of Trees

@@ -10,12 +10,9 @@ vignette: >
   %\VignetteIndexEntry{Getting started}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib
 ---
 
-<!-- TODO Add the following to the header:
-
-bibliography: REFERENCES.bib
--->
 
 ```{r setup, include = FALSE}
 # Make results reproducible
@@ -80,11 +77,13 @@ The goal of this web-site is to provide examples and a technical reference for S
 * The [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html) guide shows how to create and run a SPLITT traversal task. This tutorial uses `TraversalSpecification`-class defined in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) to build a simple console appication reading from the standard input `std::cin` and writing to the stadard output `std::cout`. 
 * The [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html) guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package. This tutorial uses the `TraversalSpecification`-class defined in the [Writing a traversal specification](https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html) to build an Rcpp-module. 
 
-All examples discussed in the user guides in the following locations:
+Examples of using the SPLITT library can be found in the following locations:
 
 * [PMMUsingSPLITT-console-app](https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app) is the console application described in [Running a traversal](https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html). 
 * [PMMUsingSPLITT](https://github.com/venelin/PMMUsingSPLITT) is the R-package described in [Calling SPLITT from an R-package](https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html).
 * [ThreePointUsingSPLITT-R-package](https://github.com/venelin/ThreePointUsingSPLITT) is an R-package implementation the 3-point structure algorithm for calculating likelihoods of Gaussian phylogenetic models. Specifically, the 3-point structure algorithm is a linear time algorithm for calculating the determinant, $|V|$, and any quadratic product of the form $a^{T} V^{-1} b$, where $V$ is a $N \times N$ covariance matrix satisfying a 3-point structure, and a is a column vector of size N. This algorithm has been introduced in the article "A linear-time algorithm for Gaussian and non-Gaussian trait evolution models" by Lam si Tung Ho and Cecile Ane published in Systematic Biology in 2014. 
 * [BianaryPoissonUsingSPLITT-R-package](https://github.com/venelin/BinaryPoissonUsingSPLITT) is an R-package implementing a simple binary trait substitution model with constant substitution rates. 
+* [POUMM](https://github.com/venelin/POUMM) - the POUMM R-package, developed originally for the analysis of HIV virulence heritability [@Mitov:2018pg].
+* [PCMBaseCpp](https://github.com/venelin/PCMBaseCpp) - the PCMBaseCpp R-package, enabling parallel likelihood calculation for multivariate phylogenetic comparative models [@Mitov:2018fl].
 
-
+# References

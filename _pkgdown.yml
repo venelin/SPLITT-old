@@ -1,5 +1,9 @@
 url: http://venelin.github.io/SPLITT
 
+template:
+  params:
+    ganalytics: UA-129563006-2
+
 navbar:
   title: SPLITT
   type: default

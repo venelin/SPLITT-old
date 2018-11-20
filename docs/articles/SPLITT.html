@@ -16,7 +16,13 @@
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<![endif]--><!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id=UA-129563006-2"></script><script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-129563006-2');
+</script>
 </head>
 <body>
     <div class="container template-article">
@@ -100,10 +106,6 @@
 
     
     
-<!-- TODO Add the following to the header:
-
-bibliography: REFERENCES.bib
--->
 <div id="before-you-start" class="section level1">
 <h1 class="hasAnchor">
 <a href="#before-you-start" class="anchor"></a>Before you start</h1>
@@ -177,7 +179,7 @@ bibliography: REFERENCES.bib
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a> guide shows how to create and run a SPLITT traversal task. This tutorial uses <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build a simple console appication reading from the standard input <code>std::cin</code> and writing to the stadard output <code>std::cout</code>.</li>
 <li>The <a href="https://venelin.github.io/SPLITT/articles/SPLITTRcppModules.html">Calling SPLITT from an R-package</a> guide shows how to use Rcpp to wrap SPLITT traversal functionality into an R-package. This tutorial uses the <code>TraversalSpecification</code>-class defined in the <a href="https://venelin.github.io/SPLITT/articles/SPLITTTraversalSpecification.html">Writing a traversal specification</a> to build an Rcpp-module.</li>
 </ul>
-<p>All examples discussed in the user guides in the following locations:</p>
+<p>Examples of using the SPLITT library can be found in the following locations:</p>
 <ul>
 <li>
 <a href="https://github.com/venelin/SPLITT/tree/master/PMMUsingSPLITT-console-app">PMMUsingSPLITT-console-app</a> is the console application described in <a href="https://venelin.github.io/SPLITT/articles/SPLITTRunTraversal.html">Running a traversal</a>.</li>
@@ -187,7 +189,23 @@ bibliography: REFERENCES.bib
 <a href="https://github.com/venelin/ThreePointUsingSPLITT">ThreePointUsingSPLITT-R-package</a> is an R-package implementation the 3-point structure algorithm for calculating likelihoods of Gaussian phylogenetic models. Specifically, the 3-point structure algorithm is a linear time algorithm for calculating the determinant, <span class="math inline">\(|V|\)</span>, and any quadratic product of the form <span class="math inline">\(a^{T} V^{-1} b\)</span>, where <span class="math inline">\(V\)</span> is a <span class="math inline">\(N \times N\)</span> covariance matrix satisfying a 3-point structure, and a is a column vector of size N. This algorithm has been introduced in the article “A linear-time algorithm for Gaussian and non-Gaussian trait evolution models” by Lam si Tung Ho and Cecile Ane published in Systematic Biology in 2014.</li>
 <li>
 <a href="https://github.com/venelin/BinaryPoissonUsingSPLITT">BianaryPoissonUsingSPLITT-R-package</a> is an R-package implementing a simple binary trait substitution model with constant substitution rates.</li>
+<li>
+<a href="https://github.com/venelin/POUMM">POUMM</a> - the POUMM R-package, developed originally for the analysis of HIV virulence heritability <span class="citation">(Mitov and Stadler 2018)</span>.</li>
+<li>
+<a href="https://github.com/venelin/PCMBaseCpp">PCMBaseCpp</a> - the PCMBaseCpp R-package, enabling parallel likelihood calculation for multivariate phylogenetic comparative models <span class="citation">(Mitov et al. 2018)</span>.</li>
 </ul>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h1>
+<div id="refs" class="references">
+<div id="ref-Mitov:2018pg">
+<p>Mitov, Venelin, and Tanja Stadler. 2018. “A Practical Guide to Estimating the Heritability of Pathogen Traits.” <em>Molecular Biology and Evolution</em>, msx328. doi:<a href="https://doi.org/10.1093/molbev/msx328">10.1093/molbev/msx328</a>.</p>
+</div>
+<div id="ref-Mitov:2018fl">
+<p>Mitov, Venelin, Krzysztof Bartoszek, Georgios Asimomitis, and Tanja Stadler. 2018. “Fast Likelihood Evaluation for Multivariate Phylogenetic Comparative Methods: The Pcmbase R Package.” <em>Arxiv Q-Bio.PE</em>, arXiv:1809.09014. <a href="https://arxiv.org/abs/1809.09014" class="uri">https://arxiv.org/abs/1809.09014</a>.</p>
+</div>
+</div>
 </div>
   </div>
 
@@ -201,6 +219,7 @@ bibliography: REFERENCES.bib
       <li><a href="#prerequisites">Prerequisites</a></li>
       <li><a href="#the-splitt-api">The SPLITT API</a></li>
       <li><a href="#what-is-in-the-splitt-online-documetation">What is in the SPLITT online documetation</a></li>
+      <li><a href="#references">References</a></li>
       </ul>
 </div>
       </div>
